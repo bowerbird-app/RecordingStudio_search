@@ -28,4 +28,24 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Ada Admin", response.body
   end
+
+  test "vector search finds a page by meaning" do
+    page = Page.create!(title: "Refunds", body: "How to request a refund when a charge looks wrong.")
+    RecordingStudioSearch::DocumentEmbedder.call(
+      searchable_type: "Page",
+      searchable_id: page.id
+    )
+
+    get root_path, params: { q: "refund" }
+    assert_response :success
+    assert_match "Refunds", response.body
+  end
+
+  test "trigram search finds a note by title" do
+    Note.create!(title: "Sticky reminder")
+
+    get root_path, params: { q: "sticky" }
+    assert_response :success
+    assert_match "Sticky reminder", response.body
+  end
 end

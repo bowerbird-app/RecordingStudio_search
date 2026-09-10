@@ -100,8 +100,10 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes tailwind_source, "../../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}"
     assert_includes tailwind_source, "flatpack-*/app/components/**/*.{rb,erb}"
+    assert_includes tailwind_source, "usr/local/lib/ruby/gems/**/bundler/gems/flatpack-"
     assert_includes tailwind_source, "../../../vendor/bundle/**/recording_studio/app/views/**/*.erb"
     assert_includes tailwind_source, "recordingstudio-*/app/views/**/*.erb"
+    assert_includes tailwind_source, "usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-"
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
