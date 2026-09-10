@@ -53,7 +53,8 @@ searchable backend: :pg_trgm, against: %i[name email]
 searchable backend: :pgvector, against: %i[title body], recording_id: :recording_id
 
 Model.search("refund policy")
-RecordingStudioSearch.search(Model, q)
+RecordingStudioSearch.search(Model, q)                 # => Relation
+RecordingStudioSearch.search([ModelA, ModelB], q)      # => { ModelA => Relation, ModelB => Relation }
 RecordingStudioSearch.embed_later(record)
 ```
 

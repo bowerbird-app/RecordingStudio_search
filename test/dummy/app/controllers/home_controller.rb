@@ -2,9 +2,10 @@ class HomeController < ApplicationController
   def index
     @q = params[:q].to_s
     if @q.present?
-      @users = User.search(@q, limit: 20)
-      @pages = Page.search(@q, limit: 20)
-      @notes = Note.search(@q, limit: 20)
+      results = RecordingStudioSearch.search([User, Page, Note], @q, limit: 20)
+      @users = results[User]
+      @pages = results[Page]
+      @notes = results[Note]
     else
       @users = User.none
       @pages = Page.none

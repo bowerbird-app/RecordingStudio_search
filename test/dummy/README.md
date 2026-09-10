@@ -31,7 +31,7 @@ Then open the app and sign in with:
 
 ## Useful Routes
 
-- `/` - search demo (`User` trigram, `Page` vector, `Note` trigram)
+- `/` - search demo (`User` trigram, `Page` vector, `Note` trigram) via `RecordingStudioSearch.search([User, Page, Note], q)`
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
 - `/users/sign_in` - Devise sign-in page
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - dummy-only starter pages
@@ -43,4 +43,4 @@ Use this app to verify search generators, embeddings, and fallback before a host
 
 Authenticated pages use Recording Studio's shared default layout. Devise sign-in keeps `layouts/application`.
 
-The home page in `app/views/home/index.html.erb` is a minimal demo of `Model.search`. Deeper explanations live in the product README.
+The home page in `app/views/home/index.html.erb` is a minimal demo of `RecordingStudioSearch.search([User, Page, Note], q)`. Deeper explanations live in the product README.

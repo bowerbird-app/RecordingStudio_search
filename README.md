@@ -77,7 +77,21 @@ end
 
 `Model.search("")` (or blank `q`) returns the **unchanged relation**.
 
-`RecordingStudioSearch.search(Model, q)` is the same facade.
+`RecordingStudioSearch.search(Model, q)` is the same facade and returns an `ActiveRecord::Relation`.
+
+Pass an array when a screen needs several types (for example Section + Page). That returns a **Hash** of model class => relation, in the order you passed, with each model using its own backend. Lists stay separate; scores are not merged across types.
+
+```ruby
+RecordingStudioSearch.search(User, "ada")
+# => User::ActiveRecord_Relation
+
+RecordingStudioSearch.search([User, SupportPage], "refund", limit: 20)
+# => { User => relation, SupportPage => relation }
+
+hits = RecordingStudioSearch.search([User, SupportPage], "refund")
+hits[User]         # people
+hits[SupportPage]  # pages
+```
 
 ## Data
 

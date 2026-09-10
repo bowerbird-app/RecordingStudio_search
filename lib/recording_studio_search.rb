@@ -33,8 +33,15 @@ module RecordingStudioSearch
       @configuration = Configuration.new
     end
 
+    # Search one model or several. One class returns an +ActiveRecord::Relation+.
+    # An array of classes returns a Hash of class => relation in input order.
+    # Types are not merged or re-ranked across models.
     def search(model, query, limit: nil)
-      Searcher.call(model, query, limit: limit)
+      if model.is_a?(Array)
+        model.uniq.to_h { |one| [one, Searcher.call(one, query, limit: limit)] }
+      else
+        Searcher.call(model, query, limit: limit)
+      end
     end
 
     def embed_later(record, recording_id: nil)

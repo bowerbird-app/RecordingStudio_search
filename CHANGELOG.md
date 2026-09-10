@@ -13,6 +13,7 @@ First release of Recording Studio Search (renamed from the gem template).
 ### Added
 - Per-model `searchable` DSL with `:pg_trgm` and `:pgvector` backends
 - `Model.search` / `RecordingStudioSearch.search` with blank-query passthrough
+- `RecordingStudioSearch.search([ModelA, ModelB], q)` returns a Hash of class => relation (no cross-type ranking)
 - `searchable_pg_trgm` and `searchable_pgvector` generators (trigram columns on the model; embeddings in `recording_studio_search_documents`)
 - Core query-cache migration without requiring the `vector` extension
 - Injectable `embedding_client` and optional `RecordingStudioAI::Embeddings.create!` adapter
