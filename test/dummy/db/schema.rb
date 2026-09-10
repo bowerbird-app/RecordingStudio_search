@@ -10,10 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_21_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_10_001005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "pg_trgm"
   enable_extension "pgcrypto"
+  enable_extension "vector"
 
   create_table "folders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -21,10 +23,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_000000) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "pages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.virtual "search_vector", type: :tsvector, as: "to_tsvector('english'::regconfig, COALESCE((title)::text, ''::text))", stored: true
     t.string "title"
     t.datetime "updated_at", null: false
+    t.index ["search_vector"], name: "index_notes_on_search_vector", using: :gin
+    t.index ["title"], name: "index_notes_on_title_trgm", opclass: :gin_trgm_ops, using: :gin
+  end
+
+  create_table "pages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.virtual "search_vector", type: :tsvector, as: "to_tsvector('english'::regconfig, ((COALESCE((title)::text, ''::text) || ' '::text) || COALESCE(body, ''::text)))", stored: true
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["body"], name: "index_pages_on_body_trgm", opclass: :gin_trgm_ops, using: :gin
+    t.index ["search_vector"], name: "index_pages_on_search_vector", using: :gin
+    t.index ["title"], name: "index_pages_on_title_trgm", opclass: :gin_trgm_ops, using: :gin
   end
 
   create_table "recording_studio_accesses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -94,16 +110,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_000000) do
     t.index ["root_recording_id"], name: "idx_rs_root_switchable_root_recording"
   end
 
+# Could not dump table "recording_studio_search_documents" because of following StandardError
+#   Unknown type 'vector(8)' for column 'embedding'
+
+
+  create_table "recording_studio_search_queries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.jsonb "embedding", null: false
+    t.datetime "embedding_at", null: false
+    t.string "embedding_model", null: false
+    t.integer "hit_count", default: 0, null: false
+    t.string "keyword", null: false
+    t.datetime "updated_at", null: false
+    t.index ["keyword", "embedding_model"], name: "index_rss_queries_on_keyword_and_model", unique: true
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.string "name"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
+    t.virtual "search_vector", type: :tsvector, as: "to_tsvector('english'::regconfig, ((COALESCE((name)::text, ''::text) || ' '::text) || COALESCE((email)::text, ''::text)))", stored: true
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["email"], name: "index_users_on_email_trgm", opclass: :gin_trgm_ops, using: :gin
+    t.index ["name"], name: "index_users_on_name_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["search_vector"], name: "index_users_on_search_vector", using: :gin
   end
 
   create_table "workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

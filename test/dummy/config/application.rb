@@ -41,6 +41,8 @@ module Dummy
       g.orm :active_record, primary_key_type: :uuid
     end
 
+    config.active_record.schema_format = :sql
+
     # Don't generate system test files.
     config.generators.system_tests = nil
   end
