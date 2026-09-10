@@ -34,15 +34,17 @@ workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
 accessible_workspace = Workspace.find_or_create_by!(name: "Client Workspace")
 private_workspace = Workspace.find_or_create_by!(name: "Private Workspace")
 folder = Folder.find_or_create_by!(name: "Product Docs")
-page = Page.find_or_create_by!(title: "Getting Started") do |record|
-  record.body = "Welcome to the studio. Set a password you can remember."
+page = Page.find_or_initialize_by(title: "Getting Started")
+if page.new_record?
+  page.body = "Welcome to the studio. Set a password you can remember."
+  page.save!
 end
-page.update!(body: "Welcome to the studio. Set a password you can remember.") if page.body.blank?
 
-refund_page = Page.find_or_create_by!(title: "Refunds") do |record|
-  record.body = "How to request a refund when a charge looks wrong."
+refund_page = Page.find_or_initialize_by(title: "Refunds")
+if refund_page.new_record?
+  refund_page.body = "How to request a refund when a charge looks wrong."
+  refund_page.save!
 end
-refund_page.update!(body: "How to request a refund when a charge looks wrong.") if refund_page.body.blank?
 
 Note.find_or_create_by!(title: "Sticky reminder")
 
