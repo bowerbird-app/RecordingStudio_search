@@ -21,7 +21,7 @@
     <%= render FlatPack::Alert::Component.new(
       style: :info,
       title: "Type a name",
-      description: "This page only asks User.search. Nobody else is invited."
+      description: "Nobody from pages or notes shows up here."
     ) %>
   <% elsif @people.any? %>
     <%= render FlatPack::Table::Component.new(data: @people.to_a, class: "text-sm") do |table| %>
