@@ -22,6 +22,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - `recording_studio_search:backfill` and `recording_studio_search:reembed`
 - Dummy `User` / `Page` / `Note` proof and tests
 - Dummy host names Flatpack `rounded` (`FlatPack.configuration.default_theme`) and stamps `html data-theme="rounded"` without copying core `default_layout`
+- Dummy home uses `FlatPack::Search::Component` (GET `q`) instead of a labeled text input plus Search button
 
 ### Upgrade notes
 - This is the first search release. Copy the initializer, run `recording_studio_search:install`, then enable each model with the searchable generators. Do not add embedding columns to host tables.

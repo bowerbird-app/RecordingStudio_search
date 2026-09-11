@@ -44,4 +44,4 @@ Use this app to verify search generators, embeddings, and fallback before a host
 
 Authenticated pages include `RecordingStudio::UsesDefaultLayout` and render the gem's `recording_studio/default_layout` (theme `rounded` on `body`; dummy also stamps `data-theme="rounded"` on `html`). Devise sign-in keeps `layouts/application`, which already sets `html data-theme="rounded"`. Dummy names the theme in `config/initializers/flat_pack.rb` (`FlatPack.configuration.default_theme = :rounded`).
 
-The home page in `app/views/home/index.html.erb` is a minimal demo of `RecordingStudioSearch.search([User, Page, Note], q)`. Deeper explanations live in the product README.
+The home page in `app/views/home/index.html.erb` is a minimal demo of `RecordingStudioSearch.search([User, Page, Note], q)` with `FlatPack::Search::Component` submitting GET `q`. Deeper explanations live in the product README.

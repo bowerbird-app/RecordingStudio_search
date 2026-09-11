@@ -15,11 +15,16 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
-  test "blank home shows the search form" do
+  test "blank home shows the Flatpack search control" do
     get root_path
     assert_response :success
     assert_select "h1", text: /Search/
-    assert_match "Look up", response.body
+    assert_select "form[action='#{root_path}'][method=get]" do
+      assert_select "input[name=q]", count: 1
+      assert_select "[data-controller*='flat-pack--search-input']", count: 1
+    end
+    refute_match "Look up", response.body
+    refute_select "button[type=submit]"
     refute_match "Ada Admin", response.body
   end
 
@@ -35,6 +40,7 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
   test "trigram search finds a person" do
     get root_path, params: { q: "Ada" }
     assert_response :success
+    assert_select "input[name=q][value=Ada]"
     assert_match "Ada Admin", response.body
   end
 
