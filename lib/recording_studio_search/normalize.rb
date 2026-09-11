@@ -13,7 +13,7 @@ module RecordingStudioSearch
     end
 
     def content_digest(parts)
-      Digest::SHA256.hexdigest(Array(parts).map(&:to_s).join("\n"))
+      Digest::SHA256.hexdigest(Array(parts).join("\n"))
     end
 
     def vector_literal(values)
