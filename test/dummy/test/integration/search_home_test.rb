@@ -23,6 +23,15 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     refute_match "Ada Admin", response.body
   end
 
+  test "home page stamps the rounded Flatpack theme on html and body" do
+    get root_path
+
+    assert_response :success
+    assert_select 'html[data-theme="rounded"]', count: 1
+    assert_select 'body[data-theme="rounded"]', count: 1
+    assert_select "body[data-recording-studio-default-layout='true']", count: 1
+  end
+
   test "trigram search finds a person" do
     get root_path, params: { q: "Ada" }
     assert_response :success

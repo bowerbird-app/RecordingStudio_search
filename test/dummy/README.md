@@ -9,7 +9,8 @@ This Rails app exists to validate the Recording Studio search addon in a real ho
 - Root workspace plus seeded folder and page recordables
 - Trigram search on `User` and `Note`
 - Vector search on `Page` with trigram fallback
-- Recording Studio default layout, FlatPack assets, and Tailwind source scanning
+- Recording Studio default layout with Flatpack `rounded` on `html` and `body` (no vendored layout copy)
+- FlatPack assets and Tailwind source scanning
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 - Dummy-only `/docs/*` pages for gem-specific onboarding
 
@@ -41,6 +42,6 @@ Then open the app and sign in with:
 
 Use this app to verify search generators, embeddings, and fallback before a host enables models. If a layout, route, asset source, or Recording Studio initializer change breaks here, the gem likely needs adjustment before reuse.
 
-Authenticated pages use Recording Studio's shared default layout. Devise sign-in keeps `layouts/application`.
+Authenticated pages include `RecordingStudio::UsesDefaultLayout` and render the gem's `recording_studio/default_layout` (theme `rounded` on `body`; dummy also stamps `data-theme="rounded"` on `html`). Devise sign-in keeps `layouts/application`, which already sets `html data-theme="rounded"`. Dummy names the theme in `config/initializers/flat_pack.rb` (`FlatPack.configuration.default_theme = :rounded`).
 
 The home page in `app/views/home/index.html.erb` is a minimal demo of `RecordingStudioSearch.search([User, Page, Note], q)`. Deeper explanations live in the product README.

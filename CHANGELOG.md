@@ -21,11 +21,13 @@ First release of Recording Studio Search (renamed from the gem template).
 - Vector → trigram fallback with warnings; no merged result sets
 - `recording_studio_search:backfill` and `recording_studio_search:reembed`
 - Dummy `User` / `Page` / `Note` proof and tests
+- Dummy host names Flatpack `rounded` (`FlatPack.configuration.default_theme`) and stamps `html data-theme="rounded"` without copying core `default_layout`
 
 ### Upgrade notes
 - This is the first search release. Copy the initializer, run `recording_studio_search:install`, then enable each model with the searchable generators. Do not add embedding columns to host tables.
 - Set `config.embedding_client` or wait for `RecordingStudioAI::Embeddings.create!`. Missing embeddings make `:pgvector` models search as trigram until fixed.
 - Freeze `embedding_dimensions` before the first pgvector migration. To change dimensions, migrate the documents column yourself and run `recording_studio_search:reembed`.
+- Dummy stamps `html data-theme="rounded"` because Recording Studio 4.2 puts the theme on `body`. Hosts that still key FlatPack off `html` can do the same. Do not vendor `recording_studio/default_layout`.
 
 [Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0

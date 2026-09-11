@@ -10,6 +10,12 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
   end
 
+  test "dummy host names the rounded Flatpack theme" do
+    assert_equal :rounded, FlatPack.configuration.default_theme
+    assert_includes ApplicationController.ancestors, DummyHtmlRoundedTheme
+    refute File.exist?(Rails.root.join("app/views/layouts/recording_studio/default_layout.html.erb"))
+  end
+
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal [ "Workspace" ], RecordingStudio.root_recordable_types

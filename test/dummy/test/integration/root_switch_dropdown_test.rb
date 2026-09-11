@@ -12,7 +12,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "admin@admin.com"
     assert_includes response.body, "Password"
-    assert_includes response.body, 'data-theme="rounded"'
+    assert_select 'html[data-theme="rounded"]', count: 1
     refute_includes response.body, "data-recording-studio-default-layout"
     refute_includes response.body, "mt-28"
     refute_includes response.body, "fixed inset-0"
@@ -33,6 +33,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, workspace.name
+    assert_select 'html[data-theme="rounded"]', count: 1
+    assert_select 'body[data-theme="rounded"]', count: 1
     assert_select "body[data-recording-studio-default-layout='true']", count: 1
   end
 
@@ -50,6 +52,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     get "/recording_studio_root_switchable/v1/root_switch?scope=all_workspaces"
 
     assert_response :success
+    assert_select 'html[data-theme="rounded"]', count: 1
+    assert_select 'body[data-theme="rounded"]', count: 1
     assert_select "body[data-recording-studio-default-layout='true']", count: 1
     refute_includes response.body, "flat-pack-sidebar-layout"
   end

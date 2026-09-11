@@ -82,6 +82,18 @@ class RecordingStudioSearchTest < Minitest::Test
     refute_includes controller_source, "flat_pack_sidebar"
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack_sidebar.html.erb", __dir__))
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack/_sidebar.html.erb", __dir__))
+    refute File.exist?(File.expand_path("dummy/app/views/layouts/recording_studio/default_layout.html.erb", __dir__))
+  end
+
+  def test_dummy_host_names_the_rounded_flatpack_theme
+    initializer = File.read(File.expand_path("dummy/config/initializers/flat_pack.rb", __dir__))
+    html_theme = File.read(File.expand_path("dummy/config/initializers/html_rounded_theme.rb", __dir__))
+
+    assert_includes initializer, "FlatPack.configure"
+    assert_includes initializer, "default_theme = :rounded"
+    assert_includes html_theme, "DummyHtmlRoundedTheme"
+    assert_includes html_theme, 'data-theme="rounded"'
+    refute_includes html_theme, "recording_studio/default_layout.html.erb"
   end
 
   def test_dummy_login_layout_keeps_flatpack_assets_without_tight_main_offset
@@ -127,6 +139,8 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme_source, "validate the Recording Studio search addon"
     assert_includes readme_source, "/recording_studio"
     assert_includes readme_source, "redirects to `/`"
+    assert_includes readme_source, "html data-theme=\"rounded\""
+    assert_includes readme_source, "default_theme = :rounded"
     refute_includes readme_source, "flat_pack_sidebar"
   end
 
