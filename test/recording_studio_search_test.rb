@@ -16,6 +16,7 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
     assert_includes gemspec, 'spec.add_dependency "pgvector"'
+    assert_includes gemspec, 'spec.add_dependency "json", ">= 2.21", "< 3"'
   end
 
   def test_gemspec_excludes_cursor_config
