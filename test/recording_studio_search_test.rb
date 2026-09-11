@@ -225,6 +225,8 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes methods_view, "FlatPack::CodeBlock::Component"
     assert_includes methods_view, "User.search"
     assert_includes methods_view, "RecordingStudioSearch.search"
+    assert_includes methods_view, "Scope"
+    assert_includes methods_view, "against: { title: \"A\", body: \"D\" }"
 
     gem_views_view = File.read(File.expand_path("dummy/app/views/docs/gem_views.html.erb", __dir__))
     assert_includes gem_views_view, "FlatPack::Table::Component"

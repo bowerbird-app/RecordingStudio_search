@@ -16,7 +16,24 @@ class NormalizeAndSchemaTest < Minitest::Test
     assert_equal "to_tsvector('english', coalesce(name::text, '') || ' ' || coalesce(email::text, ''))", expression
   end
 
+  def test_tsvector_expression_with_weights
+    expression = RecordingStudioSearch::Schema.tsvector_expression({ title: "A", body: "D" })
+    assert_equal(
+      "setweight(to_tsvector('english', coalesce(title::text, '')), 'A') || " \
+      "setweight(to_tsvector('english', coalesce(body::text, '')), 'D')",
+      expression
+    )
+  end
+
+  def test_parse_against_accepts_weighted_generator_string
+    assert_equal %w[title body], RecordingStudioSearch::Schema.parse_against("title:A,body:D")
+  end
+
   def test_rejects_invalid_column_names
     assert_raises(ArgumentError) { RecordingStudioSearch::Schema.parse_against(["name;drop"]) }
+  end
+
+  def test_rejects_invalid_weights
+    assert_raises(ArgumentError) { RecordingStudioSearch::Schema.parse_against({ title: "Z" }) }
   end
 end

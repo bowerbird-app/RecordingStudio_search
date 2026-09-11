@@ -35,4 +35,24 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
   test "limit is applied" do
     assert_equal 1, User.search("Lovelace", limit: 1).size
   end
+
+  test "search keeps an existing where scope" do
+    scoped = User.where(email: "ada@example.com")
+
+    assert_equal ["Ada Lovelace"], scoped.search("Lovelace").map(&:name)
+    assert_empty User.where(email: "grace@hopper.test").search("Lovelace")
+  end
+
+  test "facade search keeps a relation scope" do
+    scoped = User.where(email: "ada@example.com")
+
+    assert_equal ["Ada Lovelace"], RecordingStudioSearch.search(scoped, "Lovelace").map(&:name)
+  end
+
+  test "blank query keeps the incoming scope" do
+    scoped = User.where(email: "ada@example.com")
+
+    assert_equal scoped.to_sql, scoped.search("").to_sql
+    assert_equal 1, scoped.search("").count
+  end
 end

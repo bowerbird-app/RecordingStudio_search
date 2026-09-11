@@ -31,7 +31,11 @@ bin/rails db:migrate
 
 Declare matching `searchable backend:` on each model. Boot warns if the DSL and schema disagree.
 
-`RecordingStudioSearch.search` accepts one model class (returns a relation) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`).
+`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`).
+
+## Field weights
+
+`against: %i[title body]` is equal ranking. `against: { title: "A", body: "D" }` uses Postgres `setweight` (`A`–`D`) on `search_vector` and scales trigram similarity the same way. Regenerating `searchable_pg_trgm` with `--against=title:A,body:D` writes that expression for new tables. Existing columns need drop-and-recreate (see dummy `WeightPageSearchVector`). Vector models re-embed after a weight change.
 
 Query-cache embeddings are JSON so trigram-only hosts never load `vector`. Document embeddings use `vector(N)` frozen from `config.embedding_dimensions` at migrate time.
 

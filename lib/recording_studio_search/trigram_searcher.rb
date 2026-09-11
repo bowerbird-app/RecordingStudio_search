@@ -52,8 +52,10 @@ module RecordingStudioSearch
 
     def order_sql
       quoted_query = model.connection.quote(query)
-      similarities = quoted_against.map do |column|
-        "similarity(coalesce(#{column}::text, ''), #{quoted_query})"
+      similarities = against.zip(quoted_against).map do |column, quoted|
+        scale = Schema::RANK_SCALE[entry&.weights&.[](column)]
+        similarity = "similarity(coalesce(#{quoted}::text, ''), #{quoted_query})"
+        scale ? "(#{similarity} * #{scale})" : similarity
       end
       greatest = similarities.any? ? "GREATEST(#{similarities.join(', ')})" : "0"
 

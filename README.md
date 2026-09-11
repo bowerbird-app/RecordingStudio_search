@@ -63,9 +63,18 @@ end
 
 class SupportPage < ApplicationRecord
   include RecordingStudioSearch::Searchable
-  searchable backend: :pgvector, against: %i[title body], recording_id: :recording_id
+  searchable backend: :pgvector, against: { title: "A", body: "D" }, recording_id: :recording_id
 end
 ```
+
+`against:` is a column list, or a Hash of column => Postgres weight `A`–`D` (title can outrank body). The list form keeps equal ranking. Weights change the generated `search_vector` (`setweight`) and trigram sort. Vector search still embeds one string; `A` fields are repeated so they matter more in the embedding.
+
+```bash
+bin/rails g recording_studio_search:searchable_pg_trgm User --against=name,email
+bin/rails g recording_studio_search:searchable_pgvector SupportPage --against=title:A,body:D
+```
+
+If you already have an unweighted `search_vector`, drop and recreate that column (dummy `WeightPageSearchVector` is the shape). Then re-embed `:pgvector` models.
 
 | Backend | Meaning |
 |---|---|
@@ -75,7 +84,7 @@ end
 `User.search("ada")` is trigram/FTS only.  
 `SupportPage.search("refund")` uses embeddings; on failure or empty hits it uses trigram and logs a warning.
 
-`Model.search("")` (or blank `q`) returns the **unchanged relation**.
+`Model.search("")` (or blank `q`) returns the **unchanged relation**. Scopes stick: `SupportPage.published.search(q)` and `RecordingStudioSearch.search(SupportPage.published, q)` search inside that relation.
 
 `RecordingStudioSearch.search(Model, q)` is the same facade and returns an `ActiveRecord::Relation`.
 

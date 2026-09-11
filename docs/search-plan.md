@@ -21,7 +21,8 @@ Hosts choose per model. Installing the gem does not change host tables. Hosts ru
 - For recordables, upsert embeddings by optional `recording_id`.
 - Use `recording_studio_ai` for embeddings when possible; allow an injectable `embedding_client`. Do not hard-code provider SDKs or API keys here.
 - If `RecordingStudioAI::Embeddings.create!` is missing, hosts inject `embedding_client`.
-- Blank `Model.search("")` returns the unchanged relation.
+- Blank `Model.search("")` returns the unchanged relation (including any incoming scope).
+- `against:` may be a column list or `{ column => "A"|"B"|"C"|"D" }` weights.
 - Vector dimensions freeze at the first pgvector migration from `config.embedding_dimensions`.
 
 ## Per-model backends
@@ -50,10 +51,12 @@ Hosts choose per model. Installing the gem does not change host tables. Hosts ru
 ```ruby
 include RecordingStudioSearch::Searchable
 searchable backend: :pg_trgm, against: %i[name email]
-searchable backend: :pgvector, against: %i[title body], recording_id: :recording_id
+searchable backend: :pgvector, against: { title: "A", body: "D" }, recording_id: :recording_id
 
 Model.search("refund policy")
+Model.published.search(q)                              # keeps the scope
 RecordingStudioSearch.search(Model, q)                 # => Relation
+RecordingStudioSearch.search(Model.published, q)       # => Relation
 RecordingStudioSearch.search([ModelA, ModelB], q)      # => { ModelA => Relation, ModelB => Relation }
 RecordingStudioSearch.embed_later(record)
 ```

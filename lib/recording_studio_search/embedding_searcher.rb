@@ -54,7 +54,7 @@ module RecordingStudioSearch
 
     def nearest_ids(vector)
       literal = Document.connection.quote(Normalize.vector_literal(vector))
-      scope = Document.where(searchable_type: model.name).where.not(embedding: nil)
+      scope = Document.where(searchable_type: Registry.model_class(model).name).where.not(embedding: nil)
       scope = scope.where.not(recording_id: nil) if entry&.recording_id_method
       scope.order(Arel.sql("embedding #{distance_operator} #{literal}::vector"))
            .limit(limit)
@@ -77,7 +77,7 @@ module RecordingStudioSearch
     def warn_fallback(reason)
       Rails.logger.warn(
         "[recording_studio_search] vector search falling back to trigram " \
-        "model=#{model.name} query_digest=#{Normalize.digest(query)} #{reason}"
+        "model=#{Registry.model_class(model).name} query_digest=#{Normalize.digest(query)} #{reason}"
       )
     end
   end

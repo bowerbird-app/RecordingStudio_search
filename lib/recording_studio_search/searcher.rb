@@ -15,7 +15,7 @@ module RecordingStudioSearch
     def call
       ActiveSupport::Notifications.instrument(
         "search.recording_studio_search",
-        model: model.name,
+        model: Registry.model_class(model).name,
         backend: backend,
         query_digest: Normalize.digest(query.to_s)
       ) { perform }

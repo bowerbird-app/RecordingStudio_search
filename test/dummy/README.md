@@ -8,7 +8,7 @@ This Rails app exists to validate the Recording Studio search addon in a real ho
 - `Current.actor` wiring for Recording Studio events
 - Root workspace plus seeded folder and page recordables
 - Trigram search on `User` and `Note`
-- Vector search on `Page` with trigram fallback
+- Vector search on `Page` with trigram fallback and title `A` / body `D` weights
 - Recording Studio default layout with Flatpack `rounded` on `html` and `body` (no vendored layout copy)
 - FlatPack assets and Tailwind source scanning
 - Mounted `RecordingStudio::Engine` route behavior inside a host app

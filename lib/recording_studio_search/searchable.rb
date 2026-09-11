@@ -13,7 +13,11 @@ module RecordingStudioSearch
         entry = RecordingStudioSearch::Registry.entry_for(self.class)
         return "" unless entry
 
-        entry.against.map { |column| public_send(column).to_s }.join("\n")
+        entry.against.map { |column|
+          text = public_send(column).to_s
+          repeats = Schema::EMBED_REPEATS[entry.weights[column]] || 1
+          ([text] * repeats).join("\n")
+        }.join("\n")
       end
     end
 
@@ -28,7 +32,7 @@ module RecordingStudioSearch
         RecordingStudioSearch::Registry.register(
           self,
           backend: chosen,
-          against: columns,
+          against: against,
           recording_id: recording_id
         )
 
@@ -40,7 +44,7 @@ module RecordingStudioSearch
       end
 
       def search(query, limit: nil)
-        RecordingStudioSearch.search(self, query, limit: limit)
+        RecordingStudioSearch.search(all, query, limit: limit)
       end
     end
 

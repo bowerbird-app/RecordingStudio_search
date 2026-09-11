@@ -37,4 +37,30 @@
       @notes = results[Note]
     CODE
   ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Scope",
+    subtitle: "Search inside a relation",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      User.where(email: params[:email]).search(@q)
+      RecordingStudioSearch.search(Page.where.not(body: nil), @q)
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Weights",
+    subtitle: "Title can beat body",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      # Dummy Page uses this. A–D are Postgres tsvector weights.
+      searchable backend: :pgvector, against: { title: "A", body: "D" }
+    CODE
+  ) %>
 </div>

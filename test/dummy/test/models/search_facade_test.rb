@@ -55,4 +55,11 @@ class SearchFacadeTest < ActiveSupport::TestCase
     assert_equal User.all.to_sql, result[User].to_sql
     assert_equal Note.all.to_sql, result[Note].to_sql
   end
+
+  test "relation argument is not treated as an array of records" do
+    result = RecordingStudioSearch.search(User.where(id: @ada.id), "Lovelace")
+
+    assert_kind_of ActiveRecord::Relation, result
+    assert_equal ["Ada Lovelace"], result.map(&:name)
+  end
 end

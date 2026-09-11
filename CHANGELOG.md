@@ -15,6 +15,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - `Model.search` / `RecordingStudioSearch.search` with blank-query passthrough
 - `RecordingStudioSearch.search([ModelA, ModelB], q)` returns a Hash of class => relation (no cross-type ranking)
 - `searchable_pg_trgm` and `searchable_pgvector` generators (trigram columns on the model; embeddings in `recording_studio_search_documents`)
+- `Model.search` / `RecordingStudioSearch.search` keep an existing ActiveRecord scope (class, `where`, or named scope)
+- `against:` Hash of column => `A`–`D` weights (`setweight` on `search_vector`, weighted trigram sort; vector embed repeats `A` fields)
 - Core query-cache migration without requiring the `vector` extension
 - Injectable `embedding_client` and optional `RecordingStudioAI::Embeddings.create!` adapter
 - `EmbedDocumentJob`, `embed_later`, digest-skip upserts, and `recording_id` identity for recordables
@@ -38,6 +40,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - Dummy Flatpack is `v0.1.177`. Search’s default fill is `--surface-background-color` from Flatpack 0.1.164; hosts still on 0.1.133 will see the older muted grey.
 - Hosts on Recording Studio 4.1 need 4.2 before this gem. Accessible 0.8+ adds `depends_on_recording_id` on `recording_studio_accesses`; copy that migration when bumping past 0.7.
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
+- To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
 [Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0

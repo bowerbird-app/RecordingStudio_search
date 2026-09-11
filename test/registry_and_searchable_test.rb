@@ -26,7 +26,32 @@ class RegistryAndSearchableTest < Minitest::Test
     assert_equal :pg_trgm, RecordingStudioSearch::Registry.entry_for(user).backend
     assert_equal :pgvector, RecordingStudioSearch::Registry.entry_for(page).backend
     assert_equal :search_recording_id, RecordingStudioSearch::Registry.entry_for(page).recording_id_method
+    assert_equal({}, RecordingStudioSearch::Registry.entry_for(user).weights)
     assert_equal 1, RecordingStudioSearch::Registry.pgvector_entries.size
+  end
+
+  def test_registers_weights_from_against_hash
+    page = Class.new do
+      def self.name = "WeightedPageProbe"
+    end
+    RecordingStudioSearch::Registry.register(page, backend: :pg_trgm, against: { title: "A", body: "D" })
+
+    entry = RecordingStudioSearch::Registry.entry_for(page)
+    assert_equal %i[title body], entry.against
+    assert_equal({ title: "A", body: "D" }, entry.weights)
+  end
+
+  def test_searchable_rejects_invalid_weight
+    klass = Class.new do
+      include RecordingStudioSearch::Searchable
+
+      def self.name = "BadWeight"
+      def self.after_commit(*) = nil
+    end
+
+    assert_raises(ArgumentError) do
+      klass.searchable(backend: :pg_trgm, against: { title: "E" })
+    end
   end
 
   def test_pgvector_without_client_is_treated_as_trigram

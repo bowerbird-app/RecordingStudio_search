@@ -13,7 +13,7 @@ module RecordingStudioSearch
       desc "Enable trigram fallback plus shared pgvector documents for a model"
 
       class_option :against, type: :string, required: true,
-                             desc: "Comma-separated columns to search"
+                             desc: "Comma-separated columns, optionally column:A through column:D"
 
       def ensure_trigram
         if trigram_migration_exists?

@@ -144,7 +144,7 @@ CREATE TABLE public.pages (
     title character varying,
     updated_at timestamp(6) without time zone NOT NULL,
     body text,
-    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((COALESCE((title)::text, ''::text) || ' '::text) || COALESCE(body, ''::text)))) STORED
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((title)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(body, ''::text)), 'D'::"char"))) STORED
 );
 
 
@@ -967,6 +967,7 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260911060100'),
 ('20260911033546'),
 ('20260911033524'),
 ('20260911033523'),

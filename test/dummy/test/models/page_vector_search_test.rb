@@ -123,6 +123,41 @@ class PageVectorSearchTest < ActiveSupport::TestCase
     RecordingStudioSearch.configuration.embedding_client = DummyEmbeddings.method(:vector_for)
   end
 
+  test "weighted search_vector ranks title matches above body matches" do
+    RecordingStudioSearch::Document.delete_all
+    Page.create!(title: "Widgets", body: "unrelated copy")
+    Page.create!(title: "Something else", body: "Widgets appear in the body only")
+
+    titles = Page.search("Widgets").map(&:title)
+
+    assert_equal "Widgets", titles.first
+    assert_includes titles, "Something else"
+  end
+
+  test "pages search_vector uses setweight after the weight upgrade" do
+    expression = Page.connection.select_value(<<~SQL.squish)
+      SELECT pg_get_expr(adbin, adrelid)
+      FROM pg_attrdef
+      JOIN pg_attribute ON pg_attribute.attrelid = pg_attrdef.adrelid
+        AND pg_attribute.attnum = pg_attrdef.adnum
+      JOIN pg_class ON pg_class.oid = pg_attribute.attrelid
+      WHERE pg_class.relname = 'pages'
+        AND pg_attribute.attname = 'search_vector'
+    SQL
+
+    assert_match(/setweight/i, expression)
+    assert_match(/'A'/i, expression)
+    assert_match(/'D'/i, expression)
+  end
+
+  test "weighted pages repeat title text when embedding" do
+    page = Page.new(title: "Refunds", body: "How to request a refund")
+    lines = page.recording_studio_search_text.split("\n")
+
+    assert_equal 5, lines.size
+    assert_equal(["Refunds"] * 4 + ["How to request a refund"], lines)
+  end
+
   test "notes stay on trigram after being enabled later" do
     Note.delete_all
     Note.create!(title: "Sticky reminder")

@@ -33,6 +33,25 @@ class SearchableGeneratorsTest < Minitest::Test
       assert_includes sql, "coalesce(name::text, '') || ' ' || coalesce(email::text, '')"
       assert_includes sql, "opclass: :gin_trgm_ops"
       refute_includes sql, ":embedding"
+      refute_includes sql, "setweight"
+    end
+  end
+
+  def test_trigram_generator_builds_setweight_from_against_weights
+    with_temp_app do |dir|
+      generator = RecordingStudioSearch::Generators::SearchablePgTrgmGenerator.new(
+        ["Page"],
+        { against: "title:A,body:D" },
+        destination_root: dir
+      )
+      generator.stub(:say, nil) { generator.add_trigram_migration }
+
+      path = Dir.glob(File.join(dir, "db/migrate/*add_search_vector_to_pages.rb")).first
+      sql = File.read(path)
+
+      assert_includes sql, "setweight(to_tsvector('english', coalesce(title::text, '')), 'A')"
+      assert_includes sql, "setweight(to_tsvector('english', coalesce(body::text, '')), 'D')"
+      refute_includes sql, "|| ' ' ||"
     end
   end
 
