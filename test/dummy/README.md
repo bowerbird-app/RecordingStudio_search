@@ -13,6 +13,7 @@ This Rails app exists to validate the Recording Studio search addon in a real ho
 - FlatPack assets and Tailwind source scanning
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 - Dummy-only `/docs/*` pages for gem-specific onboarding
+- `/people` one-model search (`User.search`) alongside mixed home search
 
 ## Quick Start
 
@@ -32,7 +33,8 @@ Then open the app and sign in with:
 
 ## Useful Routes
 
-- `/` - search demo (`User` trigram, `Page` vector, `Note` trigram) via `RecordingStudioSearch.search([User, Page, Note], q)`
+- `/` - mixed search demo (`User` trigram, `Page` vector, `Note` trigram) via `RecordingStudioSearch.search([User, Page, Note], q)`
+- `/people` - one-model demo: `User.search` only (linked from home as Just people)
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
 - `/users/sign_in` - Recording Studio Users sign-in (email, then password)
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - dummy-only starter pages
@@ -44,4 +46,4 @@ Use this app to verify search generators, embeddings, and fallback before a host
 
 Authenticated pages include `RecordingStudio::UsesDefaultLayout` and render the gem's `recording_studio/default_layout` (theme `rounded` on `body`; dummy also stamps `html data-theme="rounded"`). Sign-in uses the Users gem layout `recording_studio_user/auth` (`Welcome back`, Continue with email). Dummy names the theme in `config/initializers/flat_pack.rb` (`FlatPack.configuration.default_theme = :rounded`).
 
-The home page in `app/views/home/index.html.erb` is a minimal demo of `RecordingStudioSearch.search([User, Page, Note], q)` with a full-width `FlatPack::Search::Component` (`max_width: :none`) submitting GET `q`. Deeper explanations live in the product README.
+The home page in `app/views/home/index.html.erb` is a minimal demo of `RecordingStudioSearch.search([User, Page, Note], q)` with a full-width `FlatPack::Search::Component` (`max_width: :none`) submitting GET `q`. `/people` is the same Search control calling `User.search` only. Deeper explanations live in the product README.

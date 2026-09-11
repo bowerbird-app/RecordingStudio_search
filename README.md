@@ -93,6 +93,23 @@ hits[User]         # people
 hits[SupportPage]  # pages
 ```
 
+## One model, one page
+
+`RecordingStudioSearch.search([User, Page, Note], q)` is for a mixed list. A host page can call **one** model and skip the rest:
+
+```ruby
+class PeopleController < ApplicationController
+  def index
+    @q = params[:q].to_s
+    @people = @q.present? ? User.search(@q, limit: 20) : User.none
+  end
+end
+```
+
+`User.search` and `RecordingStudioSearch.search(User, q)` are the same relation. Blank `q` returns the **unchanged** relation (everyone), so a lookup screen should use `User.none` when the box is empty.
+
+The dummy app proves this at `/people` (home → **Just people**). That page never asks Page or Note.
+
 ## Data
 
 Keyword cache rows and embedding rows are ordinary tables, not Recordings.
@@ -122,7 +139,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home is a search demo: people (`User`, trigram), pages (`Page`, vector), notes (`Note`, trigram added later).
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`).
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 

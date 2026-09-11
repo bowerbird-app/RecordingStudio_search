@@ -157,6 +157,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme_source, "redirects to `/`"
     assert_includes readme_source, "html data-theme=\"rounded\""
     assert_includes readme_source, "default_theme = :rounded"
+    assert_includes readme_source, "/people"
     refute_includes readme_source, "flat_pack_sidebar"
   end
 
@@ -167,6 +168,8 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme, "searchable"
     assert_includes readme, "pg_trgm"
     assert_includes readme, "pgvector"
+    assert_includes readme, "One model, one page"
+    assert_includes readme, "User.search"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"
     refute_includes readme, "ExampleService"
@@ -183,10 +186,23 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes view_source, "size: :lg"
     refute_includes view_source, "max_width: :lg"
     assert_includes view_source, "dummy_page_nav"
+    assert_includes view_source, "people_path"
     refute_includes view_source, "FlatPack::TextInput::Component"
     refute_includes view_source, "Look up"
     refute_includes view_source, 'title: "Template Demo"'
     refute_includes view_source, "FlatPack::Breadcrumb::Component"
+  end
+
+  def test_dummy_people_page_searches_one_model
+    controller = File.read(File.expand_path("dummy/app/controllers/people_controller.rb", __dir__))
+    view_source = File.read(File.expand_path("dummy/app/views/people/index.html.erb", __dir__))
+
+    assert_includes controller, "User.search"
+    refute_includes controller, "RecordingStudioSearch.search"
+    assert_includes view_source, "people_path"
+    assert_includes view_source, "FlatPack::Search::Component"
+    refute_includes view_source, "Pages"
+    refute_includes view_source, "Notes"
   end
 
   def test_dummy_docs_pages_use_minimal_flatpack_documentation_components
@@ -207,6 +223,8 @@ class RecordingStudioSearchTest < Minitest::Test
     methods_view = File.read(File.expand_path("dummy/app/views/docs/methods.html.erb", __dir__))
     assert_includes methods_view, "FlatPack::SectionTitle::Component"
     assert_includes methods_view, "FlatPack::CodeBlock::Component"
+    assert_includes methods_view, "User.search"
+    assert_includes methods_view, "RecordingStudioSearch.search"
 
     gem_views_view = File.read(File.expand_path("dummy/app/views/docs/gem_views.html.erb", __dir__))
     assert_includes gem_views_view, "FlatPack::Table::Component"

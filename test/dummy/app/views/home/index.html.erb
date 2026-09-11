@@ -5,7 +5,16 @@
     title: "Search",
     subtitle: "People by name. Pages by meaning. Notes by title.",
     variant: :h1
-  ) %>
+  ) do |title| %>
+    <% title.slot do %>
+      <%= render FlatPack::Button::Component.new(
+        text: "Just people",
+        href: people_path,
+        style: :ghost,
+        size: :md
+      ) %>
+    <% end %>
+  <% end %>
 
   <%= form_with url: root_path, method: :get, html: { class: "w-full" } do %>
     <%= render FlatPack::Search::Component.new(

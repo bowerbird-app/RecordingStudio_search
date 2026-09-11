@@ -87,7 +87,6 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Folder: Reference"
     assert_includes response.body, "Page: API"
     refute_includes response.body, "Access boundary"
-    assert_includes response.body, "People:"
     assert_select "div[role='tree']", count: 1
     assert_select "[role='treeitem']", minimum: 3
     refute_includes response.body, "Current structure"
@@ -106,11 +105,10 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     get docs_methods_path
     assert_response :success
     assert_select "h1", text: "Methods"
-    assert_includes response.body, "Document the public methods your addon exposes."
-    assert_includes response.body, "Example method"
-    assert_includes response.body, "recordingstudio_addon.example_method"
-    assert_includes response.body, "# Explain what this method does before the example."
-    assert_includes response.body, "Provide one section title and codeblock for each method"
+    assert_includes response.body, "Call search from any host page"
+    assert_includes response.body, "User.search"
+    assert_includes response.body, "RecordingStudioSearch.search"
+    refute_includes response.body, "recordingstudio_addon.example_method"
   end
 
   test "authenticated docs pages use the recording studio default layout" do

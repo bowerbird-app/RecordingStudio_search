@@ -31,7 +31,7 @@ bin/rails db:migrate
 
 Declare matching `searchable backend:` on each model. Boot warns if the DSL and schema disagree.
 
-`RecordingStudioSearch.search` accepts one model class (returns a relation) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types.
+`RecordingStudioSearch.search` accepts one model class (returns a relation) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`).
 
 Query-cache embeddings are JSON so trigram-only hosts never load `vector`. Document embeddings use `vector(N)` frozen from `config.embedding_dimensions` at migrate time.
 

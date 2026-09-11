@@ -64,7 +64,7 @@ Jobs: `RecordingStudioSearch::EmbedDocumentJob`.
 
 - Phase 0 — repository skeleton (this repo, renamed from the gem template)
 - Phase 1 — trigram backend
-- Phase 2 — vector backend, query cache, fallback, dummy proof
+- Phase 2 — vector backend, query cache, fallback, dummy proof (home mixed search; `/people` is `User.search` only)
 - Phase 3 — backfill / re-embed tasks and search instrumentation
 
 Support and other hosts consume the gem in separate work.

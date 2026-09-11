@@ -41,6 +41,13 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     assert_select "body[data-recording-studio-default-layout='true']", count: 1
   end
 
+  test "home links to the people-only search page" do
+    get root_path
+
+    assert_response :success
+    assert_select "a[href='#{people_path}']", text: /Just people/
+  end
+
   test "trigram search finds a person" do
     get root_path, params: { q: "Ada" }
     assert_response :success

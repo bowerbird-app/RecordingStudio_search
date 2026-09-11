@@ -20,7 +20,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - `EmbedDocumentJob`, `embed_later`, digest-skip upserts, and `recording_id` identity for recordables
 - Vector → trigram fallback with warnings; no merged result sets
 - `recording_studio_search:backfill` and `recording_studio_search:reembed`
-- Dummy `User` / `Page` / `Note` proof and tests
+- Dummy `/people` searches only `User` (`User.search`) so a host can copy a one-model page
 - Dummy host names Flatpack `rounded` (`FlatPack.configuration.default_theme`) and stamps `html data-theme="rounded"` without copying core `default_layout`
 - Dummy home uses `FlatPack::Search::Component` (GET `q`) instead of a labeled text input plus Search button
 - Dummy search control is full width (`max_width: :none`)
