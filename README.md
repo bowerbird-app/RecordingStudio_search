@@ -122,7 +122,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` (`admin@admin.com` / `Password`). Home is a search demo: people (`User`, trigram), pages (`Page`, vector), notes (`Note`, trigram added later).
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home is a search demo: people (`User`, trigram), pages (`Page`, vector), notes (`Note`, trigram added later).
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 

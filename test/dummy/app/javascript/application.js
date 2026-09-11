@@ -2,3 +2,6 @@
 import "controllers"
 import { application } from "controllers/application"
 
+import * as ActiveStorage from "@rails/activestorage"
+ActiveStorage.start()
+import "recording_studio_attachable/tiptap/attachment_image_addon"

@@ -6,13 +6,15 @@ require "devise/test/integration_helpers"
 class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
-  test "sign in page uses the devise layout and is not squished by the default layout" do
+  test "sign in page uses the Users auth layout and is not squished by the default layout" do
     get new_user_session_path
 
     assert_response :success
-    assert_includes response.body, "admin@admin.com"
-    assert_includes response.body, "Password"
+    assert_includes response.body, "Welcome back"
+    assert_includes response.body, "Continue with email"
+    refute_includes response.body, "admin@admin.com"
     assert_select 'html[data-theme="rounded"]', count: 1
+    assert_includes response.body, "min-h-dvh"
     refute_includes response.body, "data-recording-studio-default-layout"
     refute_includes response.body, "mt-28"
     refute_includes response.body, "fixed inset-0"

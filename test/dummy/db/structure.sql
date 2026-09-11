@@ -56,6 +56,48 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: active_storage_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_attachments (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying NOT NULL,
+    record_type character varying NOT NULL,
+    record_id uuid NOT NULL,
+    blob_id uuid NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: active_storage_blobs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_blobs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    key character varying NOT NULL,
+    filename character varying NOT NULL,
+    content_type character varying,
+    metadata text,
+    service_name character varying NOT NULL,
+    byte_size bigint NOT NULL,
+    checksum character varying,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: active_storage_variant_records; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_variant_records (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    blob_id uuid NOT NULL,
+    variation_digest character varying NOT NULL
+);
+
+
+--
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -117,6 +159,21 @@ CREATE TABLE public.recording_studio_accesses (
     created_at timestamp(6) without time zone NOT NULL,
     role integer DEFAULT 0 NOT NULL,
     depends_on_recording_id uuid
+);
+
+
+--
+-- Name: recording_studio_attachable_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_attachable_attachments (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    attachment_kind character varying NOT NULL,
+    original_filename character varying NOT NULL,
+    content_type character varying NOT NULL,
+    byte_size bigint NOT NULL
 );
 
 
@@ -216,6 +273,67 @@ CREATE TABLE public.recording_studio_search_queries (
 
 
 --
+-- Name: recording_studio_user_identities; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_user_identities (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    provider character varying NOT NULL,
+    uid character varying NOT NULL,
+    email character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_user_otp_challenges; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_user_otp_challenges (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    purpose character varying NOT NULL,
+    code_digest character varying NOT NULL,
+    delivery_code_ciphertext text,
+    expires_at timestamp(6) without time zone NOT NULL,
+    attempts_count integer DEFAULT 0 NOT NULL,
+    verified_at timestamp(6) without time zone,
+    consumed_at timestamp(6) without time zone,
+    revoked_at timestamp(6) without time zone,
+    delivery_requested_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_user_people; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_user_people (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_user_profiles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_user_profiles (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    first_name character varying NOT NULL,
+    last_name character varying NOT NULL,
+    time_zone character varying DEFAULT 'UTC'::character varying NOT NULL,
+    additional_profile_attributes jsonb DEFAULT '{}'::jsonb NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -238,7 +356,13 @@ CREATE TABLE public.users (
     reset_password_token character varying,
     updated_at timestamp(6) without time zone NOT NULL,
     name character varying,
-    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((COALESCE((name)::text, ''::text) || ' '::text) || COALESCE((email)::text, ''::text)))) STORED
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((COALESCE((name)::text, ''::text) || ' '::text) || COALESCE((email)::text, ''::text)))) STORED,
+    registered_with character varying DEFAULT 'password'::character varying NOT NULL,
+    confirmation_token character varying,
+    confirmed_at timestamp(6) without time zone,
+    confirmation_sent_at timestamp(6) without time zone,
+    unconfirmed_email character varying,
+    CONSTRAINT users_registered_with_check CHECK (((registered_with)::text = ANY ((ARRAY['password'::character varying, 'otp'::character varying])::text[])))
 );
 
 
@@ -252,6 +376,30 @@ CREATE TABLE public.workspaces (
     name character varying,
     updated_at timestamp(6) without time zone NOT NULL
 );
+
+
+--
+-- Name: active_storage_attachments active_storage_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments
+    ADD CONSTRAINT active_storage_attachments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: active_storage_blobs active_storage_blobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_blobs
+    ADD CONSTRAINT active_storage_blobs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: active_storage_variant_records active_storage_variant_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records
+    ADD CONSTRAINT active_storage_variant_records_pkey PRIMARY KEY (id);
 
 
 --
@@ -295,6 +443,14 @@ ALTER TABLE ONLY public.recording_studio_accesses
 
 
 --
+-- Name: recording_studio_attachable_attachments recording_studio_attachable_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_attachable_attachments
+    ADD CONSTRAINT recording_studio_attachable_attachments_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: recording_studio_events recording_studio_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -335,6 +491,38 @@ ALTER TABLE ONLY public.recording_studio_search_queries
 
 
 --
+-- Name: recording_studio_user_identities recording_studio_user_identities_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_identities
+    ADD CONSTRAINT recording_studio_user_identities_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_user_otp_challenges recording_studio_user_otp_challenges_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_otp_challenges
+    ADD CONSTRAINT recording_studio_user_otp_challenges_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_user_people recording_studio_user_people_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_people
+    ADD CONSTRAINT recording_studio_user_people_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_user_profiles recording_studio_user_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_profiles
+    ADD CONSTRAINT recording_studio_user_profiles_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -359,6 +547,41 @@ ALTER TABLE ONLY public.workspaces
 
 
 --
+-- Name: idx_on_attachment_kind_d683071625; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_on_attachment_kind_d683071625 ON public.recording_studio_attachable_attachments USING btree (attachment_kind);
+
+
+--
+-- Name: idx_on_user_id_purpose_2b7c2a59c4; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_on_user_id_purpose_2b7c2a59c4 ON public.recording_studio_user_otp_challenges USING btree (user_id, purpose);
+
+
+--
+-- Name: idx_rs_attachable_kind_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rs_attachable_kind_type ON public.recording_studio_attachable_attachments USING btree (attachment_kind, content_type);
+
+
+--
+-- Name: idx_rs_attachable_parent_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rs_attachable_parent_active ON public.recording_studio_recordings USING btree (parent_recording_id) WHERE (((recordable_type)::text = 'RecordingStudioAttachable::Attachment'::text) AND (trashed_at IS NULL));
+
+
+--
+-- Name: idx_rs_attachable_root_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rs_attachable_root_active ON public.recording_studio_recordings USING btree (root_recording_id) WHERE (((recordable_type)::text = 'RecordingStudioAttachable::Attachment'::text) AND (trashed_at IS NULL));
+
+
+--
 -- Name: idx_rs_root_switchable_actor_device_scope; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -377,6 +600,34 @@ CREATE UNIQUE INDEX idx_rs_root_switchable_anonymous_device_scope ON public.reco
 --
 
 CREATE INDEX idx_rs_root_switchable_root_recording ON public.recording_studio_root_switchable_selections USING btree (root_recording_id);
+
+
+--
+-- Name: index_active_storage_attachments_on_blob_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_active_storage_attachments_on_blob_id ON public.active_storage_attachments USING btree (blob_id);
+
+
+--
+-- Name: index_active_storage_attachments_uniqueness; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_attachments_uniqueness ON public.active_storage_attachments USING btree (record_type, record_id, name, blob_id);
+
+
+--
+-- Name: index_active_storage_blobs_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_blobs_on_key ON public.active_storage_blobs USING btree (key);
+
+
+--
+-- Name: index_active_storage_variant_records_uniqueness; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_variant_records_uniqueness ON public.active_storage_variant_records USING btree (blob_id, variation_digest);
 
 
 --
@@ -471,6 +722,48 @@ CREATE INDEX index_recording_studio_recordings_on_recordable_parent_trashed ON p
 
 
 --
+-- Name: index_recording_studio_user_identities_on_provider_and_uid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_user_identities_on_provider_and_uid ON public.recording_studio_user_identities USING btree (provider, uid);
+
+
+--
+-- Name: index_recording_studio_user_identities_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_user_identities_on_user_id ON public.recording_studio_user_identities USING btree (user_id);
+
+
+--
+-- Name: index_recording_studio_user_identities_on_user_id_and_provider; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_user_identities_on_user_id_and_provider ON public.recording_studio_user_identities USING btree (user_id, provider);
+
+
+--
+-- Name: index_recording_studio_user_otp_challenges_on_expires_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_user_otp_challenges_on_expires_at ON public.recording_studio_user_otp_challenges USING btree (expires_at);
+
+
+--
+-- Name: index_recording_studio_user_otp_challenges_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_user_otp_challenges_on_user_id ON public.recording_studio_user_otp_challenges USING btree (user_id);
+
+
+--
+-- Name: index_recording_studio_user_profiles_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_user_profiles_on_user_id ON public.recording_studio_user_profiles USING btree (user_id);
+
+
+--
 -- Name: index_rs_events_on_action_and_occurred_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -562,6 +855,13 @@ CREATE UNIQUE INDEX index_rss_queries_on_keyword_and_model ON public.recording_s
 
 
 --
+-- Name: index_users_on_confirmation_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_confirmation_token ON public.users USING btree (confirmation_token);
+
+
+--
 -- Name: index_users_on_email; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -597,11 +897,51 @@ CREATE INDEX index_users_on_search_vector ON public.users USING gin (search_vect
 
 
 --
+-- Name: recording_studio_user_profiles fk_rails_19efa4e96e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_profiles
+    ADD CONSTRAINT fk_rails_19efa4e96e FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: recording_studio_user_identities fk_rails_24997f0186; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_identities
+    ADD CONSTRAINT fk_rails_24997f0186 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: recording_studio_recordings fk_rails_26012d5ca3; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.recording_studio_recordings
     ADD CONSTRAINT fk_rails_26012d5ca3 FOREIGN KEY (parent_recording_id) REFERENCES public.recording_studio_recordings(id);
+
+
+--
+-- Name: recording_studio_user_otp_challenges fk_rails_5a5625bfeb; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_otp_challenges
+    ADD CONSTRAINT fk_rails_5a5625bfeb FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: active_storage_variant_records fk_rails_993965df05; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records
+    ADD CONSTRAINT fk_rails_993965df05 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
+
+
+--
+-- Name: active_storage_attachments fk_rails_c3b3935057; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments
+    ADD CONSTRAINT fk_rails_c3b3935057 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
 
 
 --
@@ -627,6 +967,14 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260911033546'),
+('20260911033524'),
+('20260911033523'),
+('20260911033522'),
+('20260911033521'),
+('20260911033520'),
+('20260911033519'),
+('20260911033518'),
 ('20260911000000'),
 ('20260910001005'),
 ('20260910001004'),

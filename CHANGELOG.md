@@ -25,7 +25,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Dummy home uses `FlatPack::Search::Component` (GET `q`) instead of a labeled text input plus Search button
 - Dummy search control is full width (`max_width: :none`)
 - Dummy Flatpack pin is `v0.1.177` so Search idle fill matches the live demo (`--surface-background-color`, not muted grey)
-- Dummy GitHub pins: Recording Studio `v4.2.1`, Accessible `v0.9.1`, Root Switchable `v0.5.1`
+- Dummy GitHub pins: Recording Studio `v4.2.1`, Accessible `v0.9.1`, Root Switchable `v0.5.1`, Users `v0.11.0`, Admin `v2.0.2`, Attachable `v0.5.1`
+- Dummy sign-in uses Recording Studio Users auth (`Welcome back`, email then password) instead of a host Devise Login card
 - Gemspec requires `recording_studio ~> 4.2` (Accessible 0.7+ needs 4.2)
 - Gemspec requires `json >= 2.21, < 3` so ActiveSupport’s `JSON.parse(string, options)` still works (json 3 only takes keyword options)
 

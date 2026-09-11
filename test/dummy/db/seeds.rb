@@ -23,12 +23,16 @@ user = User.find_or_create_by!(email: "admin@admin.com") do |account|
 end
 user.update!(name: "Ada Admin") if user.name.blank?
 
+RecordingStudioUser.record_profile!(user, first_name: "Ada", last_name: "Admin", time_zone: "UTC") unless RecordingStudioUser.profile_for(user)
+
 lovelace = User.find_or_create_by!(email: "ada@example.com") do |account|
   account.password = "Password"
   account.password_confirmation = "Password"
   account.name = "Ada Lovelace"
 end
 lovelace.update!(name: "Ada Lovelace") if lovelace.name.blank?
+
+RecordingStudioUser.record_profile!(lovelace, first_name: "Ada", last_name: "Lovelace", time_zone: "UTC") unless RecordingStudioUser.profile_for(lovelace)
 
 workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
 accessible_workspace = Workspace.find_or_create_by!(name: "Client Workspace")
