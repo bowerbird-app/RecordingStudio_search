@@ -23,6 +23,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - Dummy `User` / `Page` / `Note` proof and tests
 - Dummy host names Flatpack `rounded` (`FlatPack.configuration.default_theme`) and stamps `html data-theme="rounded"` without copying core `default_layout`
 - Dummy home uses `FlatPack::Search::Component` (GET `q`) instead of a labeled text input plus Search button
+- Dummy search control is full width (`max_width: :none`)
 - Dummy Flatpack pin is `v0.1.177` so Search idle fill matches the live demo (`--surface-background-color`, not muted grey)
 - Dummy GitHub pins: Recording Studio `v4.2.1`, Accessible `v0.9.1`, Root Switchable `v0.5.1`
 - Gemspec requires `recording_studio ~> 4.2` (Accessible 0.7+ needs 4.2)

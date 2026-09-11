@@ -22,6 +22,9 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{root_path}'][method=get]" do
       assert_select "input[name=q]", count: 1
       assert_select "[data-controller*='flat-pack--search-input']", count: 1
+      assert_select "[data-controller*='flat-pack--search-input'][class*='max-w-none']", count: 1
+      assert_select "[data-controller*='flat-pack--search-input'][class*='w-full']", count: 1
+      refute_select "[class*='max-w-lg']"
       assert_select "input[class*='search-padding-y-lg']", count: 1
       refute_select "button[type=submit]"
     end

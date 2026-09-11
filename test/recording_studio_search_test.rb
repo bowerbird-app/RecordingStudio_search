@@ -174,7 +174,9 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes view_source, 'title: "Search"'
     assert_includes view_source, "FlatPack::Search::Component"
+    assert_includes view_source, "max_width: :none"
     assert_includes view_source, "size: :lg"
+    refute_includes view_source, "max_width: :lg"
     assert_includes view_source, "dummy_page_nav"
     refute_includes view_source, "FlatPack::TextInput::Component"
     refute_includes view_source, "Look up"

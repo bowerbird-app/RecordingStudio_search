@@ -7,12 +7,12 @@
     variant: :h1
   ) %>
 
-  <%= form_with url: root_path, method: :get do %>
+  <%= form_with url: root_path, method: :get, html: { class: "w-full" } do %>
     <%= render FlatPack::Search::Component.new(
       name: "q",
       value: @q.presence,
       placeholder: "Try Ada, refund, sticky",
-      max_width: :lg,
+      max_width: :none,
       size: :lg
     ) %>
   <% end %>
