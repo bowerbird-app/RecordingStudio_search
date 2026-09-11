@@ -117,7 +117,7 @@ end
 
 `User.search` and `RecordingStudioSearch.search(User, q)` are the same relation. Blank `q` returns the **unchanged** relation (everyone), so a lookup screen should use `User.none` when the box is empty.
 
-The dummy app proves this at `/people` (home → **Just people**). That page never asks Page or Note.
+The dummy app proves this at `/people` (home → **Just people**). That page never asks Page or Note. `/groups` searches inside a mailbox (`User.where(...).search`). `/title-first` ranks a title hit above a body hit.
 
 ## Data
 
@@ -148,7 +148,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`).
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 

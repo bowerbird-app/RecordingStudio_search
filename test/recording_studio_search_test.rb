@@ -158,6 +158,8 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme_source, "html data-theme=\"rounded\""
     assert_includes readme_source, "default_theme = :rounded"
     assert_includes readme_source, "/people"
+    assert_includes readme_source, "/groups"
+    assert_includes readme_source, "/title-first"
     refute_includes readme_source, "flat_pack_sidebar"
   end
 
@@ -186,7 +188,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes view_source, "size: :lg"
     refute_includes view_source, "max_width: :lg"
     assert_includes view_source, "dummy_page_nav"
-    assert_includes view_source, "people_path"
+    assert_includes view_source, "dummy_search_demo_buttons"
     refute_includes view_source, "FlatPack::TextInput::Component"
     refute_includes view_source, "Look up"
     refute_includes view_source, 'title: "Template Demo"'
@@ -203,6 +205,35 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes view_source, "FlatPack::Search::Component"
     refute_includes view_source, "Pages"
     refute_includes view_source, "Notes"
+  end
+
+  def test_dummy_group_and_title_first_pages_demo_scope_and_weights
+    groups_controller = File.read(File.expand_path("dummy/app/controllers/group_searches_controller.rb", __dir__))
+    groups_view = File.read(File.expand_path("dummy/app/views/group_searches/index.html.erb", __dir__))
+    weights_controller = File.read(File.expand_path("dummy/app/controllers/weighted_pages_controller.rb", __dir__))
+    weights_view = File.read(File.expand_path("dummy/app/views/weighted_pages/index.html.erb", __dir__))
+    routes = File.read(File.expand_path("dummy/config/routes.rb", __dir__))
+
+    assert_includes groups_controller, "people.search"
+    assert_includes groups_controller, "email ILIKE"
+    assert_includes groups_view, "groups_path"
+    assert_includes groups_view, "In this group"
+    assert_includes weights_controller, "TrigramSearcher"
+    assert_includes weights_view, "title_first_path"
+    assert_includes weights_view, "Title first"
+    assert_includes routes, 'get "groups"'
+    assert_includes routes, 'get "title-first"'
+  end
+
+  def test_dummy_home_demo_buttons_link_to_people_groups_and_title_first
+    helper = File.read(File.expand_path("dummy/app/helpers/application_helper.rb", __dir__))
+
+    assert_includes helper, "people_path"
+    assert_includes helper, "groups_path"
+    assert_includes helper, "title_first_path"
+    assert_includes helper, "Just people"
+    assert_includes helper, "In a group"
+    assert_includes helper, "Title first"
   end
 
   def test_dummy_docs_pages_use_minimal_flatpack_documentation_components
@@ -227,6 +258,8 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes methods_view, "RecordingStudioSearch.search"
     assert_includes methods_view, "Scope"
     assert_includes methods_view, "against: { title: \"A\", body: \"D\" }"
+    assert_includes methods_view, "/groups"
+    assert_includes methods_view, "/title-first"
 
     gem_views_view = File.read(File.expand_path("dummy/app/views/docs/gem_views.html.erb", __dir__))
     assert_includes gem_views_view, "FlatPack::Table::Component"

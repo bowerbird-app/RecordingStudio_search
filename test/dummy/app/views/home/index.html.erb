@@ -7,12 +7,7 @@
     variant: :h1
   ) do |title| %>
     <% title.slot do %>
-      <%= render FlatPack::Button::Component.new(
-        text: "Just people",
-        href: people_path,
-        style: :secondary,
-        size: :md
-      ) %>
+      <%= dummy_search_demo_buttons %>
     <% end %>
   <% end %>
 

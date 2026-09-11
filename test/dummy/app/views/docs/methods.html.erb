@@ -46,8 +46,10 @@
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      User.where(email: params[:email]).search(@q)
+      User.where("email ILIKE ?", "%@example.com").search(@q)
       RecordingStudioSearch.search(Page.where.not(body: nil), @q)
+
+      # Dummy /groups searches people already in a mailbox.
     CODE
   ) %>
 
@@ -59,7 +61,7 @@
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      # Dummy Page uses this. A–D are Postgres tsvector weights.
+      # Dummy Page and /title-first use this. A–D are Postgres tsvector weights.
       searchable backend: :pgvector, against: { title: "A", body: "D" }
     CODE
   ) %>
