@@ -4,7 +4,7 @@ require "test_helper"
 
 class SearchFacadeTest < ActiveSupport::TestCase
   setup do
-    User.delete_all
+    reset_users!
     Page.delete_all
     Note.delete_all
     RecordingStudioSearch::Document.delete_all

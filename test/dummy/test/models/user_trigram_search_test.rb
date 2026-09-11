@@ -4,7 +4,7 @@ require "test_helper"
 
 class UserTrigramSearchTest < ActiveSupport::TestCase
   setup do
-    User.delete_all
+    reset_users!
     @ada = User.create!(name: "Ada Lovelace", email: "ada@example.com", password: "Password")
     @grace = User.create!(name: "Grace Hopper", email: "grace@hopper.test", password: "Password")
   end

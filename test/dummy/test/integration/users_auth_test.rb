@@ -14,6 +14,19 @@ class UsersAuthTest < ActionDispatch::IntegrationTest
     refute_match ">Login<", response.body
   end
 
+  test "tests can wipe seeded Users that have profiles" do
+    user = User.find_or_create_by!(email: "wipe-profile@example.com") do |account|
+      account.password = "Password"
+      account.password_confirmation = "Password"
+      account.name = "Wipe Me"
+    end
+    RecordingStudioUser.record_profile!(user, first_name: "Wipe", last_name: "Me", time_zone: "UTC") unless RecordingStudioUser.profile_for(user)
+
+    assert RecordingStudioUser.profile_for(user)
+    reset_users!
+    refute User.exists?(user.id)
+  end
+
   test "dummy importmap names Attachable with a top-level constant" do
     importmap = File.read(Rails.root.join("config/importmap.rb"))
     index_js = File.read(Rails.root.join("app/javascript/controllers/index.js"))
