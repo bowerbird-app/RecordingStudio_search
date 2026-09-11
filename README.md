@@ -13,7 +13,7 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.1"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -130,7 +130,7 @@ PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected clie
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio 4.x (`~> 4.1`; dummy tag `v4.2.0`)
+- Recording Studio 4.x (`~> 4.2`; dummy tag `v4.2.1`)
 - PostgreSQL 16
 
 ## Documentation

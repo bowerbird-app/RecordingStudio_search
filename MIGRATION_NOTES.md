@@ -4,8 +4,10 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio 4.x (`~> 4.1` in the gemspec; dummy GitHub tag `v4.2.0`)
-- Accessible dummy tag `v0.6.0` and Root Switchable dummy tag `v0.5.0`
+- Recording Studio 4.x (`~> 4.2` in the gemspec; dummy GitHub tag `v4.2.1`)
+- Accessible dummy tag `v0.9.1` and Root Switchable dummy tag `v0.5.1`
+- FlatPack dummy tag `v0.1.177`
+- Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
 - FlatPack dummy tag `v0.1.177`
 - PostgreSQL 16 with `pg_trgm` (always) and `vector` (only if a host enables `:pgvector`)
 - Public RubyGems and GitHub access for dependency installation

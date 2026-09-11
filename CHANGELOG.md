@@ -24,6 +24,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Dummy host names Flatpack `rounded` (`FlatPack.configuration.default_theme`) and stamps `html data-theme="rounded"` without copying core `default_layout`
 - Dummy home uses `FlatPack::Search::Component` (GET `q`) instead of a labeled text input plus Search button
 - Dummy Flatpack pin is `v0.1.177` so Search idle fill matches the live demo (`--surface-background-color`, not muted grey)
+- Dummy GitHub pins: Recording Studio `v4.2.1`, Accessible `v0.9.1`, Root Switchable `v0.5.1`
+- Gemspec requires `recording_studio ~> 4.2` (Accessible 0.7+ needs 4.2)
 
 ### Upgrade notes
 - This is the first search release. Copy the initializer, run `recording_studio_search:install`, then enable each model with the searchable generators. Do not add embedding columns to host tables.
@@ -31,6 +33,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - Freeze `embedding_dimensions` before the first pgvector migration. To change dimensions, migrate the documents column yourself and run `recording_studio_search:reembed`.
 - Dummy stamps `html data-theme="rounded"` because Recording Studio 4.2 puts the theme on `body`. Hosts that still key FlatPack off `html` can do the same. Do not vendor `recording_studio/default_layout`.
 - Dummy Flatpack is `v0.1.177`. Search’s default fill is `--surface-background-color` from Flatpack 0.1.164; hosts still on 0.1.133 will see the older muted grey.
+- Hosts on Recording Studio 4.1 need 4.2 before this gem. Accessible 0.8+ adds `depends_on_recording_id` on `recording_studio_accesses`; copy that migration when bumping past 0.7.
 
 [Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0

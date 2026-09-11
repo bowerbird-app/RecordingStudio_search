@@ -115,7 +115,8 @@ CREATE TABLE public.recording_studio_accesses (
     actor_id uuid NOT NULL,
     actor_type character varying NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    role integer DEFAULT 0 NOT NULL
+    role integer DEFAULT 0 NOT NULL,
+    depends_on_recording_id uuid
 );
 
 
@@ -428,6 +429,13 @@ CREATE INDEX index_recording_studio_accesses_on_actor_and_role ON public.recordi
 
 
 --
+-- Name: index_recording_studio_accesses_on_depends_on_recording_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_accesses_on_depends_on_recording_id ON public.recording_studio_accesses USING btree (depends_on_recording_id);
+
+
+--
 -- Name: index_recording_studio_events_on_recording_and_idempotency_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -619,6 +627,7 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260911000000'),
 ('20260910001005'),
 ('20260910001004'),
 ('20260910001003'),
