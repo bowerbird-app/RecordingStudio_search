@@ -22,9 +22,9 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{root_path}'][method=get]" do
       assert_select "input[name=q]", count: 1
       assert_select "[data-controller*='flat-pack--search-input']", count: 1
+      refute_select "button[type=submit]"
     end
     refute_match "Look up", response.body
-    refute_select "button[type=submit]"
     refute_match "Ada Admin", response.body
   end
 
