@@ -50,10 +50,10 @@ module RecordingStudioSearch
     def tsvector_expression(against)
       parsed = fields(against)
       if parsed.any?(&:weight)
-        parsed.map { |field|
+        parsed.map do |field|
           weight = field.weight || "D"
           "setweight(to_tsvector('english', coalesce(#{field.column}::text, '')), '#{weight}')"
-        }.join(" || ")
+        end.join(" || ")
       else
         parts = parsed.map { |field| "coalesce(#{field.column}::text, '')" }
         "to_tsvector('english', #{parts.join(" || ' ' || ")})"

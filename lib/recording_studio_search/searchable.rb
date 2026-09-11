@@ -13,11 +13,11 @@ module RecordingStudioSearch
         entry = RecordingStudioSearch::Registry.entry_for(self.class)
         return "" unless entry
 
-        entry.against.map { |column|
+        entry.against.map do |column|
           text = public_send(column).to_s
           repeats = Schema::EMBED_REPEATS[entry.weights[column]] || 1
           ([text] * repeats).join("\n")
-        }.join("\n")
+        end.join("\n")
       end
     end
 
