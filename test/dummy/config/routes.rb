@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
-  devise_for :users
+  mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
+  devise_for :users,
+             skip: %i[sessions registrations passwords],
+             controllers: {
+               confirmations: "recording_studio_user/auth/confirmations"
+             }
+
+  recording_studio_user_auth_for :users
 
   # RecordingStudio engine is data/API-focused and has no browser root route.
   # Keep legacy links working by redirecting the base path to the app home.
@@ -26,4 +33,9 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
+  resources :people, only: :index
+  get "groups", to: "group_searches#index", as: :groups
+  get "title-first", to: "weighted_pages#index", as: :title_first
+
+  mount RecordingStudioUser::Engine => RecordingStudioUser.config.mount_path, as: :recording_studio_users
 end

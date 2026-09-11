@@ -1,0 +1,26 @@
+# frozen_string_literal: true
+
+class <%= migration_class_name %> < ActiveRecord::Migration[8.1]
+  def up
+    enable_extension "pg_trgm" unless extension_enabled?("pg_trgm")
+
+    unless column_exists?(:<%= table %>, :search_vector)
+      add_column :<%= table %>, :search_vector, :tsvector,
+                 as: "<%= tsvector_expression %>",
+                 stored: true
+    end
+
+    add_index :<%= table %>, :search_vector, using: :gin, name: "index_<%= table %>_on_search_vector" unless index_name_exists?(:<%= table %>, "index_<%= table %>_on_search_vector")
+<% against_columns.each do |column| -%>
+    add_index :<%= table %>, :<%= column %>, opclass: :gin_trgm_ops, using: :gin, name: "index_<%= table %>_on_<%= column %>_trgm" unless index_name_exists?(:<%= table %>, "index_<%= table %>_on_<%= column %>_trgm")
+<% end -%>
+  end
+
+  def down
+<% against_columns.each do |column| -%>
+    remove_index :<%= table %>, name: "index_<%= table %>_on_<%= column %>_trgm" if index_name_exists?(:<%= table %>, "index_<%= table %>_on_<%= column %>_trgm")
+<% end -%>
+    remove_index :<%= table %>, name: "index_<%= table %>_on_search_vector" if index_name_exists?(:<%= table %>, "index_<%= table %>_on_search_vector")
+    remove_column :<%= table %>, :search_vector if column_exists?(:<%= table %>, :search_vector)
+  end
+end

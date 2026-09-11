@@ -1,0 +1,60 @@
+<% dummy_page_nav(title: "In this group", back_url: root_path) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "In this group",
+    subtitle: "Ada lives in two mailboxes. Search one of them.",
+    variant: :h1
+  ) %>
+
+  <%= render FlatPack::SegmentedButtons::Component.new do |groups| %>
+    <% groups.button(
+      text: "Everyone",
+      href: groups_path(q: @q.presence, group: "everyone"),
+      selected: @group == "everyone",
+      size: :md
+    ) %>
+    <% groups.button(
+      text: "example.com",
+      href: groups_path(q: @q.presence, group: "example.com"),
+      selected: @group == "example.com",
+      size: :md
+    ) %>
+    <% groups.button(
+      text: "hopper.test",
+      href: groups_path(q: @q.presence, group: "hopper.test"),
+      selected: @group == "hopper.test",
+      size: :md
+    ) %>
+  <% end %>
+
+  <%= form_with url: groups_path, method: :get, html: { class: "w-full" } do %>
+    <%= hidden_field_tag :group, @group %>
+    <%= render FlatPack::Search::Component.new(
+      name: "q",
+      value: @q.presence,
+      placeholder: "Try Ada",
+      max_width: :none,
+      size: :lg
+    ) %>
+  <% end %>
+
+  <% if @q.blank? %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Pick a group, then type a name",
+      description: "The search stays inside the people already in that mailbox."
+    ) %>
+  <% elsif @people.any? %>
+    <%= render FlatPack::Table::Component.new(data: @people.to_a, class: "text-sm") do |table| %>
+      <% table.column(title: "Name") { |person| person.name.presence || "—" } %>
+      <% table.column(title: "Email") { |person| person.email } %>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Nobody in this group",
+      description: "Try Ada on example.com, or switch back to Everyone."
+    ) %>
+  <% end %>
+</div>

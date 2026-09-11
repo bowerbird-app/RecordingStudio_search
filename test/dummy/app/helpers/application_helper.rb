@@ -19,4 +19,47 @@ module ApplicationHelper
       )
     end
   end
+
+  def dummy_search_demo_buttons
+    render FlatPack::OverflowRow::Component.new(gap: :sm) do
+      safe_join(
+        [
+          render(FlatPack::Button::Component.new(
+            text: "Just people",
+            href: people_path,
+            style: :secondary,
+            size: :md
+          )),
+          render(FlatPack::Button::Component.new(
+            text: "In a group",
+            href: groups_path,
+            style: :secondary,
+            size: :md
+          )),
+          render(FlatPack::Button::Component.new(
+            text: "Title first",
+            href: title_first_path,
+            style: :secondary,
+            size: :md
+          ))
+        ]
+      )
+    end
+  end
+
+  def weighted_hit_label(page, query)
+    needle = query.to_s.downcase
+    in_title = page.title.to_s.downcase.include?(needle)
+    in_body = page.body.to_s.downcase.include?(needle)
+
+    if in_title && in_body
+      "Title and body"
+    elsif in_title
+      "Title"
+    elsif in_body
+      "Body"
+    else
+      "Close match"
+    end
+  end
 end

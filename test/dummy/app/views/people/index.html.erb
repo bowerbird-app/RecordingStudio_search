@@ -1,0 +1,38 @@
+<% dummy_page_nav(title: "People", back_url: root_path) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "People",
+    subtitle: "Names and emails. Nothing else on this page.",
+    variant: :h1
+  ) %>
+
+  <%= form_with url: people_path, method: :get, html: { class: "w-full" } do %>
+    <%= render FlatPack::Search::Component.new(
+      name: "q",
+      value: @q.presence,
+      placeholder: "Try Ada or hopper",
+      max_width: :none,
+      size: :lg
+    ) %>
+  <% end %>
+
+  <% if @q.blank? %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Type a name",
+      description: "Nobody from pages or notes shows up here."
+    ) %>
+  <% elsif @people.any? %>
+    <%= render FlatPack::Table::Component.new(data: @people.to_a, class: "text-sm") do |table| %>
+      <% table.column(title: "Name") { |person| person.name.presence || "—" } %>
+      <% table.column(title: "Email") { |person| person.email } %>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Nobody by that name",
+      description: "Try Ada, or a slice of an email. Typos are welcome."
+    ) %>
+  <% end %>
+</div>

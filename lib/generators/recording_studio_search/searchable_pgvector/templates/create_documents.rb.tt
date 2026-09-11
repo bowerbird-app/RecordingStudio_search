@@ -1,0 +1,37 @@
+# frozen_string_literal: true
+
+class <%= migration_class_name %> < ActiveRecord::Migration[8.1]
+  def change
+    enable_extension "vector" unless extension_enabled?("vector")
+
+    create_table :recording_studio_search_documents, id: :uuid do |t|
+      t.string :searchable_type, null: false
+      t.uuid :searchable_id, null: false
+      t.uuid :recording_id
+      t.column :embedding, "vector(<%= embedding_dimensions %>)"
+      t.datetime :embedding_at
+      t.string :embedding_model
+      t.string :content_digest
+      t.timestamps
+    end
+
+    add_index :recording_studio_search_documents,
+              %i[searchable_type searchable_id],
+              unique: true,
+              name: "index_rss_documents_on_searchable"
+    add_index :recording_studio_search_documents, :recording_id,
+              name: "index_rss_documents_on_recording_id"
+    add_index :recording_studio_search_documents,
+              %i[searchable_type recording_id],
+              name: "index_rss_documents_on_type_and_recording"
+    add_index :recording_studio_search_documents, :recording_id,
+              unique: true,
+              where: "recording_id IS NOT NULL",
+              name: "index_rss_documents_on_recording_id_unique"
+    add_index :recording_studio_search_documents,
+              :embedding,
+              using: :hnsw,
+              opclass: :vector_cosine_ops,
+              name: "index_rss_documents_on_embedding"
+  end
+end

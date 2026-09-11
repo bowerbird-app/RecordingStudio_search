@@ -61,6 +61,16 @@ done
 # database.yml defaults to the postgres/postgres credentials over TCP.
 sudo -u postgres psql -tAc "ALTER USER postgres PASSWORD 'postgres';" >/dev/null 2>&1 || true
 
+log "Enabling pg_trgm and pgvector"
+if ! sudo apt-get install -y --no-install-recommends postgresql-16-pgvector; then
+  rm -rf /tmp/pgvector
+  git clone --depth 1 --branch v0.8.0 https://github.com/pgvector/pgvector.git /tmp/pgvector
+  make -C /tmp/pgvector
+  sudo make -C /tmp/pgvector install
+fi
+sudo -u postgres psql -d postgres -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm;' >/dev/null
+sudo -u postgres psql -d postgres -c 'CREATE EXTENSION IF NOT EXISTS vector;' >/dev/null
+
 # ---------------------------------------------------------------------------
 # 4. Gem dependencies (gem itself + dummy host app)
 # ---------------------------------------------------------------------------

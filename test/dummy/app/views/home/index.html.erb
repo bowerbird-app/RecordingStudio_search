@@ -1,101 +1,72 @@
-<% dummy_page_nav(title: "Template Demo", back_url: root_path) %>
+<% dummy_page_nav(title: "Search", back_url: root_path) %>
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Template Demo",
-    subtitle: "This dummy app is the browser-facing demo surface for the template.",
+    title: "Search",
+    subtitle: "People by name. Pages by meaning. Notes by title.",
     variant: :h1
-  ) %>
+  ) do |title| %>
+    <% title.slot do %>
+      <%= dummy_search_demo_buttons %>
+    <% end %>
+  <% end %>
 
-  <div class="grid gap-6 lg:grid-cols-2">
-    <%= render FlatPack::Card::Component.new(style: :default) do |card| %>
-      <% card.header do %>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: "What's working",
-          subtitle: "Core template capabilities already wired into the dummy app.",
-          variant: :h3,
-          class: "mb-0 pb-0"
-        ) %>
-      <% end %>
+  <%= form_with url: root_path, method: :get, html: { class: "w-full" } do %>
+    <%= render FlatPack::Search::Component.new(
+      name: "q",
+      value: @q.presence,
+      placeholder: "Try Ada, refund, sticky",
+      max_width: :none,
+      size: :lg
+    ) %>
+  <% end %>
 
-      <% card.body do %>
-        <ul class="space-y-3 text-sm leading-6">
-          <li>Rails engine routes are mounted and responding.</li>
-          <li>PostgreSQL UUID-oriented migrations are included in the engine.</li>
-          <li>Tailwind sources can be wired into a host app through the install generator.</li>
-          <li>The dummy app exercises authentication, the Recording Studio default layout, and FlatPack.</li>
-        </ul>
+  <% if @q.blank? %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Type something first",
+      description: "Blank search leaves the list alone. Add a word to see hits."
+    ) %>
+  <% else %>
+    <%= render FlatPack::SectionTitle::Component.new(title: "People") %>
+    <% if @users.any? %>
+      <%= render FlatPack::Table::Component.new(data: @users.to_a, class: "text-sm") do |table| %>
+        <% table.column(title: "Name") { |user| user.name.presence || "—" } %>
+        <% table.column(title: "Email") { |user| user.email } %>
       <% end %>
+    <% else %>
+      <%= render FlatPack::Alert::Component.new(
+        style: :info,
+        title: "No people match",
+        description: "Try a name or email, typos included."
+      ) %>
     <% end %>
 
-    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
-      <% card.header do %>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: "Next steps",
-          subtitle: "The usual first moves when turning the template into a real addon.",
-          variant: :h3,
-          class: "mb-0 pb-0"
-        ) %>
+    <%= render FlatPack::SectionTitle::Component.new(title: "Pages") %>
+    <% if @pages.any? %>
+      <%= render FlatPack::Table::Component.new(data: @pages.to_a, class: "text-sm") do |table| %>
+        <% table.column(title: "Title") { |page| page.title } %>
+        <% table.column(title: "Body") { |page| page.body.to_s.truncate(80) } %>
       <% end %>
-
-      <% card.body do %>
-        <ol class="space-y-3 text-sm leading-6 list-decimal pl-5">
-          <li>Run <code>bin/rename_gem your_addon_name</code> when you are ready to rename the engine.</li>
-          <li>Replace the sample migration with your addon tables and install them into the host app.</li>
-          <li>Configure Recording Studio recordable types and capabilities in the host app initializer.</li>
-          <li>Use the dummy app to validate layout, asset scanning, and authentication flows.</li>
-        </ol>
-      <% end %>
+    <% else %>
+      <%= render FlatPack::Alert::Component.new(
+        style: :info,
+        title: "No pages match",
+        description: "If meaning search is cold, we fall back to the words on the page."
+      ) %>
     <% end %>
 
-    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
-      <% card.header do %>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: "FlatPack usage",
-          subtitle: "This page uses FlatPack components for its primary UI structure.",
-          variant: :h3,
-          class: "mb-0 pb-0"
-        ) %>
+    <%= render FlatPack::SectionTitle::Component.new(title: "Notes") %>
+    <% if @notes.any? %>
+      <%= render FlatPack::Table::Component.new(data: @notes.to_a, class: "text-sm") do |table| %>
+        <% table.column(title: "Title") { |note| note.title } %>
       <% end %>
-
-      <% card.body do %>
-        <p class="text-sm leading-6 text-(--surface-content-color)">
-          Use FlatPack cards, buttons, badges, inputs, and layout primitives as the default path for addon UI. Keep raw HTML for simple semantic content only.
-        </p>
-      <% end %>
-
-      <% card.footer do %>
-        <a href="https://github.com/bowerbird-app/flatpack"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="inline-flex">
-          <%= render FlatPack::Button::Component.new(
-            text: "View FlatPack documentation",
-            style: :primary,
-            size: :md
-          ) %>
-        </a>
-      <% end %>
+    <% else %>
+      <%= render FlatPack::Alert::Component.new(
+        style: :info,
+        title: "No notes match",
+        description: "Notes only look at the title."
+      ) %>
     <% end %>
-
-    <%= render FlatPack::Card::Component.new(style: :default) do |card| %>
-      <% card.header do %>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: "Install flow",
-          subtitle: "What the host app generator path covers.",
-          variant: :h3,
-          class: "mb-0 pb-0"
-        ) %>
-      <% end %>
-
-      <% card.body do %>
-        <ul class="space-y-3 text-sm leading-6">
-          <li>Add the gem to your host app and run <code>bundle install</code>.</li>
-          <li>Run <code>rails generate gem_template:install</code> to mount the engine and add configuration.</li>
-          <li>Run <code>rails generate gem_template:migrations</code> to copy engine migrations into the host app.</li>
-          <li>Rebuild Tailwind if needed with <code>bin/rails tailwindcss:build</code>.</li>
-        </ul>
-      <% end %>
-    <% end %>
-  </div>
+  <% end %>
 </div>

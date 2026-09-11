@@ -10,9 +10,15 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
   end
 
+  test "dummy host names the rounded Flatpack theme" do
+    assert_equal :rounded, FlatPack.configuration.default_theme
+    assert_includes ApplicationController.ancestors, DummyHtmlRoundedTheme
+    refute File.exist?(Rails.root.join("app/views/layouts/recording_studio/default_layout.html.erb"))
+  end
+
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
-    assert_equal [ "Workspace" ], RecordingStudio.root_recordable_types
+    assert_equal %w[RecordingStudioUser::People Workspace], RecordingStudio.root_recordable_types.sort
     assert_equal [ "Workspace", "Folder" ], RecordingStudio.allowed_parent_types_for("Page")
   end
 
@@ -35,6 +41,9 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     private_workspace = Workspace.find_by!(name: "Private Workspace")
     folder = Folder.find_by!(name: "Product Docs")
     page = Page.find_by!(title: "Getting Started")
+    refund_page = Page.find_by!(title: "Refunds")
+    note = Note.find_by!(title: "Sticky reminder")
+    lovelace = User.find_by!(email: "ada@example.com")
     root_recording = RecordingStudio::Recording.find_by!(recordable: workspace)
     accessible_root_recording = RecordingStudio::Recording.find_by!(recordable: accessible_workspace)
     private_root_recording = RecordingStudio::Recording.find_by!(recordable: private_workspace)
@@ -50,6 +59,9 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_equal folder_recording, page_recording.parent_recording
     assert_equal root_recording, page_recording.root_recording
     assert_equal 3, Workspace.count
+    assert_equal "Ada Lovelace", lovelace.name
+    assert_equal "How to request a refund when a charge looks wrong.", refund_page.body
+    assert_equal "Sticky reminder", note.title
 
     assert_no_difference -> { User.count } do
       assert_no_difference -> { RecordingStudio::Recording.count } do
@@ -63,7 +75,7 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
 
   test "workspace opts into accessible and the example mixin without enabling them globally" do
     workspace_source = File.read(Rails.root.join("app/models/workspace.rb"))
-    example_source = File.read(GemTemplate::Engine.root.join("lib/gem_template/capabilities/example.rb"))
+    example_source = File.read(RecordingStudioSearch::Engine.root.join("lib/recording_studio_search/capabilities/example.rb"))
 
     assert_includes workspace_source, "include RecordingStudio::Capabilities::Example.to(label: \"dummy workspace\")"
     assert_includes example_source, "RecordingStudio::Capabilities.include_for(:example, **)"

@@ -3,30 +3,66 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Methods",
-    subtitle: "Document the public methods your addon exposes.",
+    subtitle: "Call search from any host page. One model or several.",
     variant: :h1
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Example method",
-    subtitle: "recordingstudio_addon.example_method",
+    title: "One model",
+    subtitle: "User.search",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      # Explain what this method does before the example.
-      result = RecordingstudioAddon.example_method(
-        # Replace with the real arguments this method accepts.
-        input: "demo value"
-      )
-
-      # Show what the method returns or what side effect it creates.
-      puts result
+      # Dummy /people uses this. Blank q returns the full relation,
+      # so a lookup page should skip search when the box is empty.
+      @q = params[:q].to_s
+      @people = @q.present? ? User.search(@q, limit: 20) : User.none
     CODE
   ) %>
 
-  <p class="text-sm text-(--body-muted-content-color)">
-    Provide one section title and codeblock for each method
-  </p>
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Several models",
+    subtitle: "RecordingStudioSearch.search",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      # Dummy home keeps each type in its own list.
+      results = RecordingStudioSearch.search([User, Page, Note], @q, limit: 20)
+      @users = results[User]
+      @pages = results[Page]
+      @notes = results[Note]
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Scope",
+    subtitle: "Search inside a relation",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      User.where("email ILIKE ?", "%@example.com").search(@q)
+      RecordingStudioSearch.search(Page.where.not(body: nil), @q)
+
+      # Dummy /groups searches people already in a mailbox.
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Weights",
+    subtitle: "Title can beat body",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      # Dummy Page and /title-first use this. A–D are Postgres tsvector weights.
+      searchable backend: :pgvector, against: { title: "A", body: "D" }
+    CODE
+  ) %>
 </div>
