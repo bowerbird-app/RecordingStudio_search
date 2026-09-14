@@ -31,6 +31,12 @@ module ApplicationHelper
             size: :md
           )),
           render(FlatPack::Button::Component.new(
+            text: "As you type",
+            href: instant_people_path,
+            style: :secondary,
+            size: :md
+          )),
+          render(FlatPack::Button::Component.new(
             text: "In a group",
             href: groups_path,
             style: :secondary,

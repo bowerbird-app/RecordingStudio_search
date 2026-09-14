@@ -1,0 +1,27 @@
+<% query = local_assigns.fetch(:query, "") %>
+<% collections = instant_search_result_collections(hits) %>
+<% if collections.empty? %>
+  <% if query.to_s.strip.empty? %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Type a little",
+      description: "Hits land here as you go."
+    ) %>
+  <% else %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "No luck",
+      description: "Try another word. Typos are fine."
+    ) %>
+  <% end %>
+<% else %>
+  <% collections.each do |label, rows| %>
+    <% if collections.many? %>
+      <%= render FlatPack::SectionTitle::Component.new(title: label) %>
+    <% end %>
+    <%= render FlatPack::Table::Component.new(data: rows.to_a, class: "text-sm") do |table| %>
+      <% table.column(title: "Name") { |row| instant_search_row_name(row) } %>
+      <% table.column(title: "Detail") { |row| instant_search_row_detail(row) } %>
+    <% end %>
+  <% end %>
+<% end %>

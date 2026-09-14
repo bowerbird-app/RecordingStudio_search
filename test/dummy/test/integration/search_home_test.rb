@@ -46,6 +46,7 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a[href='#{people_path}']", text: /Just people/
+    assert_select "a[href='#{instant_people_path}']", text: /As you type/
     assert_select "a[href='#{groups_path}']", text: /In a group/
     assert_select "a[href='#{title_first_path}']", text: /Title first/
   end

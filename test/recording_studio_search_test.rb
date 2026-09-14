@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioSearchTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.3.0", ::RecordingStudioSearch::VERSION
+    assert_equal "0.4.0", ::RecordingStudioSearch::VERSION
   end
 
   def test_engine_exists
@@ -158,6 +158,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme_source, "html data-theme=\"rounded\""
     assert_includes readme_source, "default_theme = :rounded"
     assert_includes readme_source, "/people"
+    assert_includes readme_source, "/instant"
     assert_includes readme_source, "/groups"
     assert_includes readme_source, "/title-first"
     refute_includes readme_source, "flat_pack_sidebar"
@@ -170,8 +171,14 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme, "searchable"
     assert_includes readme, "pg_trgm"
     assert_includes readme, "pgvector"
+    assert_includes File.read(File.expand_path("../docs/search-plan.md", __dir__)), "## Phase 4 — Instant search UI"
     assert_includes readme, "One model, one page"
     assert_includes readme, "User.search"
+    assert_includes readme, "instant_search_field"
+    assert_includes readme, "instant_search_results"
+    assert_includes readme, "instant_search_models"
+    assert_includes readme, "trigram or vector"
+    assert_includes readme, "recording_studio_search_queries"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"
     refute_includes readme, "ExampleService"
@@ -229,11 +236,28 @@ class RecordingStudioSearchTest < Minitest::Test
     helper = File.read(File.expand_path("dummy/app/helpers/application_helper.rb", __dir__))
 
     assert_includes helper, "people_path"
+    assert_includes helper, "instant_people_path"
     assert_includes helper, "groups_path"
     assert_includes helper, "title_first_path"
     assert_includes helper, "Just people"
+    assert_includes helper, "As you type"
     assert_includes helper, "In a group"
     assert_includes helper, "Title first"
+  end
+
+  def test_dummy_instant_page_uses_locked_helper_and_engine_frame
+    controller = File.read(File.expand_path("dummy/app/controllers/instant_people_controller.rb", __dir__))
+    view_source = File.read(File.expand_path("dummy/app/views/instant_people/index.html.erb", __dir__))
+    routes = File.read(File.expand_path("dummy/config/routes.rb", __dir__))
+
+    assert_includes controller, "User.none"
+    assert_includes view_source, "instant_search_field"
+    assert_includes view_source, "instant_search_results"
+    assert_includes view_source, 'frame_id: "people_results"'
+    assert_includes view_source, "recording_studio_search.instant_search_path"
+    refute_includes view_source, "<turbo-frame"
+    assert_includes routes, "instant_people"
+    assert_includes routes, "RecordingStudioSearch::Engine"
   end
 
   def test_dummy_docs_pages_use_minimal_flatpack_documentation_components

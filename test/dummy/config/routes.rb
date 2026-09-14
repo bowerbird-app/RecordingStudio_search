@@ -34,8 +34,10 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "home#index"
   resources :people, only: :index
+  get "instant", to: "instant_people#index", as: :instant_people
   get "groups", to: "group_searches#index", as: :groups
   get "title-first", to: "weighted_pages#index", as: :title_first
 
   mount RecordingStudioUser::Engine => RecordingStudioUser.config.mount_path, as: :recording_studio_users
+  mount RecordingStudioSearch::Engine, at: "/recording_studio_search"
 end

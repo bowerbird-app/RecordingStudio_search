@@ -42,6 +42,7 @@ RecordingStudioSearch.configure do |config|
   config.embedding_client = nil # nil → RecordingStudioAI embeddings when that API exists
   config.trigram_threshold = 0.3
   config.vector_result_limit = 50
+  config.instant_search_models = [] # e.g. [User] — required for the instant endpoint
 end
 ```
 
@@ -119,6 +120,44 @@ end
 
 The dummy app proves this at `/people` (home → **Just people**). That page never asks Page or Note. `/groups` searches inside a mailbox (`User.where(...).search`). `/title-first` ranks a title hit above a body hit.
 
+## Instant search (opt-in)
+
+Debounced Flatpack Search chrome that fills a Turbo Frame. Same `Model.search` / `RecordingStudioSearch.search` as a full-page search: **trigram or vector**, whichever the model declared. Allowlist a `:pgvector` model and the frame uses embeddings (with the usual trigram fallback). The UI is **not** injected on boot. Scores are **not** merged across models.
+
+Document vectors already live in `recording_studio_search_documents`. The **query** string still needs an embedding the first time that exact keyword is seen; repeats come from `recording_studio_search_queries`. Debounce (default 200ms) fires once per settled prefix, so typing `Ada` can embed `A`, `Ad`, and `Ada` unless those rows are already cached.
+
+1. Mount the engine (`bin/rails g recording_studio_search:install` does this).
+2. Allowlist models. Only these may be searched via the engine endpoint. Prefer class **names** in the initializer so boot does not load models early:
+
+```ruby
+config.instant_search_models = ["User"]
+```
+
+3. Pin `controllers/recording_studio_search` and `eagerLoadControllersFrom` it. Import Turbo (`import "@hotwired/turbo-rails"`).
+4. Copy this pair onto a host page. First helper is the field. Second is the frame.
+
+```erb
+<%= recording_studio_search.instant_search_field(
+      models: [User],
+      frame_id: "people_results",
+      url: recording_studio_search.instant_search_path,
+      param: :q,
+      debounce_ms: 200
+    ) %>
+<%= recording_studio_search.instant_search_results(
+      frame_id: "people_results",
+      hits: @hits
+    ) %>
+```
+
+On the host action, start with empty hits (`User.none`). Do not call `User.search("")` for a blank box — that would list everyone. The engine show action does the same: blank `q` renders the empty frame, not the full table.
+
+`url:` defaults to `InstantSearchesController#show` (`GET …/instant_search?models[]=User&frame_id=…`). Pass a host path only when that action should render the frame instead. Requested models that are not allowlisted are ignored.
+
+Override `app/views/recording_studio_search/_results.html.erb` if the default Name / Detail table is wrong for a type.
+
+Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `User` (trigram) so typing updates the frame and leaves the URL at `/instant`. That is a demo choice, not a backend limit. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
+
 ## Data
 
 Keyword cache rows and embedding rows are ordinary tables, not Recordings.
@@ -148,7 +187,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 

@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-14
+
+### Added
+- Opt-in instant search: Flatpack `Search` via `recording_studio_search.instant_search_field`
+- `recording_studio_search.instant_search_results` Turbo Frame wrapper around `recording_studio_search/results`
+- Engine `InstantSearchesController#show` for allowlisted `Model.search` / `RecordingStudioSearch.search`
+- `config.instant_search_models` allowlist (empty by default; the endpoint ignores other models)
+- Stimulus debounce controller that updates a Turbo Frame without a full page reload
+- Blank `q` on the instant endpoint returns no rows (not everyone)
+- Dummy `/instant` (“As you type”) proves typing updates `people_results` via `User.search` (trigram). Instant search is not limited to that backend: an allowlisted `:pgvector` model uses the same query cache and embedding path as `Model.search`
+
+### Upgrade notes
+- Instant search is off until you set `config.instant_search_models`, mount `RecordingStudioSearch::Engine`, and pin `controllers/recording_studio_search` in the host importmap (`eagerLoadControllersFrom`). Import Turbo.
+- Re-run `bin/rails g recording_studio_search:install` or copy those lines by hand. Existing `Model.search` pages are unchanged.
+- Copy the field + `instant_search_results` pair. The results URL is the engine show action (`recording_studio_search.instant_search_path`) unless you pass `url:`.
+- Prefer class names in `instant_search_models` (`["User"]`) so the initializer does not load models at boot.
+- Instant search on a `:pgvector` model still embeds each new query prefix (then caches it). Plan for first-type latency and embed cost; repeats stay in Postgres.
+
 ## [0.3.0] - 2026-09-10
 
 First release of Recording Studio Search (renamed from the gem template).
@@ -44,5 +62,6 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0
