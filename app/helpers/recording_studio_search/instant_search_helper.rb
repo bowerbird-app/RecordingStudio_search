@@ -16,8 +16,18 @@ module RecordingStudioSearch
       param = options.fetch(:param, :q)
       results_url = results_url_for(options[:url], models, frame_id, param)
       debounce_ms = options.fetch(:debounce_ms, 200)
-      @view.tag.div(**wrapper_attributes(results_url, frame_id, param, debounce_ms)) do
+      @view.tag.div(
+        class: "w-full",
+        **wrapper_attributes(results_url, frame_id, param, debounce_ms)
+      ) do
         render_search_control(param, options)
+      end
+    end
+
+    # Host-copyable Turbo Frame around +recording_studio_search/results+.
+    def instant_search_results(frame_id:, hits:, query: nil)
+      @view.tag.turbo_frame(id: frame_id.to_s) do
+        @view.render("recording_studio_search/results", hits: hits, query: query)
       end
     end
 
@@ -36,7 +46,7 @@ module RecordingStudioSearch
         FlatPack::Search::Component.new(
           name: param.to_s,
           value: chrome[:value],
-          placeholder: chrome.fetch(:placeholder, "Search..."),
+          placeholder: chrome.fetch(:placeholder, "Try a name"),
           max_width: chrome.fetch(:max_width, :none),
           size: chrome.fetch(:size, :lg)
         )

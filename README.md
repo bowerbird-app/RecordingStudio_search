@@ -122,17 +122,17 @@ The dummy app proves this at `/people` (home → **Just people**). That page nev
 
 ## Instant search (opt-in)
 
-Debounced Flatpack chrome that fills a Turbo Frame. It calls the same `Model.search` / `RecordingStudioSearch.search` backends. The UI is **not** injected on boot.
+Debounced Flatpack Search chrome that fills a Turbo Frame. Same `Model.search` / `RecordingStudioSearch.search` backends. The UI is **not** injected on boot. Scores are **not** merged across models.
 
 1. Mount the engine (`bin/rails g recording_studio_search:install` does this).
-2. Allowlist models. Only these may be searched via the engine endpoint:
+2. Allowlist models. Only these may be searched via the engine endpoint. Prefer class **names** in the initializer so boot does not load models early:
 
 ```ruby
-config.instant_search_models = ["User"] # or [User] after the class loads
+config.instant_search_models = ["User"]
 ```
 
-3. Pin the Stimulus controller (`controllers/recording_studio_search`) and eager-load it.
-4. Render the locked helper and frame on a host page:
+3. Pin `controllers/recording_studio_search` and `eagerLoadControllersFrom` it. Import Turbo (`import "@hotwired/turbo-rails"`).
+4. Copy this pair onto a host page. First helper is the field. Second is the frame.
 
 ```erb
 <%= recording_studio_search.instant_search_field(
@@ -142,14 +142,19 @@ config.instant_search_models = ["User"] # or [User] after the class loads
       param: :q,
       debounce_ms: 200
     ) %>
-<turbo-frame id="people_results">
-  <%= render "recording_studio_search/results", hits: @hits %>
-</turbo-frame>
+<%= recording_studio_search.instant_search_results(
+      frame_id: "people_results",
+      hits: @hits
+    ) %>
 ```
 
-`url:` defaults to engine `InstantSearchesController#show` (`GET …/instant_search`). Pass a host path only when that action should render the frame instead. Requested models that are not allowlisted are ignored.
+On the host action, start with empty hits (`User.none`). Do not call `User.search("")` for a blank box — that would list everyone. The engine show action does the same: blank `q` renders the empty frame, not the full table.
 
-Dummy `/instant` (home → **As you type**) is the proof page.
+`url:` defaults to `InstantSearchesController#show` (`GET …/instant_search?models[]=User&frame_id=…`). Pass a host path only when that action should render the frame instead. Requested models that are not allowlisted are ignored.
+
+Override `app/views/recording_studio_search/_results.html.erb` if the default Name / Detail table is wrong for a type.
+
+Dummy `/instant` (home → **As you type**) is the proof page: typing updates the frame and leaves the URL at `/instant`.
 
 ## Data
 

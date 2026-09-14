@@ -28,9 +28,10 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     assert_select "input[name=q]", count: 1
     assert_select "[data-controller*='flat-pack--search-input']", count: 1
     assert_select "turbo-frame#people_results", count: 1
-    assert_match "Nothing yet", response.body
+    assert_match "Type a little", response.body
     refute_match "Ada Admin", response.body
     refute_select "form[action='#{instant_people_path}']"
+    refute_select "form[method=get]"
   end
 
   test "engine instant search finds an allowlisted person inside the turbo frame" do
@@ -58,7 +59,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :success
-    assert_match "Nothing yet", response.body
+    assert_match "No luck", response.body
     refute_match "Refunds", response.body
   end
 
@@ -84,7 +85,21 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :success
-    assert_match "Nothing yet", response.body
+    assert_match "Type a little", response.body
     refute_match "Ada Admin", response.body
+  end
+
+  test "typed query with no people says no luck and still skips everyone" do
+    get recording_studio_search.instant_search_path, params: {
+      q: "zzzznope",
+      models: ["User"],
+      frame_id: "people_results"
+    }, headers: { "Turbo-Frame" => "people_results" }
+
+    assert_response :success
+    assert_select "turbo-frame#people_results"
+    assert_match "No luck", response.body
+    refute_match "Ada Admin", response.body
+    refute_match "<html", response.body
   end
 end

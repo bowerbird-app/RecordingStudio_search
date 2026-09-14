@@ -9,15 +9,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [0.4.0] - 2026-09-14
 
 ### Added
-- Opt-in instant search chrome: `recording_studio_search.instant_search_field` plus engine `InstantSearchesController#show`
+- Opt-in instant search: Flatpack `Search` via `recording_studio_search.instant_search_field`
+- `recording_studio_search.instant_search_results` Turbo Frame wrapper around `recording_studio_search/results`
+- Engine `InstantSearchesController#show` for allowlisted `Model.search` / `RecordingStudioSearch.search`
 - `config.instant_search_models` allowlist (empty by default; the endpoint ignores other models)
 - Stimulus debounce controller that updates a Turbo Frame without a full page reload
-- Dummy `/instant` page proves typing updates `people_results` via `User.search`
+- Blank `q` on the instant endpoint returns no rows (not everyone)
+- Dummy `/instant` (“As you type”) proves typing updates `people_results` via `User.search`
 
 ### Upgrade notes
-- Instant search is off until you set `config.instant_search_models`, mount `RecordingStudioSearch::Engine`, and pin `controllers/recording_studio_search` in the host importmap (`eagerLoadControllersFrom`).
+- Instant search is off until you set `config.instant_search_models`, mount `RecordingStudioSearch::Engine`, and pin `controllers/recording_studio_search` in the host importmap (`eagerLoadControllersFrom`). Import Turbo.
 - Re-run `bin/rails g recording_studio_search:install` or copy those lines by hand. Existing `Model.search` pages are unchanged.
-- The results URL is the engine show action (`recording_studio_search.instant_search_path`). Pass `url:` only when a host action should handle the frame instead.
+- Copy the field + `instant_search_results` pair. The results URL is the engine show action (`recording_studio_search.instant_search_path`) unless you pass `url:`.
+- Prefer class names in `instant_search_models` (`["User"]`) so the initializer does not load models at boot.
 
 ## [0.3.0] - 2026-09-10
 

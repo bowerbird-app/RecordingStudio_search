@@ -39,6 +39,13 @@ class InstantSearchTest < Minitest::Test
     assert_equal "query", RecordingStudioSearch::InstantSearch.search_param({ param: "query" })
   end
 
+  def test_hits_for_blank_query_or_empty_allowlist_is_empty
+    RecordingStudioSearch.configuration.instant_search_models = []
+
+    assert_equal({}, RecordingStudioSearch::InstantSearch.hits_for(["User"], "Ada"))
+    assert_equal({}, RecordingStudioSearch::InstantSearch.hits_for(["User"], "   "))
+  end
+
   def test_configuration_to_h_lists_allowlist_names
     RecordingStudioSearch.configuration.instant_search_models = [String]
 

@@ -171,9 +171,11 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme, "searchable"
     assert_includes readme, "pg_trgm"
     assert_includes readme, "pgvector"
+    assert_includes File.read(File.expand_path("../docs/search-plan.md", __dir__)), "## Phase 4 — Instant search UI"
     assert_includes readme, "One model, one page"
     assert_includes readme, "User.search"
     assert_includes readme, "instant_search_field"
+    assert_includes readme, "instant_search_results"
     assert_includes readme, "instant_search_models"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"
@@ -248,10 +250,10 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes controller, "User.none"
     assert_includes view_source, "instant_search_field"
+    assert_includes view_source, "instant_search_results"
     assert_includes view_source, 'frame_id: "people_results"'
     assert_includes view_source, "recording_studio_search.instant_search_path"
-    assert_includes view_source, 'id="people_results"'
-    assert_includes view_source, 'render "recording_studio_search/results"'
+    refute_includes view_source, "<turbo-frame"
     assert_includes routes, "instant_people"
     assert_includes routes, "RecordingStudioSearch::Engine"
   end

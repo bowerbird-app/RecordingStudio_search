@@ -70,7 +70,40 @@ Jobs: `RecordingStudioSearch::EmbedDocumentJob`.
 - Phase 2 — vector backend, query cache, fallback, dummy proof (home mixed search; `/people` is `User.search` only; `/groups` keeps a mailbox scope; `/title-first` shows weights)
 - Phase 3 — backfill / re-embed tasks and search instrumentation
 - Phase 4 — instant search UI (this gem only; no Support `/help`)
-  - Locked: helper `recording_studio_search.instant_search_field`, engine `InstantSearchesController#show`, `config.instant_search_models` allowlist, debounce Stimulus + Turbo Frame
-  - Shipped in 0.4.0 (slices 0–1). Later slices (richer results chrome, more host recipes) stay out of this pass.
 
-Support and other hosts consume the gem in separate work.
+Support and other hosts consume the gem in separate work. That includes Support `/help` (later slice).
+
+## Phase 4 — Instant search UI
+
+Opt-in chrome for hosts that already have `searchable` models. People type; a Turbo Frame refreshes. Postgres backends do not change.
+
+### What hosts get
+
+| Piece | Role |
+|---|---|
+| `recording_studio_search.instant_search_field` | Flatpack `Search` input + Stimulus debounce data attributes |
+| `recording_studio_search.instant_search_results` | Turbo Frame around `recording_studio_search/results` |
+| `InstantSearchesController#show` | Thin GET that runs allowlisted `Model.search` / `RecordingStudioSearch.search` and renders the frame |
+| `config.instant_search_models` | Allowlist. Empty means the endpoint searches nothing |
+| Stimulus `recording-studio-search--instant-search` | input → wait `debounce_ms` → set frame `src` with `param` |
+
+Hosts mount the engine and pin the controller. Installing the gem does **not** inject a search box on every screen.
+
+### Behaviour
+
+- Blank `q` on the instant endpoint is an empty list, not `Model.search("")` (which keeps the full relation).
+- Models in the request that are missing from the allowlist are dropped. If nothing remains, the frame is empty.
+- One allowlisted model returns a relation. Several return a Hash of class => relation. Types stay separate; ranks are not merged.
+- `url:` defaults to the engine show path. A host can point the field at their own frame action instead.
+
+### Dummy
+
+`/instant` (“As you type”) allowlists `User` and calls `User.search` through the engine frame. `/people` stays the older full-page GET.
+
+### Out of scope here
+
+- Support `/help` routes and screens
+- Elasticsearch / Searchkick
+- Boot-time UI injection
+- Cross-model score merge
+- Changing trigram or pgvector ranking

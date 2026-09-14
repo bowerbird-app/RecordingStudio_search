@@ -1,31 +1,17 @@
 # frozen_string_literal: true
 
 module RecordingStudioSearch
-  # Thin Turbo Frame endpoint. Runs Model.search / RecordingStudioSearch.search
-  # for allowlisted models only. Does not change search backends.
+  # Thin Turbo Frame endpoint. Allowlisted models only. Blank q is empty, not everyone.
   class InstantSearchesController < ApplicationController
     helper ResultsHelper
 
     def show
-      @hits = hits_for(search_query)
+      @query = search_query
+      @hits = InstantSearch.hits_for(requested_models, @query, limit: 20)
       render layout: false
     end
 
     private
-
-    def hits_for(query)
-      models = InstantSearch.allowed_models(requested_models)
-      return empty_hits(models) if models.empty? || query.blank?
-
-      RecordingStudioSearch.search(models.one? ? models.first : models, query, limit: 20)
-    end
-
-    def empty_hits(models)
-      return {} if models.empty?
-      return models.first.none if models.one?
-
-      models.index_with(&:none)
-    end
 
     def requested_models
       raw = params[:models]

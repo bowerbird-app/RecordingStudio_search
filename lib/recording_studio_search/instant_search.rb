@@ -1,26 +1,39 @@
 # frozen_string_literal: true
 
 module RecordingStudioSearch
-  # Instant search (slices 0–1): opt-in Turbo Frame results.
+  # Instant search: opt-in Flatpack field + Turbo Frame results.
   #
   # Locked host API:
   #   recording_studio_search.instant_search_field(
   #     models: [User],
   #     frame_id: "people_results",
-  #     url: recording_studio_search.instant_search_path, # engine InstantSearchesController#show
+  #     url: recording_studio_search.instant_search_path,
   #     param: :q,
   #     debounce_ms: 200
   #   )
-  #   turbo_frame_tag "people_results" do
-  #     render "recording_studio_search/results", hits: @hits
-  #   end
+  #   recording_studio_search.instant_search_results(frame_id: "people_results", hits: @hits)
   #
-  # Only +config.instant_search_models+ may be searched on the engine endpoint.
-  # Requested models that are missing from that allowlist are ignored.
+  # Engine InstantSearchesController#show is the default results URL.
+  # Only +config.instant_search_models+ may be searched. Unknown models are ignored.
+  # Blank +q+ returns empty hits, not Model.search("") (which would list everyone).
   module InstantSearch
     RESERVED_PARAMS = %w[models frame_id controller action format authenticity_token].freeze
 
     module_function
+
+    def hits_for(requested, query, limit: 20)
+      models = allowed_models(requested)
+      return empty_hits(models) if models.empty? || query.to_s.strip.empty?
+
+      RecordingStudioSearch.search(models.one? ? models.first : models, query, limit: limit)
+    end
+
+    def empty_hits(models)
+      return {} if models.empty?
+      return models.first.none if models.one?
+
+      models.index_with(&:none)
+    end
 
     def allowed_models(requested)
       allowlist = allowlisted_by_name

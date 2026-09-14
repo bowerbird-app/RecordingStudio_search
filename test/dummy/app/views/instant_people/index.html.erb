@@ -16,7 +16,9 @@
     placeholder: "Try Ada or hopper"
   ) %>
 
-  <turbo-frame id="people_results">
-    <%= render "recording_studio_search/results", hits: @hits %>
-  </turbo-frame>
+  <%= recording_studio_search.instant_search_results(
+    frame_id: "people_results",
+    hits: @hits,
+    query: nil
+  ) %>
 </div>
