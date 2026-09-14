@@ -77,6 +77,7 @@ class InstallGeneratorTest < Minitest::Test
     assert_includes install_guide, "instant_search_models"
     assert_includes install_guide, "instant_search_results"
     assert_includes install_guide, "InstantSearchesController#show"
+    assert_includes install_guide, ":pgvector"
     refute_includes install_guide, "RecordingStudio v3"
   end
 
