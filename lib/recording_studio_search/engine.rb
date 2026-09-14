@@ -117,6 +117,18 @@ module RecordingStudioSearch
       end
     end
 
+    initializer "recording_studio_search.assets" do |app|
+      next unless app.config.respond_to?(:assets)
+
+      app.config.assets.paths << root.join("app/javascript")
+    end
+
+    initializer "recording_studio_search.helpers" do
+      ActiveSupport.on_load(:action_view) do
+        include RecordingStudioSearch::ApplicationHelper
+      end
+    end
+
     initializer "recording_studio_search.apply_controller_extensions" do
       config.to_prepare do
         next unless defined?(ActionController::Base)

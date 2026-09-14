@@ -69,5 +69,8 @@ Jobs: `RecordingStudioSearch::EmbedDocumentJob`.
 - Phase 1 — trigram backend
 - Phase 2 — vector backend, query cache, fallback, dummy proof (home mixed search; `/people` is `User.search` only; `/groups` keeps a mailbox scope; `/title-first` shows weights)
 - Phase 3 — backfill / re-embed tasks and search instrumentation
+- Phase 4 — instant search UI (this gem only; no Support `/help`)
+  - Locked: helper `recording_studio_search.instant_search_field`, engine `InstantSearchesController#show`, `config.instant_search_models` allowlist, debounce Stimulus + Turbo Frame
+  - Shipped in 0.4.0 (slices 0–1). Later slices (richer results chrome, more host recipes) stay out of this pass.
 
 Support and other hosts consume the gem in separate work.

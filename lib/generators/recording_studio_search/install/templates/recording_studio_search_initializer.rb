@@ -9,4 +9,6 @@ RecordingStudioSearch.configure do |config|
   config.embedding_client = nil
   config.trigram_threshold = 0.3
   config.vector_result_limit = 50
+  # Instant search endpoint only runs these models. Empty means the UI is off.
+  config.instant_search_models = []
 end

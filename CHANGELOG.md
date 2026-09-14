@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-14
+
+### Added
+- Opt-in instant search chrome: `recording_studio_search.instant_search_field` plus engine `InstantSearchesController#show`
+- `config.instant_search_models` allowlist (empty by default; the endpoint ignores other models)
+- Stimulus debounce controller that updates a Turbo Frame without a full page reload
+- Dummy `/instant` page proves typing updates `people_results` via `User.search`
+
+### Upgrade notes
+- Instant search is off until you set `config.instant_search_models`, mount `RecordingStudioSearch::Engine`, and pin `controllers/recording_studio_search` in the host importmap (`eagerLoadControllersFrom`).
+- Re-run `bin/rails g recording_studio_search:install` or copy those lines by hand. Existing `Model.search` pages are unchanged.
+- The results URL is the engine show action (`recording_studio_search.instant_search_path`). Pass `url:` only when a host action should handle the frame instead.
+
 ## [0.3.0] - 2026-09-10
 
 First release of Recording Studio Search (renamed from the gem template).
@@ -44,5 +57,6 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0

@@ -42,6 +42,7 @@ RecordingStudioSearch.configure do |config|
   config.embedding_client = nil # nil → RecordingStudioAI embeddings when that API exists
   config.trigram_threshold = 0.3
   config.vector_result_limit = 50
+  config.instant_search_models = [] # e.g. [User] — required for the instant endpoint
 end
 ```
 
@@ -119,6 +120,37 @@ end
 
 The dummy app proves this at `/people` (home → **Just people**). That page never asks Page or Note. `/groups` searches inside a mailbox (`User.where(...).search`). `/title-first` ranks a title hit above a body hit.
 
+## Instant search (opt-in)
+
+Debounced Flatpack chrome that fills a Turbo Frame. It calls the same `Model.search` / `RecordingStudioSearch.search` backends. The UI is **not** injected on boot.
+
+1. Mount the engine (`bin/rails g recording_studio_search:install` does this).
+2. Allowlist models. Only these may be searched via the engine endpoint:
+
+```ruby
+config.instant_search_models = [User]
+```
+
+3. Pin the Stimulus controller (`controllers/recording_studio_search`) and eager-load it.
+4. Render the locked helper and frame on a host page:
+
+```erb
+<%= recording_studio_search.instant_search_field(
+      models: [User],
+      frame_id: "people_results",
+      url: recording_studio_search.instant_search_path,
+      param: :q,
+      debounce_ms: 200
+    ) %>
+<turbo-frame id="people_results">
+  <%= render "recording_studio_search/results", hits: @hits %>
+</turbo-frame>
+```
+
+`url:` defaults to engine `InstantSearchesController#show` (`GET …/instant_search`). Pass a host path only when that action should render the frame instead. Requested models that are not allowlisted are ignored.
+
+Dummy `/instant` (home → **As you type**) is the proof page.
+
 ## Data
 
 Keyword cache rows and embedding rows are ordinary tables, not Recordings.
@@ -148,7 +180,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 

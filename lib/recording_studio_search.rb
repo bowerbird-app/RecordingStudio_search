@@ -15,6 +15,7 @@ require "recording_studio_search/searcher"
 require "recording_studio_search/searchable"
 require "recording_studio_search/document_embedder"
 require "recording_studio_search/boot_checks"
+require "recording_studio_search/instant_search"
 require "recording_studio_search/capabilities/example"
 require "recording_studio_search/engine"
 

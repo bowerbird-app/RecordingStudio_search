@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
 module RecordingStudioSearch
-  class ApplicationController < ActionController::Base
+  class ApplicationController < (defined?(::ApplicationController) ? ::ApplicationController : ActionController::Base)
   end
 end

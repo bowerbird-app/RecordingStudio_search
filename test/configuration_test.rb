@@ -16,6 +16,7 @@ class ConfigurationTest < Minitest::Test
     assert_nil @configuration.embedding_client
     assert_in_delta 0.3, @configuration.trigram_threshold
     assert_equal 50, @configuration.vector_result_limit
+    assert_equal [], @configuration.instant_search_models
     assert_instance_of RecordingStudio::Hooks, @configuration.hooks
   end
 
@@ -27,7 +28,8 @@ class ConfigurationTest < Minitest::Test
       embedding_dimensions: 8,
       embedding_client: client,
       trigram_threshold: 0.5,
-      vector_result_limit: 9
+      vector_result_limit: 9,
+      instant_search_models: ["User"]
     )
 
     assert_equal :pgvector, @configuration.default_backend
@@ -36,6 +38,7 @@ class ConfigurationTest < Minitest::Test
     assert_equal client, @configuration.embedding_client
     assert_in_delta 0.5, @configuration.trigram_threshold
     assert_equal 9, @configuration.vector_result_limit
+    assert_equal ["User"], @configuration.instant_search_models
   end
 
   def test_merge_ignores_unknown_keys

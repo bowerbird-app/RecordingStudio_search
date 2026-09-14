@@ -31,7 +31,11 @@ bin/rails db:migrate
 
 Declare matching `searchable backend:` on each model. Boot warns if the DSL and schema disagree.
 
-`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`). Dummy `/groups` is scoped people search. Dummy `/title-first` is weighted page ranking.
+`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`). Dummy `/instant` is the same search through a Turbo Frame. Dummy `/groups` is scoped people search. Dummy `/title-first` is weighted page ranking.
+
+## Instant search (0.4.0)
+
+Off by default. Set `config.instant_search_models`, mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, then use `recording_studio_search.instant_search_field` with a `turbo-frame`. The engine show action is the results URL. Models that are not allowlisted are ignored. No Support `/help` wiring.
 
 ## Field weights
 

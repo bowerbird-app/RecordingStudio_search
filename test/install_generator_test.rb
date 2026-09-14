@@ -38,6 +38,7 @@ class InstallGeneratorTest < Minitest::Test
       assert_includes contents, "config.default_backend = :pg_trgm"
       assert_includes contents, "config.embedding_client = nil"
       assert_includes contents, "config.trigram_threshold = 0.3"
+      assert_includes contents, "config.instant_search_models = []"
       refute_includes contents, "API_KEY"
     end
   end
@@ -73,6 +74,41 @@ class InstallGeneratorTest < Minitest::Test
     assert_includes install_guide, "searchable_pg_trgm"
     assert_includes install_guide, "searchable_pgvector"
     assert_includes install_guide, "embedding_client"
+    assert_includes install_guide, "instant_search_models"
+    assert_includes install_guide, "InstantSearchesController#show"
     refute_includes install_guide, "RecordingStudio v3"
+  end
+
+  def test_mount_engine_adds_the_instant_search_route
+    generator = build_generator("/tmp")
+    routes = []
+
+    generator.stub(:route, ->(line) { routes << line }) do
+      generator.mount_engine
+    end
+
+    assert_equal ['mount RecordingStudioSearch::Engine, at: "/recording_studio_search"'], routes
+  end
+
+  def test_add_importmap_entries_pins_and_eager_loads_stimulus
+    with_temp_app do |dir|
+      FileUtils.mkdir_p(File.join(dir, "app/javascript/controllers"))
+      File.write(File.join(dir, "config/importmap.rb"), "pin \"application\"\n")
+      File.write(
+        File.join(dir, "app/javascript/controllers/index.js"),
+        "import { application } from \"controllers/application\"\nimport { eagerLoadControllersFrom } from \"@hotwired/stimulus-loading\"\n"
+      )
+
+      generator = build_generator(dir)
+      generator.stub(:say, nil) do
+        generator.add_importmap_entries
+      end
+
+      importmap = File.read(File.join(dir, "config/importmap.rb"))
+      index_js = File.read(File.join(dir, "app/javascript/controllers/index.js"))
+
+      assert_includes importmap, "controllers/recording_studio_search"
+      assert_includes index_js, 'eagerLoadControllersFrom("controllers/recording_studio_search", application)'
+    end
   end
 end
