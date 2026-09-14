@@ -37,7 +37,7 @@ Then open the app and sign in with:
 
 - `/` - mixed search demo (`User` trigram, `Page` vector, `Note` trigram) via `RecordingStudioSearch.search([User, Page, Note], q)`
 - `/people` - one-model demo: `User.search` only (linked from home as Just people)
-- `/instant` - same people search as you type (Turbo Frame + debounce)
+- `/instant` - same people search as you type (Turbo Frame + debounce). Dummy allowlists `User` (trigram); a host can allowlist a `:pgvector` model on the same helpers.
 - `/groups` - search people already in a mailbox (`User.where(...).search`)
 - `/title-first` - title weight `A` ranks above body weight `D` (try **widgets**)
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes

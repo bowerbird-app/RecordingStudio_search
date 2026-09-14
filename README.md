@@ -122,7 +122,9 @@ The dummy app proves this at `/people` (home → **Just people**). That page nev
 
 ## Instant search (opt-in)
 
-Debounced Flatpack Search chrome that fills a Turbo Frame. Same `Model.search` / `RecordingStudioSearch.search` backends. The UI is **not** injected on boot. Scores are **not** merged across models.
+Debounced Flatpack Search chrome that fills a Turbo Frame. Same `Model.search` / `RecordingStudioSearch.search` as a full-page search: **trigram or vector**, whichever the model declared. Allowlist a `:pgvector` model and the frame uses embeddings (with the usual trigram fallback). The UI is **not** injected on boot. Scores are **not** merged across models.
+
+Document vectors already live in `recording_studio_search_documents`. The **query** string still needs an embedding the first time that exact keyword is seen; repeats come from `recording_studio_search_queries`. Debounce (default 200ms) fires once per settled prefix, so typing `Ada` can embed `A`, `Ad`, and `Ada` unless those rows are already cached.
 
 1. Mount the engine (`bin/rails g recording_studio_search:install` does this).
 2. Allowlist models. Only these may be searched via the engine endpoint. Prefer class **names** in the initializer so boot does not load models early:
@@ -154,7 +156,7 @@ On the host action, start with empty hits (`User.none`). Do not call `User.searc
 
 Override `app/views/recording_studio_search/_results.html.erb` if the default Name / Detail table is wrong for a type.
 
-Dummy `/instant` (home → **As you type**) is the proof page: typing updates the frame and leaves the URL at `/instant`.
+Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `User` (trigram) so typing updates the frame and leaves the URL at `/instant`. That is a demo choice, not a backend limit. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
 
 ## Data
 

@@ -35,7 +35,7 @@ Declare matching `searchable backend:` on each model. Boot warns if the DSL and 
 
 ## Instant search (0.4.0)
 
-Off by default. Set `config.instant_search_models` (class names are safest at boot), mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, import Turbo, then copy `instant_search_field` plus `instant_search_results`. The engine show action is the results URL. Blank `q` is empty, not everyone. Models that are not allowlisted are ignored. No Support `/help` wiring. See `docs/search-plan.md` Phase 4.
+Off by default. Set `config.instant_search_models` (class names are safest at boot), mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, import Turbo, then copy `instant_search_field` plus `instant_search_results`. The engine show action is the results URL. Blank `q` is empty, not everyone. Models that are not allowlisted are ignored. The frame uses each model’s declared backend (`:pg_trgm` or `:pgvector`). New query strings still hit the embedding client once, then `recording_studio_search_queries`. Dummy `/instant` allowlists `User` only as a trigram proof. No Support `/help` wiring. See `docs/search-plan.md` Phase 4.
 
 ## Field weights
 

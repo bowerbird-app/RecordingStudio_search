@@ -15,13 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `config.instant_search_models` allowlist (empty by default; the endpoint ignores other models)
 - Stimulus debounce controller that updates a Turbo Frame without a full page reload
 - Blank `q` on the instant endpoint returns no rows (not everyone)
-- Dummy `/instant` (“As you type”) proves typing updates `people_results` via `User.search`
+- Dummy `/instant` (“As you type”) proves typing updates `people_results` via `User.search` (trigram). Instant search is not limited to that backend: an allowlisted `:pgvector` model uses the same query cache and embedding path as `Model.search`
 
 ### Upgrade notes
 - Instant search is off until you set `config.instant_search_models`, mount `RecordingStudioSearch::Engine`, and pin `controllers/recording_studio_search` in the host importmap (`eagerLoadControllersFrom`). Import Turbo.
 - Re-run `bin/rails g recording_studio_search:install` or copy those lines by hand. Existing `Model.search` pages are unchanged.
 - Copy the field + `instant_search_results` pair. The results URL is the engine show action (`recording_studio_search.instant_search_path`) unless you pass `url:`.
 - Prefer class names in `instant_search_models` (`["User"]`) so the initializer does not load models at boot.
+- Instant search on a `:pgvector` model still embeds each new query prefix (then caches it). Plan for first-type latency and embed cost; repeats stay in Postgres.
 
 ## [0.3.0] - 2026-09-10
 

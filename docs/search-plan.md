@@ -95,10 +95,12 @@ Hosts mount the engine and pin the controller. Installing the gem does **not** i
 - Models in the request that are missing from the allowlist are dropped. If nothing remains, the frame is empty.
 - One allowlisted model returns a relation. Several return a Hash of class => relation. Types stay separate; ranks are not merged.
 - `url:` defaults to the engine show path. A host can point the field at their own frame action instead.
+- Backend is whatever the model already declared. Instant search does not add a third searcher. `:pgvector` uses document rows in `recording_studio_search_documents` and embeds the query (or reads `recording_studio_search_queries`) the same way as `Model.search`.
+- Debounce still requests each settled prefix. Unique prefixes that are not in the query cache call the embedding client; cached prefixes stay in Postgres.
 
 ### Dummy
 
-`/instant` (“As you type”) allowlists `User` and calls `User.search` through the engine frame. `/people` stays the older full-page GET.
+`/instant` (“As you type”) allowlists `User` (trigram) and calls `User.search` through the engine frame. `/people` stays the older full-page GET. A host can allowlist a `:pgvector` model instead.
 
 ### Out of scope here
 

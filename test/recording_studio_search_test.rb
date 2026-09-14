@@ -177,6 +177,8 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme, "instant_search_field"
     assert_includes readme, "instant_search_results"
     assert_includes readme, "instant_search_models"
+    assert_includes readme, "trigram or vector"
+    assert_includes readme, "recording_studio_search_queries"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"
     refute_includes readme, "ExampleService"
