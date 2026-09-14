@@ -9,3 +9,5 @@ base64 -d docs/demo/instant-search-demo.mp4.b64 > instant-search-demo.mp4
 ```
 
 `instant-search-demo.mp4.b64.manifest` has `sha256` and `original_bytes`.
+
+`instant-ada.png` is the same `/instant` page after typing Ada (Ada Admin, Ada Lovelace). Decode `instant-ada.png.b64` the same way if the binary fetch is unusable.
