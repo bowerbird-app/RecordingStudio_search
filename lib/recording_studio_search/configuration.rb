@@ -39,9 +39,13 @@ module RecordingStudioSearch
         embedding_client: embedding_client.present?,
         trigram_threshold: trigram_threshold,
         vector_result_limit: vector_result_limit,
-        instant_search_models: Array(instant_search_models).map { |model| model.respond_to?(:name) ? model.name : model.to_s },
+        instant_search_models: Array(instant_search_models).map { |model| model_name(model) },
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
+    end
+
+    def model_name(model)
+      model.respond_to?(:name) ? model.name : model.to_s
     end
 
     def merge!(hash)

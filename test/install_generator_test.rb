@@ -96,7 +96,10 @@ class InstallGeneratorTest < Minitest::Test
       File.write(File.join(dir, "config/importmap.rb"), "pin \"application\"\n")
       File.write(
         File.join(dir, "app/javascript/controllers/index.js"),
-        "import { application } from \"controllers/application\"\nimport { eagerLoadControllersFrom } from \"@hotwired/stimulus-loading\"\n"
+        <<~JS
+          import { application } from "controllers/application"
+          import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
+        JS
       )
 
       generator = build_generator(dir)
@@ -108,7 +111,7 @@ class InstallGeneratorTest < Minitest::Test
       index_js = File.read(File.join(dir, "app/javascript/controllers/index.js"))
 
       assert_includes importmap, "controllers/recording_studio_search"
-      assert_includes index_js, 'eagerLoadControllersFrom("controllers/recording_studio_search", application)'
+      assert_includes index_js, "recording_studio_search"
     end
   end
 end

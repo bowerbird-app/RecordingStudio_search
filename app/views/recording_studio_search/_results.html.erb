@@ -1,18 +1,1 @@
-<% collections = instant_search_result_collections(hits) %>
-<% if collections.empty? || collections.all? { |_label, rows| rows.blank? } %>
-  <%= render FlatPack::Alert::Component.new(
-    style: :info,
-    title: "Nothing yet",
-    description: "Keep typing, or try a different name."
-  ) %>
-<% else %>
-  <% collections.each do |label, rows| %>
-    <% if collections.many? %>
-      <%= render FlatPack::SectionTitle::Component.new(title: label) %>
-    <% end %>
-    <%= render FlatPack::Table::Component.new(data: rows.to_a, class: "text-sm") do |table| %>
-      <% table.column(title: "Name") { |row| instant_search_row_name(row) } %>
-      <% table.column(title: "Detail") { |row| instant_search_row_detail(row) } %>
-    <% end %>
-  <% end %>
-<% end %>
+<%= render "recording_studio_search/instant_searches/results", hits: hits %>

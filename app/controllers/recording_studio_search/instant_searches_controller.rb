@@ -4,6 +4,8 @@ module RecordingStudioSearch
   # Thin Turbo Frame endpoint. Runs Model.search / RecordingStudioSearch.search
   # for allowlisted models only. Does not change search backends.
   class InstantSearchesController < ApplicationController
+    helper ResultsHelper
+
     def show
       @hits = hits_for(search_query)
       render layout: false

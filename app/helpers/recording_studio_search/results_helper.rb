@@ -3,17 +3,17 @@
 module RecordingStudioSearch
   module ResultsHelper
     def instant_search_result_collections(hits)
-      case hits
-      when Hash
-        hits.filter_map do |model, relation|
-          next if relation.blank?
+      return [] if hits.blank?
+      return hash_collections(hits) if hits.is_a?(Hash)
 
-          [instant_search_collection_label(model), relation]
-        end
-      when nil
-        []
-      else
-        hits.blank? ? [] : [["", hits]]
+      [["", hits]]
+    end
+
+    def hash_collections(hits)
+      hits.filter_map do |model, relation|
+        next if relation.blank?
+
+        [instant_search_collection_label(model), relation]
       end
     end
 

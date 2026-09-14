@@ -21,14 +21,14 @@ class InstantSearchTest < Minitest::Test
   def test_allowlist_keeps_only_requested_models_that_are_listed
     RecordingStudioSearch.configuration.instant_search_models = [String, Integer]
 
-    assert_equal [String], RecordingStudioSearch::InstantSearch.allowed_models(["String", "File"])
+    assert_equal [String], RecordingStudioSearch::InstantSearch.allowed_models(%w[String File])
     assert_equal [String, Integer], RecordingStudioSearch::InstantSearch.allowed_models([String, Integer])
   end
 
   def test_allowlist_ignores_unknown_and_unsafe_names
     RecordingStudioSearch.configuration.instant_search_models = ["String"]
 
-    assert_empty RecordingStudioSearch::InstantSearch.allowed_models(["Kernel", "Nope::Missing"])
+    assert_empty RecordingStudioSearch::InstantSearch.allowed_models(%w[Kernel Nope::Missing])
     assert_equal [String], RecordingStudioSearch::InstantSearch.allowed_models("String")
   end
 

@@ -29,5 +29,5 @@ RecordingStudioSearch.configure do |config|
   config.embedding_client = DummyEmbeddings.method(:vector_for)
   config.trigram_threshold = 0.3
   config.vector_result_limit = 50
-  config.instant_search_models = [User]
+  config.instant_search_models = ["User"]
 end

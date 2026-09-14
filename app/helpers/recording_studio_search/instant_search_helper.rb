@@ -4,50 +4,44 @@ module RecordingStudioSearch
   class InstantSearchHelper
     CONTROLLER = "recording-studio-search--instant-search"
 
-    def initialize(view)
-      @view = view
+    def initialize(view, routes = nil)
+      @view = view_context_for(view)
+      @routes = routes
     end
 
     # Locked helper for opt-in instant search chrome.
     # Debounced typing requests +url+ (engine InstantSearchesController#show by default)
     # into the Turbo Frame named +frame_id+.
-    def instant_search_field(
-      models:,
-      frame_id:,
-      url: nil,
-      param: :q,
-      debounce_ms: 200,
-      placeholder: "Search...",
-      value: nil,
-      size: :lg,
-      max_width: :none
-    )
-      results_url = results_url_for(url, models, frame_id, param)
-
-      @view.tag.div(
-        **wrapper_attributes(results_url, frame_id, param, debounce_ms)
-      ) do
-        @view.render(
-          FlatPack::Search::Component.new(
-            name: param.to_s,
-            value: value,
-            placeholder: placeholder,
-            max_width: max_width,
-            size: size
-          )
-        )
+    def instant_search_field(models:, frame_id:, **options)
+      param = options.fetch(:param, :q)
+      results_url = results_url_for(options[:url], models, frame_id, param)
+      debounce_ms = options.fetch(:debounce_ms, 200)
+      @view.tag.div(**wrapper_attributes(results_url, frame_id, param, debounce_ms)) do
+        render_search_control(param, options)
       end
     end
 
-    def instant_search_path(**options)
-      engine_routes.instant_search_path(**options)
+    def instant_search_path(**)
+      engine_routes.instant_search_path(**)
     end
 
-    def instant_search_url(**options)
-      engine_routes.instant_search_url(**options)
+    def instant_search_url(**)
+      engine_routes.instant_search_url(**)
     end
 
     private
+
+    def render_search_control(param, chrome)
+      @view.render(
+        FlatPack::Search::Component.new(
+          name: param.to_s,
+          value: chrome[:value],
+          placeholder: chrome.fetch(:placeholder, "Search..."),
+          max_width: chrome.fetch(:max_width, :none),
+          size: chrome.fetch(:size, :lg)
+        )
+      )
+    end
 
     def wrapper_attributes(results_url, frame_id, param, debounce_ms)
       {
@@ -79,7 +73,15 @@ module RecordingStudioSearch
       "#{path}?#{query.to_query}"
     end
 
+    def view_context_for(view)
+      return view.view_context if view.respond_to?(:view_context) && !view.respond_to?(:tag)
+
+      view
+    end
+
     def engine_routes
+      return @routes if @routes.respond_to?(:instant_search_path)
+
       helpers = Rails.application.routes.url_helpers
       return helpers.recording_studio_search if helpers.respond_to?(:recording_studio_search)
 

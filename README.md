@@ -128,7 +128,7 @@ Debounced Flatpack chrome that fills a Turbo Frame. It calls the same `Model.sea
 2. Allowlist models. Only these may be searched via the engine endpoint:
 
 ```ruby
-config.instant_search_models = [User]
+config.instant_search_models = ["User"] # or [User] after the class loads
 ```
 
 3. Pin the Stimulus controller (`controllers/recording_studio_search`) and eager-load it.

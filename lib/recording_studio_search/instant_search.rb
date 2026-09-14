@@ -28,13 +28,13 @@ module RecordingStudioSearch
     end
 
     def allowlisted_by_name
-      Array(RecordingStudioSearch.configuration.instant_search_models).filter_map { |item|
+      Array(RecordingStudioSearch.configuration.instant_search_models).filter_map do |item|
         model = item.is_a?(Class) ? item : nil
         model ||= item.to_s.safe_constantize if item.present?
         next unless model.is_a?(Class)
 
         model
-      }.index_by(&:name)
+      end.index_by(&:name)
     end
 
     def class_name(item)

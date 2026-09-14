@@ -127,6 +127,14 @@ module RecordingStudioSearch
       ActiveSupport.on_load(:action_view) do
         include RecordingStudioSearch::ApplicationHelper
       end
+
+      ActiveSupport.on_load(:action_dispatch_routing_routes_proxy) do
+        prepend RecordingStudioSearch::RoutesProxy
+      end
+
+      if defined?(ActionDispatch::Routing::RoutesProxy)
+        ActionDispatch::Routing::RoutesProxy.prepend(RecordingStudioSearch::RoutesProxy)
+      end
     end
 
     initializer "recording_studio_search.apply_controller_extensions" do
