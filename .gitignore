@@ -51,3 +51,8 @@ pkg/
 
 # Rename script state
 .rename_state.yml
+
+# Test coverage artifacts
+coverage/.history.json
+coverage/.report_stamp
+coverage/coverage.json
