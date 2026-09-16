@@ -5,19 +5,6 @@ module ApplicationHelper
       page_nav_back_url: back_url,
       page_nav_back_label: back_label
     )
-
-    recording_studio_page_nav_right do
-      concat recording_studio_root_switch_dropdown(style: :ghost, size: :md)
-      concat render(
-        FlatPack::Button::Component.new(
-          text: "Sign out",
-          style: :ghost,
-          size: :md,
-          url: main_app.destroy_user_session_path,
-          data: { turbo_method: :delete }
-        )
-      )
-    end
   end
 
   def dummy_search_demo_buttons
@@ -51,6 +38,27 @@ module ApplicationHelper
         ]
       )
     end
+  end
+
+  def dummy_search_section(title:, &block)
+    render FlatPack::Card::Component.new(padding: :none) do |card|
+      card.header(divider: true) do
+        render FlatPack::SectionTitle::Component.new(title: title, class: "my-0")
+      end
+      card.body(&block)
+    end
+  end
+
+  def page_cover_path(page)
+    slug = page.title.to_s.parameterize
+    candidate = Rails.public_path.join("covers", "#{slug}.svg")
+    return "/covers/#{slug}.svg" if candidate.exist?
+
+    "/covers/page.svg"
+  end
+
+  def page_published_on(page)
+    page.created_at.to_date.to_fs(:long)
   end
 
   def weighted_hit_label(page, query)

@@ -19,6 +19,7 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_select "h1", text: /Search/
+    assert_select "[class*='text-center']", minimum: 1
     assert_select "form[action='#{root_path}'][method=get]" do
       assert_select "input[name=q]", count: 1
       assert_select "[data-controller*='flat-pack--search-input']", count: 1
@@ -26,10 +27,13 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
       assert_select "[data-controller*='flat-pack--search-input'][class*='w-full']", count: 1
       refute_select "[class*='max-w-lg']"
       assert_select "input[class*='search-padding-y-lg']", count: 1
+      assert_select "input[class*='text-lg']", count: 1
       refute_select "button[type=submit]"
     end
     refute_match "Look up", response.body
     refute_match "Ada Admin", response.body
+    refute_match "Sign out", response.body
+    refute_match "Studio Workspace", response.body
   end
 
   test "home page stamps the rounded Flatpack theme on html and body" do
@@ -56,6 +60,7 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input[name=q][value=Ada]"
     assert_match "Ada Admin", response.body
+    assert_match "People", response.body
   end
 
   test "vector search finds a page by meaning" do
@@ -68,6 +73,8 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     get root_path, params: { q: "refund" }
     assert_response :success
     assert_match "Refunds", response.body
+    assert_select "a[href='#{page_path(page)}']"
+    assert_select "img[alt='Refunds'][class*='object-cover']"
   end
 
   test "trigram search finds a note by title" do
@@ -76,5 +83,14 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     get root_path, params: { q: "sticky" }
     assert_response :success
     assert_match "Sticky reminder", response.body
+  end
+
+  test "search hits group people pages and notes in cards" do
+    get root_path, params: { q: "Ada" }
+
+    assert_response :success
+    assert_select "h2", text: "People"
+    assert_select "h2", text: "Pages"
+    assert_select "h2", text: "Notes"
   end
 end

@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioSearchTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.4.0", ::RecordingStudioSearch::VERSION
+    assert_equal "0.4.1", ::RecordingStudioSearch::VERSION
   end
 
   def test_engine_exists
@@ -190,12 +190,18 @@ class RecordingStudioSearchTest < Minitest::Test
     view_source = File.read(view_path)
 
     assert_includes view_source, 'title: "Search"'
+    assert_includes view_source, "class: \"mb-0 w-full text-center\""
+    assert_includes view_source, "dummy_search_section"
+    assert_includes view_source, "FlatPack::Card::Component"
     assert_includes view_source, "FlatPack::Search::Component"
     assert_includes view_source, "max_width: :none"
     assert_includes view_source, "size: :lg"
+    assert_includes view_source, "--search-padding-y-lg: 1.25rem"
     refute_includes view_source, "max_width: :lg"
     assert_includes view_source, "dummy_page_nav"
     assert_includes view_source, "dummy_search_demo_buttons"
+    refute_includes view_source, "recording_studio_page_nav_right"
+    refute_includes view_source, "Sign out"
     refute_includes view_source, "FlatPack::TextInput::Component"
     refute_includes view_source, "Look up"
     refute_includes view_source, 'title: "Template Demo"'
@@ -243,6 +249,12 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes helper, "As you type"
     assert_includes helper, "In a group"
     assert_includes helper, "Title first"
+    refute_includes helper, "Sign out"
+    refute_includes helper, "recording_studio_root_switch_dropdown"
+    refute_includes helper, "recording_studio_page_nav_right"
+    assert_includes helper, "dummy_search_section"
+    assert_includes helper, "page_cover_path"
+    assert_includes helper, "page_published_on"
   end
 
   def test_dummy_instant_page_uses_locked_helper_and_engine_frame
@@ -258,6 +270,7 @@ class RecordingStudioSearchTest < Minitest::Test
     refute_includes view_source, "<turbo-frame"
     assert_includes routes, "instant_people"
     assert_includes routes, "RecordingStudioSearch::Engine"
+    assert_includes routes, "resources :pages, only: :show"
   end
 
   def test_dummy_docs_pages_use_minimal_flatpack_documentation_components

@@ -1,72 +1,97 @@
 <% dummy_page_nav(title: "Search", back_url: root_path) %>
 
-<div class="flex w-full flex-col gap-6">
+<div class="flex w-full flex-col items-center gap-8">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Search",
-    subtitle: "People by name. Pages by meaning. Notes by title.",
-    variant: :h1
-  ) do |title| %>
-    <% title.slot do %>
-      <%= dummy_search_demo_buttons %>
-    <% end %>
-  <% end %>
+    variant: :h1,
+    class: "mb-0 w-full text-center"
+  ) %>
 
-  <%= form_with url: root_path, method: :get, html: { class: "w-full" } do %>
+  <div class="flex w-full justify-center">
+    <%= dummy_search_demo_buttons %>
+  </div>
+
+  <%= form_with url: root_path, method: :get, html: {
+        class: "w-full",
+        style: "--search-padding-y-lg: 1.25rem; --search-padding-inline-lg: 3.25rem;"
+      } do %>
     <%= render FlatPack::Search::Component.new(
       name: "q",
       value: @q.presence,
       placeholder: "Try Ada, refund, sticky",
       max_width: :none,
-      size: :lg
+      size: :lg,
+      class: "[&_input]:text-lg"
     ) %>
   <% end %>
 
-  <% if @q.blank? %>
-    <%= render FlatPack::Alert::Component.new(
-      style: :info,
-      title: "Type something first",
-      description: "Blank search leaves the list alone. Add a word to see hits."
-    ) %>
-  <% else %>
-    <%= render FlatPack::SectionTitle::Component.new(title: "People") %>
-    <% if @users.any? %>
-      <%= render FlatPack::Table::Component.new(data: @users.to_a, class: "text-sm") do |table| %>
-        <% table.column(title: "Name") { |user| user.name.presence || "—" } %>
-        <% table.column(title: "Email") { |user| user.email } %>
-      <% end %>
-    <% else %>
+  <div class="flex w-full flex-col gap-6">
+    <% if @q.blank? %>
       <%= render FlatPack::Alert::Component.new(
         style: :info,
-        title: "No people match",
-        description: "Try a name or email, typos included."
+        title: "Type something first",
+        description: "Blank search leaves the list alone. Add a word to see hits."
       ) %>
-    <% end %>
+    <% else %>
+      <%= dummy_search_section(title: "People") do %>
+        <% if @users.any? %>
+          <%= render FlatPack::Table::Component.new(data: @users.to_a, class: "text-sm") do |table| %>
+            <% table.column(title: "Name") { |user| user.name.presence || "—" } %>
+            <% table.column(title: "Email") { |user| user.email } %>
+          <% end %>
+        <% else %>
+          <%= render FlatPack::Alert::Component.new(
+            style: :info,
+            title: "No people match",
+            description: "Try a name or email, typos included."
+          ) %>
+        <% end %>
+      <% end %>
 
-    <%= render FlatPack::SectionTitle::Component.new(title: "Pages") %>
-    <% if @pages.any? %>
-      <%= render FlatPack::Table::Component.new(data: @pages.to_a, class: "text-sm") do |table| %>
-        <% table.column(title: "Title") { |page| page.title } %>
-        <% table.column(title: "Body") { |page| page.body.to_s.truncate(80) } %>
+      <%= dummy_search_section(title: "Pages") do %>
+        <% if @pages.any? %>
+          <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
+            <% @pages.each do |page| %>
+              <%= render FlatPack::Card::Component.new(
+                style: :interactive,
+                clickable: true,
+                href: page_path(page),
+                padding: :none
+              ) do |card| %>
+                <% card.media(aspect_ratio: "16/9", padding: :none) do %>
+                  <%= image_tag page_cover_path(page),
+                        alt: page.title,
+                        class: "h-full w-full object-cover" %>
+                <% end %>
+                <% card.body do %>
+                  <p class="font-semibold text-[var(--surface-content-color)]"><%= page.title %></p>
+                  <p class="mt-1 text-sm text-[var(--surface-muted-content-color)]"><%= page_published_on(page) %></p>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% else %>
+          <%= render FlatPack::Alert::Component.new(
+            style: :info,
+            title: "No pages match",
+            description: "If meaning search is cold, we fall back to the words on the page."
+          ) %>
+        <% end %>
       <% end %>
-    <% else %>
-      <%= render FlatPack::Alert::Component.new(
-        style: :info,
-        title: "No pages match",
-        description: "If meaning search is cold, we fall back to the words on the page."
-      ) %>
-    <% end %>
 
-    <%= render FlatPack::SectionTitle::Component.new(title: "Notes") %>
-    <% if @notes.any? %>
-      <%= render FlatPack::Table::Component.new(data: @notes.to_a, class: "text-sm") do |table| %>
-        <% table.column(title: "Title") { |note| note.title } %>
+      <%= dummy_search_section(title: "Notes") do %>
+        <% if @notes.any? %>
+          <%= render FlatPack::Table::Component.new(data: @notes.to_a, class: "text-sm") do |table| %>
+            <% table.column(title: "Title") { |note| note.title } %>
+          <% end %>
+        <% else %>
+          <%= render FlatPack::Alert::Component.new(
+            style: :info,
+            title: "No notes match",
+            description: "Notes only look at the title."
+          ) %>
+        <% end %>
       <% end %>
-    <% else %>
-      <%= render FlatPack::Alert::Component.new(
-        style: :info,
-        title: "No notes match",
-        description: "Notes only look at the title."
-      ) %>
     <% end %>
-  <% end %>
+  </div>
 </div>

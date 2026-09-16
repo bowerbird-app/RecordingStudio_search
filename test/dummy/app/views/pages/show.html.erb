@@ -1,0 +1,21 @@
+<% dummy_page_nav(title: @page.title, back_url: root_path) %>
+
+<div class="mx-auto flex w-full max-w-3xl flex-col gap-6" style="--page-title-h1-size: var(--text-5xl);">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: @page.title,
+    subtitle: page_published_on(@page),
+    variant: :h1
+  ) %>
+
+  <%= render FlatPack::Card::Component.new(padding: :none) do |card| %>
+    <% card.media(aspect_ratio: "16/9", padding: :none) do %>
+      <%= image_tag page_cover_path(@page),
+            alt: @page.title,
+            class: "h-full w-full object-cover" %>
+    <% end %>
+  <% end %>
+
+  <p class="text-lg leading-relaxed text-[var(--surface-content-color)]">
+    <%= @page.body.presence || "Nothing on this page yet." %>
+  </p>
+</div>

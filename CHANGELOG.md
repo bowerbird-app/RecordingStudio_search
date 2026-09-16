@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-09-16
+
+### Changed
+- Dummy home centers the title, enlarges the search field, and groups People / Pages / Notes hits in cards
+- Dummy page show uses a larger title, a cover image that fills its frame, and the published date instead of a subtitle
+- Dummy page nav no longer shows Sign out or the workspace switcher
+
+### Upgrade notes
+- Host search screens are unchanged. If you copied the dummy home or page nav, take the centered title, larger search tokens, section cards, and the page show from `test/dummy`.
+
 ## [0.4.0] - 2026-09-14
 
 ### Added
@@ -62,6 +72,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0

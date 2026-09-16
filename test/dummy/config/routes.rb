@@ -33,6 +33,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
+  resources :pages, only: :show
   resources :people, only: :index
   get "instant", to: "instant_people#index", as: :instant_people
   get "groups", to: "group_searches#index", as: :groups
