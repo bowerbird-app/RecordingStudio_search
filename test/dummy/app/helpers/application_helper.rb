@@ -7,48 +7,6 @@ module ApplicationHelper
     )
   end
 
-  def dummy_search_demo_buttons
-    render FlatPack::OverflowRow::Component.new(gap: :sm) do
-      safe_join(
-        [
-          render(FlatPack::Button::Component.new(
-            text: "Just people",
-            href: people_path,
-            style: :secondary,
-            size: :md
-          )),
-          render(FlatPack::Button::Component.new(
-            text: "As you type",
-            href: instant_people_path,
-            style: :secondary,
-            size: :md
-          )),
-          render(FlatPack::Button::Component.new(
-            text: "In a group",
-            href: groups_path,
-            style: :secondary,
-            size: :md
-          )),
-          render(FlatPack::Button::Component.new(
-            text: "Title first",
-            href: title_first_path,
-            style: :secondary,
-            size: :md
-          ))
-        ]
-      )
-    end
-  end
-
-  def dummy_search_section(title:, &block)
-    render FlatPack::Card::Component.new(padding: :none) do |card|
-      card.header(divider: true) do
-        render FlatPack::SectionTitle::Component.new(title: title, class: "my-0")
-      end
-      card.body(&block)
-    end
-  end
-
   def page_cover_path(page)
     slug = page.title.to_s.parameterize
     candidate = Rails.public_path.join("covers", "#{slug}.svg")

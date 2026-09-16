@@ -192,7 +192,7 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes view_source, 'title: "Search"'
     assert_includes view_source, "class: \"mb-0 w-full text-center\""
-    assert_includes view_source, "dummy_search_section"
+    assert_includes view_source, "@categories"
     assert_includes view_source, "FlatPack::Card::Component"
     assert_includes view_source, "FlatPack::Search::Component"
     assert_includes view_source, "max_width: :none"
@@ -200,7 +200,10 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes view_source, "--search-padding-y-lg: 1.25rem"
     refute_includes view_source, "max_width: :lg"
     assert_includes view_source, "dummy_page_nav"
-    assert_includes view_source, "dummy_search_demo_buttons"
+    refute_includes view_source, "dummy_search_demo_buttons"
+    refute_includes view_source, "dummy_search_section"
+    refute_includes view_source, "Just people"
+    refute_includes view_source, "As you type"
     refute_includes view_source, "recording_studio_page_nav_right"
     refute_includes view_source, "Sign out"
     refute_includes view_source, "FlatPack::TextInput::Component"
@@ -239,23 +242,21 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes routes, 'get "title-first"'
   end
 
-  def test_dummy_home_demo_buttons_link_to_people_groups_and_title_first
+  def test_dummy_home_nav_has_no_demo_buttons_or_section_cards
     helper = File.read(File.expand_path("dummy/app/helpers/application_helper.rb", __dir__))
+    controller = File.read(File.expand_path("dummy/app/controllers/home_controller.rb", __dir__))
 
-    assert_includes helper, "people_path"
-    assert_includes helper, "instant_people_path"
-    assert_includes helper, "groups_path"
-    assert_includes helper, "title_first_path"
-    assert_includes helper, "Just people"
-    assert_includes helper, "As you type"
-    assert_includes helper, "In a group"
-    assert_includes helper, "Title first"
+    refute_includes helper, "people_path"
+    refute_includes helper, "dummy_search_demo_buttons"
+    refute_includes helper, "dummy_search_section"
+    refute_includes helper, "Just people"
+    refute_includes helper, "As you type"
     refute_includes helper, "Sign out"
     refute_includes helper, "recording_studio_root_switch_dropdown"
     refute_includes helper, "recording_studio_page_nav_right"
-    assert_includes helper, "dummy_search_section"
     assert_includes helper, "page_cover_path"
     assert_includes helper, "page_published_on"
+    assert_includes controller, "@categories"
   end
 
   def test_dummy_instant_page_uses_locked_helper_and_engine_frame

@@ -15,7 +15,7 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
-  test "blank home shows the Flatpack search control" do
+  test "blank home shows the Flatpack search control and category cards" do
     get root_path
     assert_response :success
     assert_select "h1", text: /Search/
@@ -30,10 +30,17 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
       refute_select "button[type=submit]"
     end
     assert_includes response.body, "--search-padding-y-lg: 1.25rem"
+    assert_select "h2", text: "People"
+    assert_select "h2", text: "Pages"
+    assert_select "h2", text: "Notes"
     refute_match "Look up", response.body
     refute_match "Ada Admin", response.body
     refute_match "Sign out", response.body
     refute_match "Studio Workspace", response.body
+    refute_match "Just people", response.body
+    refute_match "As you type", response.body
+    refute_match "In a group", response.body
+    refute_match "Title first", response.body
   end
 
   test "home page stamps the rounded Flatpack theme on html and body" do
@@ -45,25 +52,17 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     assert_select "body[data-recording-studio-default-layout='true']", count: 1
   end
 
-  test "home links to the people, group, and title-first demos" do
-    get root_path
-
-    assert_response :success
-    assert_select "a[href='#{people_path}']", text: /Just people/
-    assert_select "a[href='#{instant_people_path}']", text: /As you type/
-    assert_select "a[href='#{groups_path}']", text: /In a group/
-    assert_select "a[href='#{title_first_path}']", text: /Title first/
-  end
-
-  test "trigram search finds a person" do
+  test "trigram search finds a person as a card without section wrappers" do
     get root_path, params: { q: "Ada" }
     assert_response :success
     assert_select "input[name=q][value=Ada]"
     assert_match "Ada Admin", response.body
-    assert_match "People", response.body
+    refute_select "h2", text: "People"
+    refute_select "h2", text: "Pages"
+    refute_select "h2", text: "Notes"
   end
 
-  test "vector search finds a page by meaning" do
+  test "vector search finds a page by meaning as an article card" do
     page = Page.create!(title: "Refunds", body: "How to request a refund when a charge looks wrong.")
     RecordingStudioSearch::DocumentEmbedder.call(
       searchable_type: "Page",
@@ -75,6 +74,7 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     assert_match "Refunds", response.body
     assert_select "a[href='#{page_path(page)}']"
     assert_select "img[alt='Refunds'][class*='object-cover']"
+    refute_select "h2", text: "Pages"
   end
 
   test "trigram search finds a note by title" do
@@ -83,14 +83,14 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     get root_path, params: { q: "sticky" }
     assert_response :success
     assert_match "Sticky reminder", response.body
+    refute_select "h2", text: "Notes"
   end
 
-  test "search hits group people pages and notes in cards" do
-    get root_path, params: { q: "Ada" }
+  test "unmatched search shows one empty state" do
+    get root_path, params: { q: "zzzz-no-such-hit" }
 
     assert_response :success
-    assert_select "h2", text: "People"
-    assert_select "h2", text: "Pages"
-    assert_select "h2", text: "Notes"
+    assert_match "Nothing for that", response.body
+    refute_select "h2", text: "People"
   end
 end

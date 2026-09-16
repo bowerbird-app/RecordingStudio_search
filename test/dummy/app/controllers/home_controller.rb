@@ -10,6 +10,11 @@ class HomeController < ApplicationController
       @users = User.none
       @pages = Page.none
       @notes = Note.none
+      @categories = [
+        { title: "People", blurb: "Names and emails." },
+        { title: "Pages", blurb: "Guides you can open." },
+        { title: "Notes", blurb: "Short reminders." }
+      ]
     end
   end
 end

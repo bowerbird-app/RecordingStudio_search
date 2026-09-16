@@ -7,10 +7,6 @@
     class: "mb-0 w-full text-center"
   ) %>
 
-  <div class="flex w-full justify-center">
-    <%= dummy_search_demo_buttons %>
-  </div>
-
   <%= form_with url: root_path, method: :get, html: {
         class: "w-full",
         style: "--search-padding-y-lg: 1.25rem; --search-padding-inline-lg: 3.25rem;"
@@ -24,73 +20,62 @@
     ) %>
   <% end %>
 
-  <div class="flex w-full flex-col gap-6">
-    <% if @q.blank? %>
-      <%= render FlatPack::Alert::Component.new(
-        style: :info,
-        title: "Type something first",
-        description: "Blank search leaves the list alone. Add a word to see hits."
-      ) %>
-    <% else %>
-      <%= dummy_search_section(title: "People") do %>
-        <% if @users.any? %>
-          <%= render FlatPack::Table::Component.new(data: @users.to_a, class: "text-sm") do |table| %>
-            <% table.column(title: "Name") { |user| user.name.presence || "—" } %>
-            <% table.column(title: "Email") { |user| user.email } %>
+  <% if @q.blank? %>
+    <%= render FlatPack::Grid::Component.new(cols: 3, gap: :lg, class: "w-full") do %>
+      <% @categories.each do |category| %>
+        <%= render FlatPack::Card::Component.new do |card| %>
+          <% card.header(divider: false) do %>
+            <%= render FlatPack::SectionTitle::Component.new(title: category[:title], class: "my-0") %>
           <% end %>
-        <% else %>
-          <%= render FlatPack::Alert::Component.new(
-            style: :info,
-            title: "No people match",
-            description: "Try a name or email, typos included."
-          ) %>
-        <% end %>
-      <% end %>
-
-      <%= dummy_search_section(title: "Pages") do %>
-        <% if @pages.any? %>
-          <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
-            <% @pages.each do |page| %>
-              <%= render FlatPack::Card::Component.new(
-                style: :interactive,
-                clickable: true,
-                href: page_path(page),
-                padding: :none
-              ) do |card| %>
-                <% card.media(aspect_ratio: "16/9", padding: :none) do %>
-                  <%= image_tag page_cover_path(page),
-                        alt: page.title,
-                        class: "h-full w-full object-cover" %>
-                <% end %>
-                <% card.body do %>
-                  <p class="font-semibold text-[var(--surface-content-color)]"><%= page.title %></p>
-                  <p class="mt-1 text-sm text-[var(--surface-muted-content-color)]"><%= page_published_on(page) %></p>
-                <% end %>
-              <% end %>
-            <% end %>
+          <% card.body do %>
+            <p class="text-[var(--surface-muted-content-color)]"><%= category[:blurb] %></p>
           <% end %>
-        <% else %>
-          <%= render FlatPack::Alert::Component.new(
-            style: :info,
-            title: "No pages match",
-            description: "If meaning search is cold, we fall back to the words on the page."
-          ) %>
-        <% end %>
-      <% end %>
-
-      <%= dummy_search_section(title: "Notes") do %>
-        <% if @notes.any? %>
-          <%= render FlatPack::Table::Component.new(data: @notes.to_a, class: "text-sm") do |table| %>
-            <% table.column(title: "Title") { |note| note.title } %>
-          <% end %>
-        <% else %>
-          <%= render FlatPack::Alert::Component.new(
-            style: :info,
-            title: "No notes match",
-            description: "Notes only look at the title."
-          ) %>
         <% end %>
       <% end %>
     <% end %>
-  </div>
+  <% elsif @pages.any? || @users.any? || @notes.any? %>
+    <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, class: "w-full") do %>
+      <% @pages.each do |page| %>
+        <%= render FlatPack::Card::Component.new(
+          style: :interactive,
+          clickable: true,
+          href: page_path(page),
+          padding: :none
+        ) do |card| %>
+          <% card.media(aspect_ratio: "16/9", padding: :none) do %>
+            <%= image_tag page_cover_path(page),
+                  alt: page.title,
+                  class: "h-full w-full object-cover" %>
+          <% end %>
+          <% card.body do %>
+            <p class="font-semibold text-[var(--surface-content-color)]"><%= page.title %></p>
+            <p class="mt-1 text-sm text-[var(--surface-muted-content-color)]"><%= page_published_on(page) %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% @users.each do |user| %>
+        <%= render FlatPack::Card::Component.new do |card| %>
+          <% card.body do %>
+            <p class="font-semibold text-[var(--surface-content-color)]"><%= user.name.presence || "—" %></p>
+            <p class="mt-1 text-sm text-[var(--surface-muted-content-color)]"><%= user.email %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% @notes.each do |note| %>
+        <%= render FlatPack::Card::Component.new do |card| %>
+          <% card.body do %>
+            <p class="font-semibold text-[var(--surface-content-color)]"><%= note.title %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Nothing for that",
+      description: "Try Ada, refund, or sticky."
+    ) %>
+  <% end %>
 </div>

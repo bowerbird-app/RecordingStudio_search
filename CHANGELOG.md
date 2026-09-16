@@ -9,12 +9,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [0.4.1] - 2026-09-16
 
 ### Changed
-- Dummy home centers the title, enlarges the search field, and groups People / Pages / Notes hits in cards
+- Dummy home centers the title, enlarges the search field, and shows category cards until you search
+- After a search, dummy home shows each hit as its own card (no section wrappers)
 - Dummy page show uses a larger title, a cover image that fills its frame, and the published date instead of a subtitle
-- Dummy page nav no longer shows Sign out or the workspace switcher
+- Dummy page nav no longer shows Sign out, the workspace switcher, or the old demo buttons
 
 ### Upgrade notes
-- Host search screens are unchanged. If you copied the dummy home or page nav, take the centered title, larger search tokens, section cards, and the page show from `test/dummy`.
+- Host search screens are unchanged. If you copied the dummy home or page nav, take the centered title, larger search tokens, idle category cards, hit cards, and the page show from `test/dummy`.
 
 ## [0.4.0] - 2026-09-14
 
