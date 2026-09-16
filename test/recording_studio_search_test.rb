@@ -161,6 +161,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme_source, "/instant"
     assert_includes readme_source, "/groups"
     assert_includes readme_source, "/title-first"
+    assert_includes readme_source, "/pages/:id"
     refute_includes readme_source, "flat_pack_sidebar"
   end
 
