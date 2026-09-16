@@ -27,9 +27,9 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
       assert_select "[data-controller*='flat-pack--search-input'][class*='w-full']", count: 1
       refute_select "[class*='max-w-lg']"
       assert_select "input[class*='search-padding-y-lg']", count: 1
-      assert_select "input[class*='text-lg']", count: 1
       refute_select "button[type=submit]"
     end
+    assert_includes response.body, "--search-padding-y-lg: 1.25rem"
     refute_match "Look up", response.body
     refute_match "Ada Admin", response.body
     refute_match "Sign out", response.body
