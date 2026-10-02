@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 - Dummy / root GitHub pin for Recording Studio: `v4.2.1` → `v4.2.2`
+- Dummy `brakeman` `8.0.6` → `8.1.0` so Security CI does not fail on the outdated-version check
 
 ## [0.4.0] - 2026-09-14
 
