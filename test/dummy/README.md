@@ -28,6 +28,8 @@ bin/dev
 
 Run the commands above from the dummy app directory, not the repository root.
 
+Dummy credentials (`config/credentials.yml.enc`) use the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or write that key to `config/master.key` (gitignored). Do not mint a per-repo dummy key.
+
 Then open the app and sign in with:
 
 - Email: `admin@admin.com`
