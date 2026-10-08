@@ -149,6 +149,30 @@ CREATE TABLE public.pages (
 
 
 --
+-- Name: recording_studio_access_invitations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_access_invitations (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    recording_id uuid NOT NULL,
+    email character varying NOT NULL,
+    role character varying NOT NULL,
+    token_digest character varying(64) NOT NULL,
+    manager_actor_type character varying NOT NULL,
+    manager_actor_id uuid NOT NULL,
+    accepted_by_actor_type character varying,
+    accepted_by_actor_id uuid,
+    expires_at timestamp(6) without time zone NOT NULL,
+    last_sent_at timestamp(6) without time zone NOT NULL,
+    accepted_at timestamp(6) without time zone,
+    revoked_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT access_invitations_not_accepted_and_revoked CHECK (((accepted_at IS NULL) OR (revoked_at IS NULL)))
+);
+
+
+--
 -- Name: recording_studio_accesses; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -157,7 +181,7 @@ CREATE TABLE public.recording_studio_accesses (
     actor_id uuid NOT NULL,
     actor_type character varying NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    role integer DEFAULT 0 NOT NULL,
+    role character varying DEFAULT 'view'::character varying NOT NULL,
     depends_on_recording_id uuid
 );
 
@@ -173,7 +197,11 @@ CREATE TABLE public.recording_studio_attachable_attachments (
     attachment_kind character varying NOT NULL,
     original_filename character varying NOT NULL,
     content_type character varying NOT NULL,
-    byte_size bigint NOT NULL
+    byte_size bigint NOT NULL,
+    root_recording_id uuid,
+    caption text,
+    credit text,
+    alt_text text
 );
 
 
@@ -326,8 +354,8 @@ CREATE TABLE public.recording_studio_user_profiles (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id uuid NOT NULL,
     first_name character varying NOT NULL,
-    last_name character varying NOT NULL,
-    time_zone character varying DEFAULT 'UTC'::character varying NOT NULL,
+    last_name character varying,
+    time_zone character varying DEFAULT 'UTC'::character varying,
     additional_profile_attributes jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp(6) without time zone NOT NULL
 );
@@ -362,7 +390,7 @@ CREATE TABLE public.users (
     confirmed_at timestamp(6) without time zone,
     confirmation_sent_at timestamp(6) without time zone,
     unconfirmed_email character varying,
-    CONSTRAINT users_registered_with_check CHECK (((registered_with)::text = ANY ((ARRAY['password'::character varying, 'otp'::character varying])::text[])))
+    CONSTRAINT users_registered_with_check CHECK (((registered_with)::text = ANY (ARRAY[('password'::character varying)::text, ('otp'::character varying)::text])))
 );
 
 
@@ -432,6 +460,14 @@ ALTER TABLE ONLY public.notes
 
 ALTER TABLE ONLY public.pages
     ADD CONSTRAINT pages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_access_invitations recording_studio_access_invitations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_access_invitations
+    ADD CONSTRAINT recording_studio_access_invitations_pkey PRIMARY KEY (id);
 
 
 --
@@ -561,6 +597,20 @@ CREATE INDEX idx_on_user_id_purpose_2b7c2a59c4 ON public.recording_studio_user_o
 
 
 --
+-- Name: idx_rs_access_invitations_one_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_rs_access_invitations_one_active ON public.recording_studio_access_invitations USING btree (recording_id, email) WHERE ((accepted_at IS NULL) AND (revoked_at IS NULL));
+
+
+--
+-- Name: idx_rs_access_invitations_token_digest; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_rs_access_invitations_token_digest ON public.recording_studio_access_invitations USING btree (token_digest);
+
+
+--
 -- Name: idx_rs_attachable_kind_type; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -666,6 +716,13 @@ CREATE INDEX index_pages_on_title_trgm ON public.pages USING gin (title public.g
 
 
 --
+-- Name: index_recording_studio_access_invitations_on_recording_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_access_invitations_on_recording_id ON public.recording_studio_access_invitations USING btree (recording_id);
+
+
+--
 -- Name: index_recording_studio_accesses_on_actor; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -761,6 +818,13 @@ CREATE INDEX index_recording_studio_user_otp_challenges_on_user_id ON public.rec
 --
 
 CREATE INDEX index_recording_studio_user_profiles_on_user_id ON public.recording_studio_user_profiles USING btree (user_id);
+
+
+--
+-- Name: index_rs_attachable_attachments_on_root_recording_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_attachable_attachments_on_root_recording_id ON public.recording_studio_attachable_attachments USING btree (root_recording_id);
 
 
 --
@@ -921,6 +985,14 @@ ALTER TABLE ONLY public.recording_studio_recordings
 
 
 --
+-- Name: recording_studio_access_invitations fk_rails_414646b380; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_access_invitations
+    ADD CONSTRAINT fk_rails_414646b380 FOREIGN KEY (recording_id) REFERENCES public.recording_studio_recordings(id);
+
+
+--
 -- Name: recording_studio_user_otp_challenges fk_rails_5a5625bfeb; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -967,6 +1039,11 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261008061231'),
+('20261008061230'),
+('20261008061229'),
+('20261008061228'),
+('20261008061227'),
 ('20260911060100'),
 ('20260911033546'),
 ('20260911033524'),

@@ -3,7 +3,7 @@
 Copied addons now start on Recording Studio 4.x.
 
 - Gemspec: `add_dependency "recording_studio", "~> 4.2"`
-- Dummy GitHub tags: Recording Studio `v4.2.2`, Accessible `v0.9.1`, Root Switchable `v0.5.1`, Users `v0.11.0`, Admin `v2.0.2`, Attachable `v0.5.1`, FlatPack `v0.1.177`
+- Dummy GitHub tags: Recording Studio `v4.2.2`, Accessible `v0.11.2`, Root Switchable `v0.5.1`, Users `v0.15.0`, Admin `v2.0.2`, Attachable `v0.7.4`, FlatPack `v0.1.198`
 - Authenticated dummy layout: `RecordingStudio::UsesDefaultLayout` plus FlatPack CSS/JS
 - Hooks and BaseService come from core; do not copy them into a new addon
 - Recordable declarations remain required

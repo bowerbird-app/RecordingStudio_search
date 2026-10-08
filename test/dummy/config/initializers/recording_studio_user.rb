@@ -9,9 +9,10 @@ RecordingStudioUser.configure do |config|
   # Layout for the engine's signed-in screens. Sign in and sign up keep the
   # gem's own centered layout, "recording_studio_user/auth".
   config.layout = "recording_studio/default_layout"
-  config.additional_profile_attributes = []
+  # Leave unset so the gem default (:locale) stays on the allowlist.
+  # config.additional_profile_attributes |= [:nickname]
   config.require_password_confirmation = false
-  # Sign-in page heading. Default "Welcome back".
+  # Sign-in page heading. Default follows I18n ("Welcome back").
   # config.login_title = "Welcome back"
   # First auth screen is always email. Next screen follows this setting:
   # :email → password, :otp → email code (requires otp_enabled and OTP flags).
