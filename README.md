@@ -187,7 +187,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.11.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.15.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 
