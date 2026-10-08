@@ -6,8 +6,8 @@
 - Rails 8.1 or newer
 - Recording Studio 4.x (`~> 4.2` in the gemspec; dummy GitHub tag `v4.2.2`)
 - Accessible dummy tag `v0.11.2` and Root Switchable dummy tag `v0.5.1`
-- Users dummy tag `v0.15.0` (Admin `v2.0.2` and Attachable `v0.7.4` as Users runtime deps)
-- FlatPack dummy tag `v0.1.198`
+- Users dummy tag `v0.15.0` (Admin `v2.0.6` and Attachable `v0.7.4` as Users runtime deps)
+- FlatPack dummy tag `v0.1.207`
 - Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
 - `json` 2.x (`>= 2.21, < 3`) until Rails 8.1 can call json 3’s `JSON.parse`
 - PostgreSQL 16 with `pg_trgm` (always) and `vector` (only if a host enables `:pgvector`)
