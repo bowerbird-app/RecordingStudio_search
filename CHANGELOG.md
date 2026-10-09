@@ -6,9 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-09
+
+### Added
+
+- English Rails I18n keys for static interface copy in the gem's own instant-search
+  views and helpers (`config/locales/en.yml` under `recording_studio.search`)
+
 ### Changed
+
+- Instant-search empty states, table column titles, default search placeholder, and
+  missing-detail placeholder resolve through `t(...)` (English output unchanged)
 - Dummy / root GitHub pin for Recording Studio: `v4.2.1` → `v4.2.2`
 - Dummy `brakeman` `8.0.6` → `8.1.0` so Security CI does not fail on the outdated-version check
+
+### Upgrade notes
+
+- No migration or host code change is required for English.
+- To translate or override the defaults, add keys under `recording_studio.search`
+  in the host's locale files.
+- There is no dependency on `recording_studio_internationalization`.
+- This gem had no older top-level `recording_studio_search.*` I18n namespace for
+  interface copy; new keys use only `recording_studio.search.*`.
 
 ## [0.4.0] - 2026-09-14
 
@@ -66,6 +85,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0

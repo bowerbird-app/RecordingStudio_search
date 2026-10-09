@@ -1,0 +1,16 @@
+en:
+  recording_studio:
+    search:
+      instant:
+        placeholder: "Try a name"
+      results:
+        empty:
+          title: "Type a little"
+          description: "Hits land here as you go."
+        no_hits:
+          title: "No luck"
+          description: "Try another word. Typos are fine."
+        columns:
+          name: "Name"
+          detail: "Detail"
+        missing_detail: "—"

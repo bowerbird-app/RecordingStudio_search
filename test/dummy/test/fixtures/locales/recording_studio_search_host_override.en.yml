@@ -1,0 +1,7 @@
+# Loaded only inside HostLocaleOverrideTest (not under config/locales).
+en:
+  recording_studio:
+    search:
+      results:
+        empty:
+          title: "Host empty nudge"

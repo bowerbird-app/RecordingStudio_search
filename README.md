@@ -156,6 +156,12 @@ On the host action, start with empty hits (`User.none`). Do not call `User.searc
 
 Override `app/views/recording_studio_search/_results.html.erb` if the default Name / Detail table is wrong for a type.
 
+Static chrome on that partial (empty-state titles, column headers, and the helper's
+default placeholder) ships as English Rails I18n under `recording_studio.search` in
+the gem's `config/locales/en.yml`. Hosts can override those keys. Pass `placeholder:`
+to `instant_search_field` when the page should use its own prompt. Search result rows
+stay untranslated — they are model data.
+
 Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `User` (trigram) so typing updates the frame and leaves the URL at `/instant`. That is a demo choice, not a backend limit. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
 
 ## Data

@@ -37,6 +37,10 @@ Declare matching `searchable backend:` on each model. Boot warns if the DSL and 
 
 Off by default. Set `config.instant_search_models` (class names are safest at boot), mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, import Turbo, then copy `instant_search_field` plus `instant_search_results`. The engine show action is the results URL. Blank `q` is empty, not everyone. Models that are not allowlisted are ignored. The frame uses each model’s declared backend (`:pg_trgm` or `:pgvector`). New query strings still hit the embedding client once, then `recording_studio_search_queries`. Dummy `/instant` allowlists `User` only as a trigram proof. No Support `/help` wiring. See `docs/search-plan.md` Phase 4.
 
+## Interface text (0.5.0)
+
+Static instant-search chrome (empty states, column titles, default placeholder) uses Rails I18n keys under `recording_studio.search` in the gem’s `config/locales/en.yml`. English output is unchanged. Override those keys in the host locale files to translate. No dependency on `recording_studio_internationalization`. Result row content stays model data.
+
 ## Field weights
 
 `against: %i[title body]` is equal ranking. `against: { title: "A", body: "D" }` uses Postgres `setweight` (`A`–`D`) on `search_vector` and scales trigram similarity the same way. Regenerating `searchable_pg_trgm` with `--against=title:A,body:D` writes that expression for new tables. Existing columns need drop-and-recreate (see dummy `WeightPageSearchVector`). Vector models re-embed after a weight change.

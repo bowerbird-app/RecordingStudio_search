@@ -83,6 +83,7 @@ Opt-in chrome for hosts that already have `searchable` models. People type; a Tu
 |---|---|
 | `recording_studio_search.instant_search_field` | Flatpack `Search` input + Stimulus debounce data attributes |
 | `recording_studio_search.instant_search_results` | Turbo Frame around `recording_studio_search/results` |
+| `config/locales/en.yml` | English I18n for static instant-search chrome (`recording_studio.search.*`) |
 | `InstantSearchesController#show` | Thin GET that runs allowlisted `Model.search` / `RecordingStudioSearch.search` and renders the frame |
 | `config.instant_search_models` | Allowlist. Empty means the endpoint searches nothing |
 | Stimulus `recording-studio-search--instant-search` | input → wait `debounce_ms` → set frame `src` with `param` |
