@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Instant-search empty states, table column titles, default search placeholder, and
   missing-detail placeholder resolve through `t(...)` (English output unchanged)
+- Dummy / root GitHub pin for Recording Studio: `v4.2.1` → `v4.2.2`
+- Dummy `brakeman` `8.0.6` → `8.1.0` so Security CI does not fail on the outdated-version check
 
 ### Upgrade notes
 
