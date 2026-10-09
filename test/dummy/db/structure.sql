@@ -206,6 +206,28 @@ CREATE TABLE public.recording_studio_attachable_attachments (
 
 
 --
+-- Name: recording_studio_attachable_libraries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_attachable_libraries (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    key character varying DEFAULT 'default'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_attachable_placements; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_attachable_placements (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    attachment_recording_id uuid NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
 -- Name: recording_studio_events; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -487,6 +509,22 @@ ALTER TABLE ONLY public.recording_studio_attachable_attachments
 
 
 --
+-- Name: recording_studio_attachable_libraries recording_studio_attachable_libraries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_attachable_libraries
+    ADD CONSTRAINT recording_studio_attachable_libraries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_attachable_placements recording_studio_attachable_placements_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_attachable_placements
+    ADD CONSTRAINT recording_studio_attachable_placements_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: recording_studio_events recording_studio_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -587,6 +625,13 @@ ALTER TABLE ONLY public.workspaces
 --
 
 CREATE INDEX idx_on_attachment_kind_d683071625 ON public.recording_studio_attachable_attachments USING btree (attachment_kind);
+
+
+--
+-- Name: idx_on_attachment_recording_id_76c6286907; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_on_attachment_recording_id_76c6286907 ON public.recording_studio_attachable_placements USING btree (attachment_recording_id);
 
 
 --
@@ -741,6 +786,13 @@ CREATE INDEX index_recording_studio_accesses_on_actor_and_role ON public.recordi
 --
 
 CREATE INDEX index_recording_studio_accesses_on_depends_on_recording_id ON public.recording_studio_accesses USING btree (depends_on_recording_id);
+
+
+--
+-- Name: index_recording_studio_attachable_libraries_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_attachable_libraries_on_key ON public.recording_studio_attachable_libraries USING btree (key);
 
 
 --
@@ -1039,6 +1091,8 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261009101701'),
+('20261009101700'),
 ('20261008061231'),
 ('20261008061230'),
 ('20261008061229'),
