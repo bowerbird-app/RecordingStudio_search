@@ -4,14 +4,14 @@
   <% if query.to_s.strip.empty? %>
     <%= render FlatPack::Alert::Component.new(
       style: :info,
-      title: "Type a little",
-      description: "Hits land here as you go."
+      title: t("recording_studio.search.results.empty.title"),
+      description: t("recording_studio.search.results.empty.description")
     ) %>
   <% else %>
     <%= render FlatPack::Alert::Component.new(
       style: :info,
-      title: "No luck",
-      description: "Try another word. Typos are fine."
+      title: t("recording_studio.search.results.no_hits.title"),
+      description: t("recording_studio.search.results.no_hits.description")
     ) %>
   <% end %>
 <% else %>
@@ -20,8 +20,8 @@
       <%= render FlatPack::SectionTitle::Component.new(title: label) %>
     <% end %>
     <%= render FlatPack::Table::Component.new(data: rows.to_a, class: "text-sm") do |table| %>
-      <% table.column(title: "Name") { |row| instant_search_row_name(row) } %>
-      <% table.column(title: "Detail") { |row| instant_search_row_detail(row) } %>
+      <% table.column(title: t("recording_studio.search.results.columns.name")) { |row| instant_search_row_name(row) } %>
+      <% table.column(title: t("recording_studio.search.results.columns.detail")) { |row| instant_search_row_detail(row) } %>
     <% end %>
   <% end %>
 <% end %>

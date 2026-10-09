@@ -29,6 +29,8 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     assert_select "[data-controller*='flat-pack--search-input']", count: 1
     assert_select "turbo-frame#people_results", count: 1
     assert_match "Type a little", response.body
+    assert_match "Hits land here as you go.", response.body
+    assert_match "Try Ada or hopper", response.body
     refute_match "Ada Admin", response.body
     refute_select "form[action='#{instant_people_path}']"
     refute_select "form[method=get]"
@@ -44,6 +46,8 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "turbo-frame#people_results"
     assert_match "Ada Admin", response.body
+    assert_match "Name", response.body
+    assert_match "Detail", response.body
     refute_match "<html", response.body
   end
 
@@ -60,6 +64,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_match "No luck", response.body
+    assert_match "Try another word. Typos are fine.", response.body
     refute_match "Refunds", response.body
   end
 
@@ -86,6 +91,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_match "Type a little", response.body
+    assert_match "Hits land here as you go.", response.body
     refute_match "Ada Admin", response.body
   end
 
@@ -99,6 +105,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "turbo-frame#people_results"
     assert_match "No luck", response.body
+    assert_match "Try another word. Typos are fine.", response.body
     refute_match "Ada Admin", response.body
     refute_match "<html", response.body
   end

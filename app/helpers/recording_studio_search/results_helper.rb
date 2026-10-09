@@ -27,7 +27,9 @@ module RecordingStudioSearch
     end
 
     def instant_search_row_detail(row)
-      row.try(:email).presence || row.try(:body).to_s.truncate(80).presence || "—"
+      row.try(:email).presence ||
+        row.try(:body).to_s.truncate(80).presence ||
+        t("recording_studio.search.results.missing_detail")
     end
   end
 end
