@@ -1,0 +1,8 @@
+# Host override for one search gem key. Proves Rails loads host locales after
+# the engine so English from the host wins over the gem's en.yml.
+en:
+  recording_studio:
+    search:
+      results:
+        empty:
+          title: "Host empty nudge"
