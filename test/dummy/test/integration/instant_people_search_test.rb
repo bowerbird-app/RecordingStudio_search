@@ -28,7 +28,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     assert_select "input[name=q]", count: 1
     assert_select "[data-controller*='flat-pack--search-input']", count: 1
     assert_select "turbo-frame#people_results", count: 1
-    assert_match "Host empty nudge", response.body
+    assert_match "Type a little", response.body
     assert_match "Hits land here as you go.", response.body
     assert_match "Try Ada or hopper", response.body
     refute_match "Ada Admin", response.body
@@ -90,7 +90,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :success
-    assert_match "Host empty nudge", response.body
+    assert_match "Type a little", response.body
     assert_match "Hits land here as you go.", response.body
     refute_match "Ada Admin", response.body
   end

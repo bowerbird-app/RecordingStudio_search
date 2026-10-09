@@ -12,7 +12,7 @@ class LocalesLoadPathTest < ActiveSupport::TestCase
   test "instant search default placeholder English is available to the host" do
     I18n.with_locale(:en) do
       assert_equal "Try a name", I18n.t("recording_studio.search.instant.placeholder", raise: true)
-      assert_equal "Host empty nudge", I18n.t("recording_studio.search.results.empty.title", raise: true)
+      assert_equal "Type a little", I18n.t("recording_studio.search.results.empty.title", raise: true)
       assert_equal "No luck", I18n.t("recording_studio.search.results.no_hits.title", raise: true)
       assert_equal "Name", I18n.t("recording_studio.search.results.columns.name", raise: true)
       assert_equal "Detail", I18n.t("recording_studio.search.results.columns.detail", raise: true)
