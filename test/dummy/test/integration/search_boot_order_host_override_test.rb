@@ -41,15 +41,10 @@ class SearchBootOrderHostOverrideTest < ActionDispatch::IntegrationTest
     assert_equal "HOST missing mark",
                  I18n.t("recording_studio.search.results.missing_detail", raise: true)
 
-    row = Struct.new(:name, :email, :body, keyword_init: true).new(name: "Solo")
-    assert_equal "HOST missing mark", view_context.instant_search_row_detail(row)
-  end
+    get search_i18n_probe_path
 
-  private
-
-  def view_context
-    controller = ApplicationController.new
-    controller.request = ActionDispatch::TestRequest.create
-    controller.view_context
+    assert_response :success
+    assert_select "td", text: "HOST missing mark"
+    assert_select "td", text: "Solo"
   end
 end

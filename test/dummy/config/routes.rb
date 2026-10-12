@@ -38,6 +38,12 @@ Rails.application.routes.draw do
   get "groups", to: "group_searches#index", as: :groups
   get "title-first", to: "weighted_pages#index", as: :title_first
 
+  # Test-only: render gem `_results` with a no-email/no-body row for the
+  # rarely shown `results.missing_detail` host-override assertion.
+  if Rails.env.test?
+    get "search_i18n_probe", to: "search_i18n_probes#show", as: :search_i18n_probe
+  end
+
   mount RecordingStudioUser::Engine => RecordingStudioUser.config.mount_path, as: :recording_studio_users
   mount RecordingStudioSearch::Engine, at: "/recording_studio_search"
 end

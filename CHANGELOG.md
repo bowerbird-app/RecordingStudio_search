@@ -27,6 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   (English output unchanged)
 - Stricter dummy render-level asserts for column titles `Name` / `Detail` on
   the instant search hits frame (existing `assert_match` kept)
+- Dummy boot-order host override test hits a test-only probe page that renders
+  `_results` with a no-email/no-body row and asserts `HOST missing mark` in a `td`
 
 ### Upgrade notes
 
