@@ -149,6 +149,18 @@ CREATE TABLE public.pages (
 
 
 --
+-- Name: recording_studio_access_constraints; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_access_constraints (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    action character varying NOT NULL,
+    allowed_audiences character varying[] DEFAULT '{}'::character varying[] NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
 -- Name: recording_studio_access_invitations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -169,6 +181,18 @@ CREATE TABLE public.recording_studio_access_invitations (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     CONSTRAINT access_invitations_not_accepted_and_revoked CHECK (((accepted_at IS NULL) OR (revoked_at IS NULL)))
+);
+
+
+--
+-- Name: recording_studio_access_rules; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_access_rules (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    action character varying NOT NULL,
+    audience character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -485,11 +509,27 @@ ALTER TABLE ONLY public.pages
 
 
 --
+-- Name: recording_studio_access_constraints recording_studio_access_constraints_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_access_constraints
+    ADD CONSTRAINT recording_studio_access_constraints_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: recording_studio_access_invitations recording_studio_access_invitations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.recording_studio_access_invitations
     ADD CONSTRAINT recording_studio_access_invitations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_access_rules recording_studio_access_rules_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_access_rules
+    ADD CONSTRAINT recording_studio_access_rules_pkey PRIMARY KEY (id);
 
 
 --
@@ -761,10 +801,24 @@ CREATE INDEX index_pages_on_title_trgm ON public.pages USING gin (title public.g
 
 
 --
+-- Name: index_recording_studio_access_constraints_on_action; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_access_constraints_on_action ON public.recording_studio_access_constraints USING btree (action);
+
+
+--
 -- Name: index_recording_studio_access_invitations_on_recording_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_recording_studio_access_invitations_on_recording_id ON public.recording_studio_access_invitations USING btree (recording_id);
+
+
+--
+-- Name: index_recording_studio_access_rules_on_action; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_access_rules_on_action ON public.recording_studio_access_rules USING btree (action);
 
 
 --
@@ -1091,6 +1145,8 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261012044049'),
+('20261012044048'),
 ('20261009101701'),
 ('20261009101700'),
 ('20261008061231'),
