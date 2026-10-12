@@ -48,6 +48,9 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     assert_match "Ada Admin", response.body
     assert_match "Name", response.body
     assert_match "Detail", response.body
+    assert_select "th", text: "Name"
+    assert_select "th", text: "Detail"
+    assert_select "td", text: "Ada Admin"
     refute_match "<html", response.body
   end
 

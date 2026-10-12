@@ -1,0 +1,8 @@
+# Host nested override for a rarely shown key (missing-detail placeholder).
+# Loaded by Rails from config/locales — do not append this path in tests.
+# Common visible labels (empty, no-hits, Name/Detail) stay on gem English.
+en:
+  recording_studio:
+    search:
+      results:
+        missing_detail: "HOST missing mark"
