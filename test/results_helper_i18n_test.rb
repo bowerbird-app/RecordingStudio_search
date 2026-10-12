@@ -9,8 +9,8 @@ class ResultsHelperI18nTest < Minitest::Test
   class HelperHost
     include RecordingStudioSearch::ResultsHelper
 
-    def t(key, **options)
-      I18n.t(key, **options)
+    def t(key, **)
+      I18n.t(key, **)
     end
   end
 
@@ -24,7 +24,7 @@ class ResultsHelperI18nTest < Minitest::Test
     I18n.backend = I18n::Backend::Simple.new
     I18n.load_path = [@locale_path]
     I18n.backend.load_translations
-    I18n.available_locales = [ :en, :fr ]
+    I18n.available_locales = %i[en fr]
     @helper = HelperHost.new
   end
 
@@ -49,16 +49,16 @@ class ResultsHelperI18nTest < Minitest::Test
 
   def test_translated_collection_label_uses_host_override_and_falls_back_when_missing
     I18n.backend.store_translations(:fr, {
-      recording_studio: {
-        search: {
-          results: {
-            collections: {
-              users: "Utilisateurs"
-            }
-          }
-        }
-      }
-    })
+                                      recording_studio: {
+                                        search: {
+                                          results: {
+                                            collections: {
+                                              users: "Utilisateurs"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    })
 
     I18n.with_locale(:fr) do
       assert_equal "Utilisateurs", @helper.instant_search_translated_collection_label("Users")
@@ -72,14 +72,14 @@ class ResultsHelperI18nTest < Minitest::Test
     end
 
     I18n.backend.store_translations(:fr, {
-      recording_studio: {
-        search: {
-          results: {
-            missing_detail: "manquant"
-          }
-        }
-      }
-    })
+                                      recording_studio: {
+                                        search: {
+                                          results: {
+                                            missing_detail: "manquant"
+                                          }
+                                        }
+                                      }
+                                    })
 
     I18n.with_locale(:fr) do
       assert_equal "manquant", @helper.instant_search_row_detail(Row.new(name: "Solo"))

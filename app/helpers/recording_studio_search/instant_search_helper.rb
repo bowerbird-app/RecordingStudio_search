@@ -46,11 +46,15 @@ module RecordingStudioSearch
         FlatPack::Search::Component.new(
           name: param.to_s,
           value: chrome[:value],
-          placeholder: chrome.fetch(:placeholder, @view.t("recording_studio.search.instant.placeholder", default: "Try a name")),
+          placeholder: chrome.fetch(:placeholder, default_placeholder),
           max_width: chrome.fetch(:max_width, :none),
           size: chrome.fetch(:size, :lg)
         )
       )
+    end
+
+    def default_placeholder
+      @view.t("recording_studio.search.instant.placeholder", default: "Try a name")
     end
 
     def wrapper_attributes(results_url, frame_id, param, debounce_ms)

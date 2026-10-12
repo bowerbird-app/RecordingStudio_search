@@ -59,7 +59,7 @@ class InstantSearchHelperI18nTest < Minitest::Test
     I18n.backend = I18n::Backend::Simple.new
     I18n.load_path = []
     I18n.backend.load_translations
-    I18n.available_locales = [ :en, :zz ]
+    I18n.available_locales = %i[en zz]
 
     I18n.with_locale(:zz) do
       helper.instant_search_field(models: ["User"], frame_id: "people_results")
