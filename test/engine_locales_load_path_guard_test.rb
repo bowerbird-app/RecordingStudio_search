@@ -3,7 +3,7 @@
 require "test_helper"
 
 class EngineLocalesLoadPathGuardTest < Minitest::Test
-  def test_lib_does_not_mutate_i18n_load_path
+  def test_engine_does_not_mutate_i18n_load_path
     lib_root = File.expand_path("../lib", __dir__)
     ruby_files = Dir[File.join(lib_root, "**", "*.rb")]
 
