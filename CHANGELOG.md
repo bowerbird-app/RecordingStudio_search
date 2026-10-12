@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-12
+
+### Added
+
+- English `default:` on every instant-search `t(...)` lookup so a host locale
+  without a fallback never shows "translation missing"
+- Render-time translation for multi-model collection section titles via
+  `instant_search_translated_collection_label` (`recording_studio.search.results.collections.<label>`,
+  `default:` the raw English from `instant_search_collection_label`)
+- Always-loaded dummy host override
+  `test/dummy/config/locales/recording_studio_search_host.en.yml` on the rarely
+  shown `results.missing_detail` key
+- Locale regression: every `lib/**/*.rb` file must not mention
+  `i18n.load_path` / `I18n.load_path` (widened from `engine.rb` only)
+
+### Changed
+
+- Instant-search view and helper chrome resolve through `t(..., default: <main English>)`
+  (English output unchanged)
+- Stricter dummy render-level asserts for column titles `Name` / `Detail` on
+  the instant search hits frame (existing `assert_match` kept)
+
+### Upgrade notes
+
+- No migration or host code change is required for English.
+- To translate or override the defaults, add keys under `recording_studio.search`
+  in the host's locale files (including optional
+  `results.collections.<demodulized_plural>` for multi-model section titles).
+- `instant_search_collection_label` still returns raw English model-derived
+  labels (public data). Translate at the render site (the gem partial already
+  does via `instant_search_translated_collection_label`).
+- There is no dependency on `recording_studio_internationalization`.
+
 ## [0.5.0] - 2026-10-09
 
 ### Added
@@ -85,7 +118,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.3.0

@@ -51,6 +51,27 @@ class InstantSearchHelperI18nTest < Minitest::Test
     assert_equal "Try a name", view.rendered.placeholder
   end
 
+  def test_instant_search_field_placeholder_falls_back_to_english_default_without_locale_key
+    stub_flatpack_search!
+    view = FakeView.new
+    helper = RecordingStudioSearch::InstantSearchHelper.new(view, routes_stub)
+    original_available = I18n.available_locales
+    I18n.backend = I18n::Backend::Simple.new
+    I18n.load_path = []
+    I18n.backend.load_translations
+    I18n.available_locales = [ :en, :zz ]
+
+    I18n.with_locale(:zz) do
+      helper.instant_search_field(models: ["User"], frame_id: "people_results")
+    end
+
+    assert_equal "Try a name", view.rendered.placeholder
+  ensure
+    I18n.available_locales = original_available if original_available
+    I18n.load_path |= [@locale_path]
+    I18n.backend.reload!
+  end
+
   def test_instant_search_field_keeps_caller_placeholder
     stub_flatpack_search!
     view = FakeView.new

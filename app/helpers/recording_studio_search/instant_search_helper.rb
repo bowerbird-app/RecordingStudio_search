@@ -46,7 +46,7 @@ module RecordingStudioSearch
         FlatPack::Search::Component.new(
           name: param.to_s,
           value: chrome[:value],
-          placeholder: chrome.fetch(:placeholder, @view.t("recording_studio.search.instant.placeholder")),
+          placeholder: chrome.fetch(:placeholder, @view.t("recording_studio.search.instant.placeholder", default: "Try a name")),
           max_width: chrome.fetch(:max_width, :none),
           size: chrome.fetch(:size, :lg)
         )

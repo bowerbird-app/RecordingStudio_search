@@ -17,9 +17,20 @@ module RecordingStudioSearch
       end
     end
 
+    # Public data: raw English collection label from the model class name.
+    # Translate at the render site via +instant_search_translated_collection_label+.
     def instant_search_collection_label(model)
       name = model.respond_to?(:name) ? model.name : model.to_s
       name.demodulize.pluralize
+    end
+
+    # Render-time translation of a collection section title. +label+ stays the
+    # raw English from +instant_search_collection_label+ (or "").
+    def instant_search_translated_collection_label(label)
+      return label if label.blank?
+
+      key = label.to_s.underscore
+      t("recording_studio.search.results.collections.#{key}", default: label)
     end
 
     def instant_search_row_name(row)
@@ -29,7 +40,7 @@ module RecordingStudioSearch
     def instant_search_row_detail(row)
       row.try(:email).presence ||
         row.try(:body).to_s.truncate(80).presence ||
-        t("recording_studio.search.results.missing_detail")
+        t("recording_studio.search.results.missing_detail", default: "—")
     end
   end
 end

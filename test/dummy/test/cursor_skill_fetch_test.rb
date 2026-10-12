@@ -23,7 +23,7 @@ class CursorSkillFetchTest < ActiveSupport::TestCase
   end
 
   test "gem version stays 0.5.0 and gemspec still excludes .cursor" do
-    assert_equal "0.5.0", RecordingStudioSearch::VERSION
+    assert_equal "0.6.0", RecordingStudioSearch::VERSION
 
     spec = Gem::Specification.load(RecordingStudioSearch::Engine.root.join("recording_studio_search.gemspec").to_s)
     cursor_files = spec.files.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }

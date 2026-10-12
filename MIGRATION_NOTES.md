@@ -4,9 +4,9 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio 4.x (`~> 4.2` in the gemspec; dummy GitHub tag `v4.4.0`)
-- Accessible dummy tag `v0.13.0` and Root Switchable dummy tag `v0.6.0`
-- Users dummy tag `v0.16.0` (Admin `v2.0.7` and Attachable `v0.13.0` as Users runtime deps)
+- Recording Studio 4.x (`~> 4.2` in the gemspec; dummy GitHub tag `v4.5.0`)
+- Accessible dummy tag `v0.15.0` and Root Switchable dummy tag `v0.8.0`
+- Users dummy tag `v0.16.0` (Admin `v2.1.0` and Attachable `v0.15.0` as Users runtime deps)
 - FlatPack dummy tag `v0.1.213` (Attachable 0.12+ needs `>= 0.1.213`)
 - Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
 - `json` 2.x (`>= 2.21, < 3`) until Rails 8.1 can call json 3’s `JSON.parse`
@@ -40,6 +40,10 @@ Off by default. Set `config.instant_search_models` (class names are safest at bo
 ## Interface text (0.5.0)
 
 Static instant-search chrome (empty states, column titles, default placeholder) uses Rails I18n keys under `recording_studio.search` in the gem’s `config/locales/en.yml`. English output is unchanged. Override those keys in the host locale files to translate. No dependency on `recording_studio_internationalization`. Result row content stays model data.
+
+## Interface text outside views (0.6.0)
+
+Every gem `t(...)` call passes English `default:` so a host locale without a fallback never shows "translation missing". Multi-model collection section titles translate at render via `instant_search_translated_collection_label` (`recording_studio.search.results.collections.<demodulized_plural>`, default the raw English from `instant_search_collection_label`). Public collection labels and result rows stay raw model data. English output is unchanged.
 
 ## Field weights
 
