@@ -13,7 +13,7 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.4.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
