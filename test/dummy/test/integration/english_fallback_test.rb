@@ -38,10 +38,10 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
       get instant_people_path
 
       assert_response :success
-      assert_select "h1", text: /As you type/
-      assert_includes @response.body, "Type a little"
-      assert_includes @response.body, "Hits land here as you go."
-      refute_search_translation_missing!(@response.body)
+      assert_select "h1", text: "As you type"
+      assert_select "h3", text: "Type a little"
+      assert_select "p", text: "Hits land here as you go."
+      refute_search_translation_missing!
     end
   end
 
@@ -50,11 +50,11 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
       get instant_people_path
 
       assert_response :success
-      assert_select "h1", text: /As you type/
-      assert_includes @response.body, "Type a little"
-      assert_includes @response.body, "Hits land here as you go."
-      assert_includes @response.body, "Try Ada or hopper"
-      refute_search_translation_missing!(@response.body)
+      assert_select "h1", text: "As you type"
+      assert_select "h3", text: "Type a little"
+      assert_select "p", text: "Hits land here as you go."
+      assert_select "input[name=q][placeholder='Try Ada or hopper']"
+      refute_search_translation_missing!
     end
   end
 
@@ -75,9 +75,9 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
           get instant_people_path
 
           assert_response :success
-          assert_select "h1", text: /As you type/
-          assert_includes @response.body, "Type a little"
-          refute_search_translation_missing!(@response.body)
+          assert_select "h1", text: "As you type"
+          assert_select "h3", text: "Type a little"
+          refute_search_translation_missing!
         end
       end
     end
@@ -137,9 +137,9 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
 
   # Flatpack chrome may still say "Translation missing: <locale>.flatpack.*";
   # this gem only owns recording_studio.search.*.
-  def refute_search_translation_missing!(body)
-    refute_match(/translation missing: [a-z]+\.recording_studio\.search/i, body)
-    assert_includes body, "Type a little"
+  def refute_search_translation_missing!
+    refute_match(/translation missing: [a-z]+\.recording_studio\.search/i, @response.body)
+    assert_select "h3", text: "Type a little"
   end
 
   def i18n_config_snapshot

@@ -42,8 +42,8 @@ class SearchBootOrderHostOverrideTest < ActionDispatch::IntegrationTest
     get instant_people_path
 
     assert_response :success
-    assert_match "Type a little", response.body
-    refute_match "HOST missing mark", response.body
+    assert_select "h3", text: "Type a little"
+    refute_select "td", text: "HOST missing mark"
     assert_equal "HOST missing mark",
                  I18n.t("recording_studio.search.results.missing_detail", raise: true)
 
