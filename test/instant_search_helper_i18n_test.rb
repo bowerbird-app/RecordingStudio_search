@@ -17,10 +17,6 @@ class InstantSearchHelperI18nTest < Minitest::Test
       @output_buffer = ActionView::OutputBuffer.new
     end
 
-    def t(key, **)
-      I18n.t(key, **)
-    end
-
     def render(component)
       @rendered = component
       "search-control"
@@ -32,6 +28,8 @@ class InstantSearchHelperI18nTest < Minitest::Test
     @original_load_path = I18n.load_path.dup
     I18n.load_path |= [@locale_path]
     I18n.backend.reload!
+    RecordingStudio::Translation.register_shipped_english(@locale_path)
+    RecordingStudio::Translation.reset_shipped_english!
   end
 
   def teardown
@@ -51,7 +49,7 @@ class InstantSearchHelperI18nTest < Minitest::Test
     assert_equal "Try a name", view.rendered.placeholder
   end
 
-  def test_instant_search_field_placeholder_falls_back_to_english_default_without_locale_key
+  def test_instant_search_field_placeholder_falls_back_to_shipped_english_without_locale_key
     stub_flatpack_search!
     view = FakeView.new
     helper = RecordingStudioSearch::InstantSearchHelper.new(view, routes_stub)
@@ -60,6 +58,7 @@ class InstantSearchHelperI18nTest < Minitest::Test
     I18n.load_path = []
     I18n.backend.load_translations
     I18n.available_locales = %i[en zz]
+    RecordingStudio::Translation.reset_shipped_english!
 
     I18n.with_locale(:zz) do
       helper.instant_search_field(models: ["User"], frame_id: "people_results")
@@ -70,6 +69,7 @@ class InstantSearchHelperI18nTest < Minitest::Test
     I18n.available_locales = original_available if original_available
     I18n.load_path |= [@locale_path]
     I18n.backend.reload!
+    RecordingStudio::Translation.reset_shipped_english!
   end
 
   def test_instant_search_field_keeps_caller_placeholder

@@ -31,9 +31,31 @@ class LocalesTest < Minitest::Test
 
           assert_equal english, translation, "#{full_key} should resolve to #{english.inspect}"
           assert_equal english, I18n.t(full_key, raise: true)
+          assert_equal english, RecordingStudio.t(full_key)
         end
       end
     end
+  end
+
+  def test_shipped_en_yml_keys_resolve_through_recording_studio_t_in_missing_locales
+    previous = I18n.available_locales
+    with_gem_english_locale do
+      RecordingStudio::Translation.register_shipped_english(
+        File.join(engine_locales_dir, "en.yml")
+      )
+      RecordingStudio::Translation.reset_shipped_english!
+      I18n.available_locales = (Array(previous) + %i[en zz]).uniq
+
+      I18n.with_locale(:zz) do
+        INTERFACE_KEYS.each do |key, english|
+          full_key = "recording_studio.search.#{key}"
+          assert_equal english, RecordingStudio.t(full_key),
+                       "#{full_key} should fall back to English via RecordingStudio.t"
+        end
+      end
+    end
+  ensure
+    I18n.available_locales = previous if previous
   end
 
   def test_en_yml_nests_keys_under_recording_studio_search

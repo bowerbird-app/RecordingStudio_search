@@ -25,6 +25,8 @@ class ResultsHelperI18nTest < Minitest::Test
     I18n.load_path = [@locale_path]
     I18n.backend.load_translations
     I18n.available_locales = %i[en fr]
+    RecordingStudio::Translation.register_shipped_english(@locale_path)
+    RecordingStudio::Translation.reset_shipped_english!
     @helper = HelperHost.new
   end
 
@@ -86,6 +88,17 @@ class ResultsHelperI18nTest < Minitest::Test
     end
   end
 
+  def test_missing_detail_falls_back_to_shipped_english_when_loaded_en_deleted
+    delete_loaded_translation!(:en, "recording_studio.search.results.missing_detail")
+    refute I18n.exists?("recording_studio.search.results.missing_detail", :en)
+
+    I18n.with_locale(:en) do
+      assert_equal "—", @helper.instant_search_row_detail(Row.new(name: "Solo"))
+    end
+  ensure
+    I18n.backend.load_translations
+  end
+
   def test_row_name_and_detail_keep_model_data_raw
     row = Row.new(name: "Ada", email: "ada@example.com", body: "long body text")
 
@@ -97,5 +110,26 @@ class ResultsHelperI18nTest < Minitest::Test
     def self.name
       "User"
     end
+  end
+
+  private
+
+  # rubocop:disable-next Metrics/CyclomaticComplexity -- backend hash walk mirrors I18n nesting
+  def delete_loaded_translation!(locale, full_key)
+    I18n.exists?(full_key, locale)
+    parts = full_key.split(".").map(&:to_sym)
+    leaf = parts.pop
+    translations = I18n.backend.send(:translations)
+    locale_key = locale.to_sym
+    translations[locale_key] = translations[locale_key].dup if translations[locale_key].frozen?
+
+    node = translations[locale_key]
+    parts.each do |part|
+      break unless node.is_a?(Hash) && node[part].is_a?(Hash)
+
+      node[part] = node[part].dup if node[part].frozen?
+      node = node[part]
+    end
+    node.delete(leaf) if node.is_a?(Hash)
   end
 end

@@ -4,7 +4,7 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio 4.x (`~> 4.2` in the gemspec; dummy GitHub tag `v4.6.0`)
+- Recording Studio 4.x (`~> 4.7` in the gemspec; dummy GitHub tag `v4.7.0`)
 - Accessible dummy tag `v0.18.0` and Root Switchable dummy tag `v0.9.0`
 - Users dummy tag `v0.21.0` (Admin `v2.3.0` and Attachable `v0.15.0` as Users runtime deps)
 - FlatPack dummy tag `v0.1.213` (Attachable 0.12+ needs `>= 0.1.213`)
@@ -44,6 +44,23 @@ Static instant-search chrome (empty states, column titles, default placeholder) 
 ## Interface text outside views (0.6.0)
 
 Every gem `t(...)` call passes English `default:` so a host locale without a fallback never shows "translation missing". Multi-model collection section titles translate at render via `instant_search_translated_collection_label` (`recording_studio.search.results.collections.<demodulized_plural>`, default the raw English from `instant_search_collection_label`). Public collection labels and result rows stay raw model data. English output is unchanged.
+
+## English fallback via RecordingStudio.t (0.7.0)
+
+Instant-search chrome uses `RecordingStudio.t` for this gem's shipped
+`recording_studio.search.*` keys only. The engine registers
+`config/locales/en.yml` with `RecordingStudio::Translation.register_shipped_english`
+at boot. Fallback comes from the loaded English, host overrides included;
+hand-copied English `default:` on shipped keys is gone. Optional collection
+section titles stay on view `t` / `I18n.t` with main's `default:` the raw
+model-derived label (host-only keys). Host or other-namespace lookups stay on
+`I18n.t` with main's `default:`. Requires Recording Studio `~> 4.7`. English
+output is unchanged. A plain default with no interpolation is returned as a
+plain (non-html_safe) String, so views will escape it. On a missing `_html`
+key (vs view `t` / `I18n.t` on recording_studio v4.7.0): a plain String caller
+`default:` matches and stays unsafe; an Array caller `default:` returns the
+same string but `RecordingStudio.t` marks it html_safe while view `t` /
+`I18n.t` leave it unsafe.
 
 ## Field weights
 
