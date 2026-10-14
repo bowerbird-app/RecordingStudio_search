@@ -30,8 +30,14 @@ class SearchBootOrderHostOverrideTest < ActionDispatch::IntegrationTest
     host_locale = Rails.root.join("config/locales/recording_studio_search_host.en.yml")
     assert File.exist?(host_locale), "expected host override file at #{host_locale}"
 
+    # Force I18n to initialize before assertions (order-independent).
+    I18n.t("recording_studio.search.results.empty.title")
+
     assert_equal "HOST missing mark",
                  I18n.t("recording_studio.search.results.missing_detail", raise: true)
+    assert_equal "HOST missing mark",
+                 RecordingStudio.t("recording_studio.search.results.missing_detail")
+    refute_equal "—", I18n.t("recording_studio.search.results.missing_detail")
 
     get instant_people_path
 
