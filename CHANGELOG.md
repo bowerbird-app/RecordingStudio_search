@@ -28,6 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Pin hosts to Recording Studio `~> 4.7`.
 - Fallback comes from the loaded English, host overrides included.
+- A plain default with no interpolation is returned as a plain
+  (non-html_safe) String, so views will escape it.
 - On a missing `_html` key (verified vs view `t` / `I18n.t` on recording_studio
   v4.7.0): a plain String caller `default:` matches view `t` / `I18n.t` and
   stays unsafe; an Array caller `default:` returns the same string as view `t`
@@ -154,8 +156,7 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...HEAD
-[0.7.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.0...v0.7.0
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.0...HEAD
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.4.0

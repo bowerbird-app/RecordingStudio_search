@@ -162,17 +162,19 @@ helper's default placeholder) ships as English Rails I18n under
 through `RecordingStudio.t` (this gem's shipped keys only). When the active
 locale has no translation, fallback comes from the loaded English (host
 overrides included), then any caller `default:`, then the gem-shipped table
-registered at boot. On a missing `_html` key (vs view `t` / `I18n.t` on
-recording_studio v4.7.0): a plain String caller `default:` matches and stays
-unsafe; an Array caller `default:` returns the same string but
-`RecordingStudio.t` marks it html_safe while view `t` / `I18n.t` leave it
-unsafe. Hosts can override those keys. Optional multi-model
-`results.collections.<demodulized_plural>` section titles are host-only keys:
-they stay on view `t` / `I18n.t` with main's `default:` the raw model-derived
-label. Pass `placeholder:` to `instant_search_field` when the page should use
-its own prompt. Search result rows stay untranslated — they are model data.
-`instant_search_collection_label` still returns raw English; the results partial
-translates at render via `instant_search_translated_collection_label`.
+registered at boot. Requires Recording Studio `~> 4.7`. A plain default with
+no interpolation is returned as a plain (non-html_safe) String, so views will
+escape it. On a missing `_html` key (vs view `t` / `I18n.t` on recording_studio
+v4.7.0): a plain String caller `default:` matches and stays unsafe; an Array
+caller `default:` returns the same string but `RecordingStudio.t` marks it
+html_safe while view `t` / `I18n.t` leave it unsafe. Hosts can override those
+keys. Optional multi-model `results.collections.<demodulized_plural>` section
+titles are host-only keys: they stay on view `t` / `I18n.t` with main's
+`default:` the raw model-derived label. Pass `placeholder:` to
+`instant_search_field` when the page should use its own prompt. Search result
+rows stay untranslated — they are model data. `instant_search_collection_label`
+still returns raw English; the results partial translates at render via
+`instant_search_translated_collection_label`.
 
 Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `User` (trigram) so typing updates the frame and leaves the URL at `/instant`. That is a demo choice, not a backend limit. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
 

@@ -38,6 +38,7 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
       get instant_people_path
 
       assert_response :success
+      assert_select "h1", text: /As you type/
       assert_includes @response.body, "Type a little"
       assert_includes @response.body, "Hits land here as you go."
       refute_search_translation_missing!(@response.body)
@@ -49,6 +50,7 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
       get instant_people_path
 
       assert_response :success
+      assert_select "h1", text: /As you type/
       assert_includes @response.body, "Type a little"
       assert_includes @response.body, "Hits land here as you go."
       assert_includes @response.body, "Try Ada or hopper"
@@ -73,6 +75,7 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
           get instant_people_path
 
           assert_response :success
+          assert_select "h1", text: /As you type/
           assert_includes @response.body, "Type a little"
           refute_search_translation_missing!(@response.body)
         end

@@ -55,11 +55,12 @@ hand-copied English `default:` on shipped keys is gone. Optional collection
 section titles stay on view `t` / `I18n.t` with main's `default:` the raw
 model-derived label (host-only keys). Host or other-namespace lookups stay on
 `I18n.t` with main's `default:`. Requires Recording Studio `~> 4.7`. English
-output is unchanged. On a missing `_html` key (vs view `t` / `I18n.t` on
-recording_studio v4.7.0): a plain String caller `default:` matches and stays
-unsafe; an Array caller `default:` returns the same string but
-`RecordingStudio.t` marks it html_safe while view `t` / `I18n.t` leave it
-unsafe.
+output is unchanged. A plain default with no interpolation is returned as a
+plain (non-html_safe) String, so views will escape it. On a missing `_html`
+key (vs view `t` / `I18n.t` on recording_studio v4.7.0): a plain String caller
+`default:` matches and stays unsafe; an Array caller `default:` returns the
+same string but `RecordingStudio.t` marks it html_safe while view `t` /
+`I18n.t` leave it unsafe.
 
 ## Field weights
 
