@@ -5,7 +5,7 @@
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
 - Recording Studio 4.x (`~> 4.7` in the gemspec; dummy GitHub tag `v4.7.0`)
-- Accessible dummy tag `v0.17.0` and Root Switchable dummy tag `v0.9.0`
+- Accessible dummy tag `v0.18.0` and Root Switchable dummy tag `v0.9.0`
 - Users dummy tag `v0.21.0` (Admin `v2.3.0` and Attachable `v0.15.0` as Users runtime deps)
 - FlatPack dummy tag `v0.1.213` (Attachable 0.12+ needs `>= 0.1.213`)
 - Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
