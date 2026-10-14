@@ -25,12 +25,13 @@ module RecordingStudioSearch
     end
 
     # Render-time translation of a collection section title. +label+ stays the
-    # raw English from +instant_search_collection_label+ (or "").
+    # raw English from +instant_search_collection_label+ (or ""). Caller
+    # +default:+ is the raw label for optional host keys that are not shipped.
     def instant_search_translated_collection_label(label)
       return label if label.blank?
 
       key = label.to_s.underscore
-      t("recording_studio.search.results.collections.#{key}", default: label)
+      RecordingStudio.t("recording_studio.search.results.collections.#{key}", default: label)
     end
 
     def instant_search_row_name(row)
@@ -40,7 +41,7 @@ module RecordingStudioSearch
     def instant_search_row_detail(row)
       row.try(:email).presence ||
         row.try(:body).to_s.truncate(80).presence ||
-        t("recording_studio.search.results.missing_detail", default: "—")
+        RecordingStudio.t("recording_studio.search.results.missing_detail")
     end
   end
 end

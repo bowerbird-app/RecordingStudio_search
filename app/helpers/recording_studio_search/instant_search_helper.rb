@@ -54,7 +54,7 @@ module RecordingStudioSearch
     end
 
     def default_placeholder
-      @view.t("recording_studio.search.instant.placeholder", default: "Try a name")
+      RecordingStudio.t("recording_studio.search.instant.placeholder")
     end
 
     def wrapper_attributes(results_url, frame_id, param, debounce_ms)
