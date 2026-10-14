@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-14
+
+### Added
+
+- Instant-search chrome looks up `recording_studio.search.*` through
+  `RecordingStudio.t` so a missing active locale falls back to English
+- Engine registers this gem's `config/locales/en.yml` with
+  `RecordingStudio::Translation.register_shipped_english` at boot so the
+  final shipped-English table includes search keys when loaded `:en` is pruned
+
+### Changed
+
+- Requires `recording_studio >= 4.7.0` (dummy / root pins `v4.7.0`)
+- Removed hand-copied English `default:` on shipped search keys; optional
+  collection section titles still pass the raw model-derived label as
+  `default:` for host-only keys
+
+### Upgrade notes
+
+- Pin hosts to Recording Studio `>= 4.7.0`.
+- Fallback comes from the loaded English, host overrides included.
+- Missing `_html` key with a non-interpolating caller `default:` stays unsafe
+  like view `t`; interpolating caller `default:` on a missing `_html` key is
+  stricter (args escaped, result html_safe).
+- No migration or host code change is required for English output.
+- `en.yml` is unchanged. Prefer `RecordingStudio.t` for gem keys when adding
+  new instant-search copy.
+
 ## [0.6.0] - 2026-10-12
 
 ### Added
@@ -120,7 +148,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.4.0
