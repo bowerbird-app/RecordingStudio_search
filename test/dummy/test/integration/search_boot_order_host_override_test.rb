@@ -43,7 +43,8 @@ class SearchBootOrderHostOverrideTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h3", text: "Type a little"
-    refute_select "td", text: "HOST missing mark"
+    # Empty instant results do not render missing_detail; refute gem English for that key.
+    refute_includes response.body, "—"
     assert_equal "HOST missing mark",
                  I18n.t("recording_studio.search.results.missing_detail", raise: true)
 
