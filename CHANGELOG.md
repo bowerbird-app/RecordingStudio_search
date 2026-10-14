@@ -28,11 +28,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Pin hosts to Recording Studio `~> 4.7`.
 - Fallback comes from the loaded English, host overrides included.
-- Missing `_html` key with a non-interpolating String caller `default:` stays
-  unsafe like view `t`; interpolating caller `default:` on a missing `_html`
-  key is stricter (args escaped, result html_safe). An Array caller `default:`
-  on a missing `_html` key is also marked html_safe by `RecordingStudio.t`
-  (stricter than view `t`).
+- On a missing `_html` key (verified vs view `t` / `I18n.t` on recording_studio
+  v4.7.0): a plain String caller `default:` matches view `t` / `I18n.t` and
+  stays unsafe; an Array caller `default:` returns the same string as view `t`
+  / `I18n.t` but `RecordingStudio.t` marks it html_safe while view `t` /
+  `I18n.t` leave it unsafe.
 - Use `RecordingStudio.t` only for this gem's shipped
   `recording_studio.search.*` keys. Host or other-namespace lookups stay on
   `I18n.t` / view `t` with main's `default:`.

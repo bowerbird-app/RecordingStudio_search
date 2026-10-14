@@ -162,9 +162,11 @@ helper's default placeholder) ships as English Rails I18n under
 through `RecordingStudio.t` (this gem's shipped keys only). When the active
 locale has no translation, fallback comes from the loaded English (host
 overrides included), then any caller `default:`, then the gem-shipped table
-registered at boot. An Array caller `default:` on a missing `_html` key is
-marked html_safe by `RecordingStudio.t` (stricter than view `t`). Hosts can
-override those keys. Optional multi-model
+registered at boot. On a missing `_html` key (vs view `t` / `I18n.t` on
+recording_studio v4.7.0): a plain String caller `default:` matches and stays
+unsafe; an Array caller `default:` returns the same string but
+`RecordingStudio.t` marks it html_safe while view `t` / `I18n.t` leave it
+unsafe. Hosts can override those keys. Optional multi-model
 `results.collections.<demodulized_plural>` section titles are host-only keys:
 they stay on view `t` / `I18n.t` with main's `default:` the raw model-derived
 label. Pass `placeholder:` to `instant_search_field` when the page should use

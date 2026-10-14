@@ -304,18 +304,47 @@ class TranslationTest < Minitest::Test
       refute_predicate reserved, :html_safe?
       assert_equal view.t(missing_html, default: "<b>ok</b>"), reserved
 
-      # Array caller defaults on a missing _html key are marked html_safe by
-      # RecordingStudio.t (String defaults stay unsafe like view t).
-      array_default = RecordingStudio.t(missing_html, default: ["<b>arr</b>"])
-      assert_equal "<b>arr</b>", array_default
-      assert_predicate array_default, :html_safe?
-
       xss = RecordingStudio.t(
         "recording_studio.search.probe.hi_html",
         name: "<script>alert(1)</script>"
       )
       assert_equal "<b>Hi &lt;script&gt;alert(1)&lt;/script&gt;</b>", xss
       assert_predicate xss, :html_safe?
+    end
+  end
+
+  # Verified against recording_studio v4.7.0: plain String caller defaults on a
+  # missing _html key match view t / I18n.t (unsafe). Array caller defaults
+  # return the same string but RecordingStudio.t marks html_safe while view t
+  # and I18n.t leave the value unsafe.
+  def test_missing_html_key_string_and_array_defaults_vs_view_t_and_i18n_t
+    missing_html = "recording_studio.search.probe.missing_defaults_html"
+    view = ActionController::Base.helpers
+
+    I18n.with_locale(:en) do
+      string_opts = { default: "<b>ok</b>" }
+      rs_string = RecordingStudio.t(missing_html, **string_opts)
+      view_string = view.t(missing_html, **string_opts)
+      i18n_string = I18n.t(missing_html, **string_opts)
+
+      assert_equal "<b>ok</b>", rs_string
+      assert_equal view_string, rs_string
+      assert_equal i18n_string, rs_string
+      refute_predicate rs_string, :html_safe?
+      refute_predicate view_string, :html_safe?
+      refute_predicate i18n_string, :html_safe?
+
+      array_opts = { default: ["<b>arr</b>"] }
+      rs_array = RecordingStudio.t(missing_html, **array_opts)
+      view_array = view.t(missing_html, **array_opts)
+      i18n_array = I18n.t(missing_html, **array_opts)
+
+      assert_equal "<b>arr</b>", rs_array
+      assert_equal view_array, rs_array
+      assert_equal i18n_array, rs_array
+      assert_predicate rs_array, :html_safe?
+      refute_predicate view_array, :html_safe?
+      refute_predicate i18n_array, :html_safe?
     end
   end
 
