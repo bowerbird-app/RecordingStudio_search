@@ -381,16 +381,6 @@ class TranslationTest < Minitest::Test
     assert_equal before, i18n_config_snapshot
   end
 
-  def test_engine_registers_shipped_english_initializer_before_base_load
-    source = File.read(File.expand_path("../lib/recording_studio_search/engine.rb", __dir__))
-
-    assert_includes source, "recording_studio_search.register_shipped_english"
-    assert_includes source, 'before: "recording_studio.load_shipped_english"'
-    assert_includes source, "register_shipped_english"
-    assert_includes source, 'root.join("config/locales/en.yml")'
-    refute_includes source, "module Translation"
-  end
-
   private
 
   def ensure_search_english_registered!

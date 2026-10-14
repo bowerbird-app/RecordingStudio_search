@@ -25,13 +25,15 @@ module RecordingStudioSearch
     end
 
     # Render-time translation of a collection section title. +label+ stays the
-    # raw English from +instant_search_collection_label+ (or ""). Caller
-    # +default:+ is the raw label for optional host keys that are not shipped.
+    # raw English from +instant_search_collection_label+ (or ""). Optional host
+    # keys under results.collections.* are not shipped in this gem's en.yml, so
+    # they stay on view +t+ / +I18n.t+ with main's +default: label+ (not
+    # +RecordingStudio.t+, which is only for this gem's shipped keys).
     def instant_search_translated_collection_label(label)
       return label if label.blank?
 
       key = label.to_s.underscore
-      RecordingStudio.t("recording_studio.search.results.collections.#{key}", default: label)
+      t("recording_studio.search.results.collections.#{key}", default: label)
     end
 
     def instant_search_row_name(row)

@@ -83,10 +83,22 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
     I18n.reload!
   end
 
-  test "shipped english table includes search keys after boot and after reloader reload" do
-    before = RecordingStudio::Translation.shipped_english
-    assert_equal "Try a name", before.fetch(PLACEHOLDER_KEY)
-    assert_equal "Type a little", before.fetch(EMPTY_TITLE_KEY)
+  test "search en.yml path is registered at boot without calling the initializer" do
+    expected = File.expand_path(RecordingStudioSearch::Engine.root.join("config/locales/en.yml"))
+    paths = RecordingStudio::Translation.send(:registered_shipped_english_paths)
+
+    assert_includes paths, expected,
+                    "engine boot must register this gem's en.yml; do not call the initializer in the test"
+    assert_equal "Try a name",
+                 RecordingStudio::Translation.shipped_english.fetch(PLACEHOLDER_KEY)
+    assert_equal "Type a little",
+                 RecordingStudio::Translation.shipped_english.fetch(EMPTY_TITLE_KEY)
+  end
+
+  test "search en.yml path stays registered after rails reloader reload" do
+    expected = File.expand_path(RecordingStudioSearch::Engine.root.join("config/locales/en.yml"))
+    before_paths = RecordingStudio::Translation.send(:registered_shipped_english_paths).dup
+    assert_includes before_paths, expected
 
     previous_cache_classes = Rails.application.config.cache_classes
     Rails.application.config.cache_classes = false
@@ -94,10 +106,12 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
 
     Rails.application.reloader.reload!
 
-    after = RecordingStudio::Translation.shipped_english
-    refute_same before, after
-    assert_equal "Try a name", after.fetch(PLACEHOLDER_KEY)
-    assert_equal "Type a little", after.fetch(EMPTY_TITLE_KEY)
+    after_paths = RecordingStudio::Translation.send(:registered_shipped_english_paths)
+    assert_includes after_paths, expected
+    assert_equal "Try a name",
+                 RecordingStudio::Translation.shipped_english.fetch(PLACEHOLDER_KEY)
+    assert_equal "Type a little",
+                 RecordingStudio::Translation.shipped_english.fetch(EMPTY_TITLE_KEY)
   ensure
     Rails.application.config.cache_classes = previous_cache_classes unless previous_cache_classes.nil?
   end

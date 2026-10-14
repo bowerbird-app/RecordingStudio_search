@@ -8,6 +8,10 @@ require_relative "../app/helpers/recording_studio_search/results_helper"
 class ResultsHelperI18nTest < Minitest::Test
   class HelperHost
     include RecordingStudioSearch::ResultsHelper
+
+    def t(key, **)
+      I18n.t(key, **)
+    end
   end
 
   Row = Struct.new(:name, :email, :body, :title, keyword_init: true)

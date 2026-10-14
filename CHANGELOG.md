@@ -18,21 +18,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Requires `recording_studio >= 4.7.0` (dummy / root pins `v4.7.0`)
-- Removed hand-copied English `default:` on shipped search keys; optional
-  collection section titles still pass the raw model-derived label as
-  `default:` for host-only keys
+- Requires `recording_studio ~> 4.7` (dummy / root pins `v4.7.0`)
+- Removed hand-copied English `default:` on shipped search keys looked up
+  through `RecordingStudio.t`; optional collection section titles stay on
+  view `t` / `I18n.t` with main's `default:` the raw model-derived label
+  (host-only keys, not shipped in this gem's `en.yml`)
 
 ### Upgrade notes
 
-- Pin hosts to Recording Studio `>= 4.7.0`.
+- Pin hosts to Recording Studio `~> 4.7`.
 - Fallback comes from the loaded English, host overrides included.
-- Missing `_html` key with a non-interpolating caller `default:` stays unsafe
-  like view `t`; interpolating caller `default:` on a missing `_html` key is
-  stricter (args escaped, result html_safe).
+- Missing `_html` key with a non-interpolating String caller `default:` stays
+  unsafe like view `t`; interpolating caller `default:` on a missing `_html`
+  key is stricter (args escaped, result html_safe). An Array caller `default:`
+  on a missing `_html` key is also marked html_safe by `RecordingStudio.t`
+  (stricter than view `t`).
+- Use `RecordingStudio.t` only for this gem's shipped
+  `recording_studio.search.*` keys. Host or other-namespace lookups stay on
+  `I18n.t` / view `t` with main's `default:`.
 - No migration or host code change is required for English output.
-- `en.yml` is unchanged. Prefer `RecordingStudio.t` for gem keys when adding
-  new instant-search copy.
+- `en.yml` is unchanged. Prefer `RecordingStudio.t` for shipped search keys
+  when adding new instant-search copy.
 
 ## [0.6.0] - 2026-10-12
 

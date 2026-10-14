@@ -298,6 +298,16 @@ class EngineTest < Minitest::Test
     Object.send(:remove_const, parent_name) unless parent_defined
   end
 
+  def test_register_shipped_english_initializer_is_ordered_before_base_load
+    initializer = find_initializer("recording_studio_search.register_shipped_english")
+
+    refute_nil initializer, "engine must declare register_shipped_english"
+    assert_equal "recording_studio.load_shipped_english", initializer.before
+    # Do not call initializer.block here. Boot-time registration is asserted in
+    # the dummy suite (EnglishFallbackTest) so the path check can fail on its own
+    # when the register line is removed.
+  end
+
   def find_initializer(name)
     RecordingStudioSearch::Engine.initializers.find { |initializer| initializer.name == name }
   end

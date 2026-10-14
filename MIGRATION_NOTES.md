@@ -4,7 +4,7 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio 4.x (`>= 4.7.0` in the gemspec; dummy GitHub tag `v4.7.0`)
+- Recording Studio 4.x (`~> 4.7` in the gemspec; dummy GitHub tag `v4.7.0`)
 - Accessible dummy tag `v0.17.0` and Root Switchable dummy tag `v0.9.0`
 - Users dummy tag `v0.21.0` (Admin `v2.3.0` and Attachable `v0.15.0` as Users runtime deps)
 - FlatPack dummy tag `v0.1.213` (Attachable 0.12+ needs `>= 0.1.213`)
@@ -47,13 +47,16 @@ Every gem `t(...)` call passes English `default:` so a host locale without a fal
 
 ## English fallback via RecordingStudio.t (0.7.0)
 
-Instant-search chrome uses `RecordingStudio.t` for `recording_studio.search.*`.
-The engine registers `config/locales/en.yml` with
-`RecordingStudio::Translation.register_shipped_english` at boot. Fallback comes
-from the loaded English, host overrides included; hand-copied English `default:`
-on shipped keys is gone. Optional collection section titles still pass the raw
-model-derived label as `default:` for host-only keys. Requires Recording Studio
-`>= 4.7.0`. English output is unchanged.
+Instant-search chrome uses `RecordingStudio.t` for this gem's shipped
+`recording_studio.search.*` keys only. The engine registers
+`config/locales/en.yml` with `RecordingStudio::Translation.register_shipped_english`
+at boot. Fallback comes from the loaded English, host overrides included;
+hand-copied English `default:` on shipped keys is gone. Optional collection
+section titles stay on view `t` / `I18n.t` with main's `default:` the raw
+model-derived label (host-only keys). Host or other-namespace lookups stay on
+`I18n.t` with main's `default:`. Requires Recording Studio `~> 4.7`. English
+output is unchanged. An Array caller `default:` on a missing `_html` key is
+marked html_safe by `RecordingStudio.t` (stricter than view `t`).
 
 ## Field weights
 

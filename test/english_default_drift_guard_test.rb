@@ -92,7 +92,26 @@ class EnglishDefaultDriftGuardTest < Minitest::Test
     assert_operator hits.count("Type a little"), :>=, 2, "array + multi-line Type a little"
   end
 
+  def test_recording_studio_t_call_sites_only_use_this_gem_search_keys
+    offenders = scan_files.flat_map { |path| recording_studio_t_offenders(path) }
+
+    assert_empty offenders, <<~MSG
+      RecordingStudio.t is only for this gem's shipped recording_studio.search.*
+      keys. Host or other-namespace keys must stay on I18n.t / view t with main's
+      default:.
+      #{offenders.join("\n")}
+    MSG
+  end
+
   private
+
+  def recording_studio_t_offenders(path)
+    source = File.read(path)
+    source = strip_ruby_comments(source) if path.end_with?(".rb")
+    keys = source.scan(/RecordingStudio(?:::Translation)?\.t\(\s*["'](recording_studio\.[^"']+)["']/).flatten
+    keys.reject { |key| key.start_with?("recording_studio.search.") }
+        .map { |key| "#{relative(path)}: RecordingStudio.t(#{key.inspect})" }
+  end
 
   def scan_files
     SCAN_GLOBS.flat_map { |glob| Dir[File.join(ROOT, glob)] }

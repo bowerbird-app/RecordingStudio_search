@@ -156,16 +156,19 @@ On the host action, start with empty hits (`User.none`). Do not call `User.searc
 
 Override `app/views/recording_studio_search/_results.html.erb` if the default Name / Detail table is wrong for a type.
 
-Static chrome on that partial (empty-state titles, column headers, multi-model
-collection titles, and the helper's default placeholder) ships as English Rails
-I18n under `recording_studio.search` in the gem's `config/locales/en.yml`, looked
-up through `RecordingStudio.t`. When the active locale has no translation,
-fallback comes from the loaded English (host overrides included), then any
-caller `default:`, then the gem-shipped table registered at boot. Hosts can
-override those keys (including optional
-`results.collections.<demodulized_plural>` for section titles). Pass
-`placeholder:` to `instant_search_field` when the page should use its own prompt.
-Search result rows stay untranslated — they are model data.
+Static chrome on that partial (empty-state titles, column headers, and the
+helper's default placeholder) ships as English Rails I18n under
+`recording_studio.search` in the gem's `config/locales/en.yml`, looked up
+through `RecordingStudio.t` (this gem's shipped keys only). When the active
+locale has no translation, fallback comes from the loaded English (host
+overrides included), then any caller `default:`, then the gem-shipped table
+registered at boot. An Array caller `default:` on a missing `_html` key is
+marked html_safe by `RecordingStudio.t` (stricter than view `t`). Hosts can
+override those keys. Optional multi-model
+`results.collections.<demodulized_plural>` section titles are host-only keys:
+they stay on view `t` / `I18n.t` with main's `default:` the raw model-derived
+label. Pass `placeholder:` to `instant_search_field` when the page should use
+its own prompt. Search result rows stay untranslated — they are model data.
 `instant_search_collection_label` still returns raw English; the results partial
 translates at render via `instant_search_translated_collection_label`.
 
@@ -210,7 +213,7 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio 4.x (`>= 4.7.0`; dummy tag `v4.7.0`)
+- Recording Studio 4.x (`~> 4.7`; dummy tag `v4.7.0`)
 - PostgreSQL 16
 
 ## Documentation
