@@ -222,4 +222,4 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 ## Documentation
 
-The implementation plan lives in `docs/search-plan.md`.
+The implementation plan lives in `docs/search-plan.md`. Engine conventions from the gem template remain in `docs/gem_template/`.

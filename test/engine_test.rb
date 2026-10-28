@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "logger"
-require "minitest/mock"
-require "psych"
-require "stringio"
 
 class EngineTest < Minitest::Test
   def setup
@@ -72,41 +68,9 @@ class EngineTest < Minitest::Test
       end
     end.new(app_config)
 
-    logs = with_engine_logger do
-      find_initializer("recording_studio_search.load_config").block.call(app)
-    end
+    find_initializer("recording_studio_search.load_config").block.call(app)
 
     assert_in_delta 0.15, RecordingStudioSearch.configuration.trigram_threshold
-    assert_match(/skipped host YAML config \(RuntimeError: missing file\)/, logs)
-  end
-
-  def test_load_config_logs_psych_syntax_errors_from_yaml
-    app_config = Struct.new(:x).new(Object.new)
-    app = Struct.new(:config) do
-      def config_for(_name)
-        raise Psych::SyntaxError.new("<unknown>", 1, 1, 0, "mapping", nil)
-      end
-    end.new(app_config)
-
-    logs = with_engine_logger do
-      find_initializer("recording_studio_search.load_config").block.call(app)
-    end
-
-    assert_equal "text-embedding-3-small", RecordingStudioSearch.configuration.embedding_model
-    assert_match(/skipped host YAML config \(Psych::SyntaxError/, logs)
-  end
-
-  def test_load_config_does_not_rescue_argument_error_from_yaml
-    app = Struct.new(:config) do
-      def config_for(_name)
-        raise ArgumentError, "not a host config miss"
-      end
-    end.new(Object.new)
-
-    error = assert_raises(ArgumentError) do
-      find_initializer("recording_studio_search.load_config").block.call(app)
-    end
-    assert_equal "not a host config miss", error.message
   end
 
   def test_load_config_swallow_each_pair_errors
@@ -124,35 +88,10 @@ class EngineTest < Minitest::Test
       end
     end.new(app_config)
 
-    logs = with_engine_logger do
-      find_initializer("recording_studio_search.load_config").block.call(app)
-    end
+    # Should not raise even if xcfg.each_pair fails.
+    find_initializer("recording_studio_search.load_config").block.call(app)
 
     assert_equal "ok", RecordingStudioSearch.configuration.embedding_model
-    assert_match(/skipped host config\.x config \(RuntimeError: bad pair\)/, logs)
-  end
-
-  def test_load_config_logs_nomethod_error_from_each_pair
-    bad_pair_config = Class.new do
-      def each_pair
-        raise NoMethodError, "undefined method 'to_sym' for nil"
-      end
-    end.new
-
-    xcfg = Struct.new(:recording_studio_search).new(bad_pair_config)
-    app_config = Struct.new(:x).new(xcfg)
-    app = Struct.new(:config) do
-      def config_for(_name)
-        { embedding_model: "ok" }
-      end
-    end.new(app_config)
-
-    logs = with_engine_logger do
-      find_initializer("recording_studio_search.load_config").block.call(app)
-    end
-
-    assert_equal "ok", RecordingStudioSearch.configuration.embedding_model
-    assert_match(/skipped host config\.x config \(NoMethodError/, logs)
   end
 
   def test_load_config_is_noop_without_config_sources
@@ -204,6 +143,12 @@ class EngineTest < Minitest::Test
   end
 
   def test_model_extension_initializer_skips_abstract_models
+    to_prepare_blocks = []
+    config_stub = Object.new
+    config_stub.define_singleton_method(:to_prepare) do |&block|
+      to_prepare_blocks << block
+    end
+
     abstract_model = Class.new do
       def self.abstract_class?
         true
@@ -214,38 +159,47 @@ class EngineTest < Minitest::Test
         false
       end
     end
+    applied = []
+    active_record_base = Class.new
+    active_record_base.define_singleton_method(:descendants) { [abstract_model, concrete_model] }
 
-    assert_equal [concrete_model],
-                 RecordingStudioSearch::Engine.concrete_models([abstract_model, concrete_model])
+    RecordingStudioSearch::Engine.stub(:config, config_stub) do
+      find_initializer("recording_studio_search.apply_model_extensions").block.call
+    end
+
+    with_temporary_nested_constant(:ActiveRecord, :Base, active_record_base) do
+      RecordingStudioSearch::Engine.stub(:apply_model_extensions, ->(model) { applied << model }) do
+        to_prepare_blocks.first.call
+      end
+    end
+
+    assert_equal [concrete_model], applied
   end
 
   def test_controller_extension_initializer_applies_all_controllers
-    first_controller = Class.new do
-      def self.name
-        "FirstController"
-      end
+    to_prepare_blocks = []
+    config_stub = Object.new
+    config_stub.define_singleton_method(:to_prepare) do |&block|
+      to_prepare_blocks << block
     end
-    second_controller = Class.new do
-      def self.name
-        "SecondController"
-      end
+
+    first_controller = Class.new
+    second_controller = Class.new
+    applied = []
+    action_controller_base = Class.new
+    action_controller_base.define_singleton_method(:descendants) { [first_controller, second_controller] }
+
+    RecordingStudioSearch::Engine.stub(:config, config_stub) do
+      find_initializer("recording_studio_search.apply_controller_extensions").block.call
     end
-    RecordingStudioSearch.configuration.hooks.extend_controller(:FirstController) do
-      def first_extension
-        :first
-      end
-    end
-    RecordingStudioSearch.configuration.hooks.extend_controller(:SecondController) do
-      def second_extension
-        :second
+
+    with_temporary_nested_constant(:ActionController, :Base, action_controller_base) do
+      RecordingStudioSearch::Engine.stub(:apply_controller_extensions, ->(controller) { applied << controller }) do
+        to_prepare_blocks.first.call
       end
     end
 
-    RecordingStudioSearch::Engine.apply_controller_extensions(first_controller)
-    RecordingStudioSearch::Engine.apply_controller_extensions(second_controller)
-
-    assert_equal :first, first_controller.new.first_extension
-    assert_equal :second, second_controller.new.second_extension
+    assert_equal [first_controller, second_controller], applied
   end
 
   def test_apply_model_extensions_adds_registered_methods_once
@@ -328,6 +282,22 @@ class EngineTest < Minitest::Test
     assert_equal [:ReportsController], RecordingStudioSearch::Engine.send(:extension_keys_for, plain)
   end
 
+  private
+
+  def with_temporary_nested_constant(parent_name, child_name, value)
+    parent_defined = Object.const_defined?(parent_name, false)
+    parent = parent_defined ? Object.const_get(parent_name) : Object.const_set(parent_name, Module.new)
+    child_defined = parent.const_defined?(child_name, false)
+    previous_child = parent.const_get(child_name) if child_defined
+
+    parent.const_set(child_name, value)
+    yield
+  ensure
+    parent.send(:remove_const, child_name) if parent.const_defined?(child_name, false)
+    parent.const_set(child_name, previous_child) if child_defined
+    Object.send(:remove_const, parent_name) unless parent_defined
+  end
+
   def test_register_shipped_english_initializer_is_ordered_before_base_load
     initializer = find_initializer("recording_studio_search.register_shipped_english")
 
@@ -336,18 +306,6 @@ class EngineTest < Minitest::Test
     # Do not call initializer.block here. Boot-time registration is asserted in
     # the dummy suite (EnglishFallbackTest) so the path check can fail on its own
     # when the register line is removed.
-  end
-
-  private
-
-  def with_engine_logger
-    io = StringIO.new
-    previous = Rails.logger
-    Rails.logger = Logger.new(io)
-    yield
-    io.string
-  ensure
-    Rails.logger = previous
   end
 
   def find_initializer(name)

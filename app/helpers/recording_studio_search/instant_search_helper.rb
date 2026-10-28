@@ -4,10 +4,9 @@ module RecordingStudioSearch
   class InstantSearchHelper
     CONTROLLER = "recording-studio-search--instant-search"
 
-    def initialize(view, routes = nil, search_component_class: nil)
+    def initialize(view, routes = nil)
       @view = view_context_for(view)
       @routes = routes
-      @search_component_class = search_component_class
     end
 
     # Locked helper for opt-in instant search chrome.
@@ -42,13 +41,9 @@ module RecordingStudioSearch
 
     private
 
-    def search_component_class
-      @search_component_class || FlatPack::Search::Component
-    end
-
     def render_search_control(param, chrome)
       @view.render(
-        search_component_class.new(
+        FlatPack::Search::Component.new(
           name: param.to_s,
           value: chrome[:value],
           placeholder: chrome.fetch(:placeholder, default_placeholder),

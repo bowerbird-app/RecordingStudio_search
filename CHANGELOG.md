@@ -10,26 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Dummy / root pin for Recording Studio Trashable: `v0.10.0` → `v0.11.0`
 - Stop tracking SimpleCov HTML under `coverage/` and `test/dummy/coverage/`
-- Remove leftover gem-template docs, the dummy copy of `.github/workflows/ci.yml`,
-  the unused Stimulus `hello_controller`, and the empty `makeup_artist` keepfile
-- Fold the leftover Recording Studio 4.x template summary into this changelog
-  (hosts already pin Recording Studio `~> 4.7` / dummy `v4.7.0`, Accessible
-  `v0.18.0`, Root Switchable `v0.9.0`, Users `v0.21.0`, Admin `v2.3.0`,
-  Attachable `v0.15.0`, FlatPack `v0.1.213`)
-- Host YAML and `config.x` load rescue only `RuntimeError` (includes
-  `Psych::SyntaxError`) and `NoMethodError`, and log the skip
-- Document embedder rescues `EmbeddingAdapter::Error` and ActiveRecord write
-  errors only (`RecordInvalid`, `RecordNotUnique`, `RecordNotSaved`,
-  `StatementInvalid`)
+- Dummy / root pin for Recording Studio Trashable: `v0.10.0` → `v0.11.0`
+- Bundler Audit lockfile bumps: `crass` `>= 1.0.8`, `net-ssh` `>= 7.3.5`
 
 ### Upgrade notes
 
-- Unexpected errors while loading host search YAML / `config.x`, or while
-  writing embeddings, now raise instead of being swallowed. Missing YAML and
-  malformed YAML still skip with a log line.
-- No migration or host code change is required for search queries.
+- No migration or host code change is required.
 
 ## [0.7.0] - 2026-10-14
 

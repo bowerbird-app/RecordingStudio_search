@@ -203,43 +203,37 @@ class EnglishDefaultDriftGuardTest < Minitest::Test
     end
   end
 
+  # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity -- scanner for default: forms
   def read_ruby_expression(source, start)
-    i = skip_spaces(source, start)
+    i = start
+    i += 1 while i < source.length && source[i].match?(/\s/)
     return "" if i >= source.length
 
     case source[i]
     when "'", '"'
-      source[i...skip_string(source, i)]
-    when "["
-      read_bracketed_list(source, i)
-    else
-      finish = i
-      finish += 1 while finish < source.length && source[finish].match?(/[A-Za-z0-9_:]/)
+      finish = skip_string(source, i)
       source[i...finish]
-    end
-  end
-
-  def skip_spaces(source, index)
-    index += 1 while index < source.length && source[index].match?(/\s/)
-    index
-  end
-
-  def read_bracketed_list(source, open_index)
-    depth = 0
-    index = open_index
-    while index < source.length
-      case source[index]
-      when "[" then depth += 1
-      when "]"
-        depth -= 1
-        return source[open_index..index] if depth.zero?
-      when "'", '"'
-        index = skip_string(source, index)
-        next
+    when "["
+      depth = 0
+      j = i
+      while j < source.length
+        case source[j]
+        when "[" then depth += 1
+        when "]"
+          depth -= 1
+          return source[i..j] if depth.zero?
+        when "'", '"'
+          j = skip_string(source, j)
+          next
+        end
+        j += 1
       end
-      index += 1
+      source[i..]
+    else
+      j = i
+      j += 1 while j < source.length && source[j].match?(/[A-Za-z0-9_:]/)
+      source[i...j]
     end
-    source[open_index..]
   end
 
   def allowed_dynamic_default?(default_src)
@@ -248,8 +242,10 @@ class EnglishDefaultDriftGuardTest < Minitest::Test
   end
 
   def default_values(default_src, constant_values = {})
-    if string_literal_default?(default_src) || array_literal_default?(default_src)
-      Array(YAML.safe_load(default_src, permitted_classes: [], aliases: false))
+    if string_literal_default?(default_src)
+      [eval_string_literal(default_src)]
+    elsif array_literal_default?(default_src)
+      extract_array_string_literals(default_src)
     elsif constant_default?(default_src)
       leaf = default_src.split("::").last
       Array(constant_values[default_src] || constant_values[leaf])
@@ -268,5 +264,16 @@ class EnglishDefaultDriftGuardTest < Minitest::Test
 
   def constant_default?(default_src)
     default_src.match?(/\A[A-Z][A-Za-z0-9_:]+\z/)
+  end
+
+  def eval_string_literal(literal)
+    # rubocop:disable-next Security/Eval
+    eval(literal)
+  end
+
+  def extract_array_string_literals(array_src)
+    array_src.scan(/(['"])((?:\\.|(?!\1).)*)\1/).map do |quote, body|
+      eval_string_literal("#{quote}#{body}#{quote}")
+    end
   end
 end
