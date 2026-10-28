@@ -10,9 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Stop tracking SimpleCov HTML under `coverage/` and `test/dummy/coverage/`
-- Dummy / root pin for Recording Studio Trashable: `v0.10.0` → `v0.11.0`
-- Bundler Audit lockfile bumps: `crass` `>= 1.0.8`, `net-ssh` `>= 7.3.5`
+- Stop tracking SimpleCov output under `coverage/` and `test/dummy/coverage/`
+- Bundler Audit lockfile bumps: `crass` `>= 1.0.8`, `net-ssh` 7.3.8
 - CI: lint and security jobs use Ruby 3.3 (runner no longer has 3.3.6)
 
 ### Upgrade notes
