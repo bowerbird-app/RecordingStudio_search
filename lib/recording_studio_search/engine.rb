@@ -13,6 +13,15 @@ module RecordingStudioSearch
         apply_extensions(target, extensions_for(:controller, extension_keys_for(target)))
       end
 
+      def concrete_models(models)
+        models.reject(&:abstract_class?)
+      end
+
+      def load_host_configuration(app)
+        merge_yaml_configuration(app)
+        merge_x_configuration(app)
+      end
+
       private
 
       def extensions_for(kind, names)
@@ -49,6 +58,41 @@ module RecordingStudioSearch
       def identity_hash
         {}.compare_by_identity
       end
+
+      def merge_yaml_configuration(app)
+        return unless app.respond_to?(:config_for)
+
+        yaml = app.config_for(:recording_studio_search)
+        RecordingStudioSearch.configuration.merge!(yaml) if yaml.respond_to?(:each)
+      rescue RuntimeError, NoMethodError => e
+        log_skipped_host_config("YAML", e)
+      end
+
+      def merge_x_configuration(app)
+        return unless app.config.respond_to?(:x) && app.config.x.respond_to?(:recording_studio_search)
+
+        xcfg = app.config.x.recording_studio_search
+        if xcfg.respond_to?(:to_h)
+          RecordingStudioSearch.configuration.merge!(xcfg.to_h)
+        else
+          merge_x_each_pair(xcfg)
+        end
+      end
+
+      def merge_x_each_pair(xcfg)
+        hash = {}
+        xcfg.each_pair { |key, value| hash[key] = value } if xcfg.respond_to?(:each_pair)
+        RecordingStudioSearch.configuration.merge!(hash) if hash.any?
+      rescue RuntimeError, NoMethodError => e
+        log_skipped_host_config("config.x", e)
+      end
+
+      def log_skipped_host_config(source, error)
+        Rails.logger&.warn(
+          "[recording_studio_search] skipped host #{source} config " \
+          "(#{error.class}: #{error.message})"
+        )
+      end
     end
 
     initializer "recording_studio_search.register_shipped_english",
@@ -65,34 +109,7 @@ module RecordingStudioSearch
     end
 
     initializer "recording_studio_search.load_config" do |app|
-      if app.respond_to?(:config_for)
-        begin
-          yaml = begin
-            app.config_for(:recording_studio_search)
-          rescue StandardError
-            nil
-          end
-          RecordingStudioSearch.configuration.merge!(yaml) if yaml.respond_to?(:each)
-        rescue StandardError
-          nil
-        end
-      end
-
-      if app.config.respond_to?(:x) && app.config.x.respond_to?(:recording_studio_search)
-        xcfg = app.config.x.recording_studio_search
-        if xcfg.respond_to?(:to_h)
-          RecordingStudioSearch.configuration.merge!(xcfg.to_h)
-        else
-          begin
-            hash = {}
-            xcfg.each_pair { |k, v| hash[k] = v } if xcfg.respond_to?(:each_pair)
-            RecordingStudioSearch.configuration.merge!(hash) if hash&.any?
-          rescue StandardError
-            nil
-          end
-        end
-      end
-
+      RecordingStudioSearch::Engine.load_host_configuration(app)
       RecordingStudioSearch.configuration.hooks.run(:on_configuration, RecordingStudioSearch.configuration)
     end
 
@@ -118,9 +135,7 @@ module RecordingStudioSearch
       config.to_prepare do
         next unless defined?(ActiveRecord::Base)
 
-        ActiveRecord::Base.descendants.each do |model|
-          next if model.abstract_class?
-
+        RecordingStudioSearch::Engine.concrete_models(ActiveRecord::Base.descendants).each do |model|
           RecordingStudioSearch::Engine.apply_model_extensions(model)
         end
       end

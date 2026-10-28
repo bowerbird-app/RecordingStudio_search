@@ -45,6 +45,12 @@ Static instant-search chrome (empty states, column titles, default placeholder) 
 
 Every gem `t(...)` call passes English `default:` so a host locale without a fallback never shows "translation missing". Multi-model collection section titles translate at render via `instant_search_translated_collection_label` (`recording_studio.search.results.collections.<demodulized_plural>`, default the raw English from `instant_search_collection_label`). Public collection labels and result rows stay raw model data. English output is unchanged.
 
+## Narrower host-config and embed rescues (0.7.1)
+
+- Loading `config/recording_studio_search.yml` and `config.x.recording_studio_search` logs and skips `RuntimeError` (including Psych YAML errors) and `NoMethodError` only. Other errors raise at boot.
+- Embedding writes log `EmbeddingAdapter::Error` and ActiveRecord write errors (`RecordInvalid`, `RecordNotUnique`, `RecordNotSaved`, `StatementInvalid`) only. Other errors raise.
+- No migration. Search queries are unchanged.
+
 ## English fallback via RecordingStudio.t (0.7.0)
 
 Instant-search chrome uses `RecordingStudio.t` for this gem's shipped

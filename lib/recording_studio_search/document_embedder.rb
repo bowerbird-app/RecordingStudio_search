@@ -1,7 +1,17 @@
 # frozen_string_literal: true
 
+require "active_record"
+
 module RecordingStudioSearch
   class DocumentEmbedder
+    EMBED_WRITE_ERRORS = [
+      EmbeddingAdapter::Error,
+      ActiveRecord::RecordInvalid,
+      ActiveRecord::RecordNotUnique,
+      ActiveRecord::RecordNotSaved,
+      ActiveRecord::StatementInvalid
+    ].freeze
+
     def self.call(searchable_type:, searchable_id:, recording_id: nil)
       new(
         searchable_type: searchable_type,
@@ -47,9 +57,9 @@ module RecordingStudioSearch
       if document
         document.update!(attrs)
       else
-        Document.create!(attrs)
+        documents.create!(attrs)
       end
-    rescue EmbeddingAdapter::Error, StandardError => e
+    rescue *EMBED_WRITE_ERRORS => e
       Rails.logger.error(
         "[recording_studio_search] embed failed model=#{searchable_type} " \
         "id=#{searchable_id} error=#{e.class}: #{e.message}"
@@ -60,13 +70,17 @@ module RecordingStudioSearch
 
     attr_reader :searchable_type, :searchable_id, :recording_id, :adapter
 
+    def documents
+      Document
+    end
+
     def find_document(record)
       stable_id = recording_id_for(record)
       if stable_id
-        Document.find_by(recording_id: stable_id) ||
-          Document.find_by(searchable_type: searchable_type, searchable_id: record.id)
+        documents.find_by(recording_id: stable_id) ||
+          documents.find_by(searchable_type: searchable_type, searchable_id: record.id)
       else
-        Document.find_by(searchable_type: searchable_type, searchable_id: record.id)
+        documents.find_by(searchable_type: searchable_type, searchable_id: record.id)
       end
     end
 

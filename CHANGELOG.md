@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-10-28
+
+### Changed
+
+- Dummy / root pin for Recording Studio Trashable: `v0.10.0` → `v0.11.0`
+- Stop tracking SimpleCov HTML under `coverage/` and `test/dummy/coverage/`
+- Remove leftover gem-template docs, the dummy copy of `.github/workflows/ci.yml`,
+  the unused Stimulus `hello_controller`, and the empty `makeup_artist` keepfile
+- Fold the leftover Recording Studio 4.x template summary into this changelog
+  (hosts already pin Recording Studio `~> 4.7` / dummy `v4.7.0`, Accessible
+  `v0.18.0`, Root Switchable `v0.9.0`, Users `v0.21.0`, Admin `v2.3.0`,
+  Attachable `v0.15.0`, FlatPack `v0.1.213`)
+- Host YAML and `config.x` load rescue only `RuntimeError` (includes
+  `Psych::SyntaxError`) and `NoMethodError`, and log the skip
+- Document embedder rescues `EmbeddingAdapter::Error` and ActiveRecord write
+  errors only (`RecordInvalid`, `RecordNotUnique`, `RecordNotSaved`,
+  `StatementInvalid`)
+
+### Upgrade notes
+
+- Unexpected errors while loading host search YAML / `config.x`, or while
+  writing embeddings, now raise instead of being swallowed. Missing YAML and
+  malformed YAML still skip with a log line.
+- No migration or host code change is required for search queries.
+
 ## [0.7.0] - 2026-10-14
 
 ### Added
@@ -156,7 +181,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.1...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.5.0

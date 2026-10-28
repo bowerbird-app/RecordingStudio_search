@@ -6,6 +6,18 @@ require "action_view"
 require_relative "../app/helpers/recording_studio_search/instant_search_helper"
 
 class InstantSearchHelperI18nTest < Minitest::Test
+  class SearchControl
+    attr_reader :name, :value, :placeholder, :max_width, :size
+
+    def initialize(name:, value:, placeholder:, max_width:, size:)
+      @name = name
+      @value = value
+      @placeholder = placeholder
+      @max_width = max_width
+      @size = size
+    end
+  end
+
   class FakeView
     include ActionView::Helpers::TagHelper
     include ActionView::Context
@@ -38,9 +50,8 @@ class InstantSearchHelperI18nTest < Minitest::Test
   end
 
   def test_instant_search_field_default_placeholder_is_english_try_a_name
-    stub_flatpack_search!
     view = FakeView.new
-    helper = RecordingStudioSearch::InstantSearchHelper.new(view, routes_stub)
+    helper = helper_for(view)
 
     I18n.with_locale(:en) do
       helper.instant_search_field(models: ["User"], frame_id: "people_results")
@@ -50,9 +61,8 @@ class InstantSearchHelperI18nTest < Minitest::Test
   end
 
   def test_instant_search_field_placeholder_falls_back_to_shipped_english_without_locale_key
-    stub_flatpack_search!
     view = FakeView.new
-    helper = RecordingStudioSearch::InstantSearchHelper.new(view, routes_stub)
+    helper = helper_for(view)
     original_available = I18n.available_locales
     I18n.backend = I18n::Backend::Simple.new
     I18n.load_path = []
@@ -73,9 +83,8 @@ class InstantSearchHelperI18nTest < Minitest::Test
   end
 
   def test_instant_search_field_keeps_caller_placeholder
-    stub_flatpack_search!
     view = FakeView.new
-    helper = RecordingStudioSearch::InstantSearchHelper.new(view, routes_stub)
+    helper = helper_for(view)
 
     I18n.with_locale(:en) do
       helper.instant_search_field(
@@ -90,25 +99,12 @@ class InstantSearchHelperI18nTest < Minitest::Test
 
   private
 
-  def stub_flatpack_search!
-    return if defined?(FlatPack::Search::Component)
-
-    component = Class.new do
-      attr_reader :name, :value, :placeholder, :max_width, :size
-
-      def initialize(name:, value:, placeholder:, max_width:, size:)
-        @name = name
-        @value = value
-        @placeholder = placeholder
-        @max_width = max_width
-        @size = size
-      end
-    end
-    search_module = Module.new
-    search_module.const_set(:Component, component)
-    flat_pack = Module.new
-    flat_pack.const_set(:Search, search_module)
-    Object.const_set(:FlatPack, flat_pack) unless defined?(FlatPack)
+  def helper_for(view)
+    RecordingStudioSearch::InstantSearchHelper.new(
+      view,
+      routes_stub,
+      search_component_class: SearchControl
+    )
   end
 
   def routes_stub

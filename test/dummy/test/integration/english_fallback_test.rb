@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "yaml"
 require "devise/test/integration_helpers"
 
 # Real-page English fallback for instant-search chrome when a locale lacks
@@ -87,21 +88,11 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
   end
 
   test "search en.yml path is registered at boot without calling the initializer" do
-    expected = File.expand_path(RecordingStudioSearch::Engine.root.join("config/locales/en.yml"))
-    paths = RecordingStudio::Translation.send(:registered_shipped_english_paths)
-
-    assert_includes paths, expected,
-                    "engine boot must register this gem's en.yml; do not call the initializer in the test"
-    assert_equal "Try a name",
-                 RecordingStudio::Translation.shipped_english.fetch(PLACEHOLDER_KEY)
-    assert_equal "Type a little",
-                 RecordingStudio::Translation.shipped_english.fetch(EMPTY_TITLE_KEY)
+    assert_search_en_yml_merged_into_shipped_english
   end
 
   test "search en.yml path stays registered after rails reloader reload" do
-    expected = File.expand_path(RecordingStudioSearch::Engine.root.join("config/locales/en.yml"))
-    before_paths = RecordingStudio::Translation.send(:registered_shipped_english_paths).dup
-    assert_includes before_paths, expected
+    assert_search_en_yml_merged_into_shipped_english
 
     previous_cache_classes = Rails.application.config.cache_classes
     Rails.application.config.cache_classes = false
@@ -109,12 +100,7 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
 
     Rails.application.reloader.reload!
 
-    after_paths = RecordingStudio::Translation.send(:registered_shipped_english_paths)
-    assert_includes after_paths, expected
-    assert_equal "Try a name",
-                 RecordingStudio::Translation.shipped_english.fetch(PLACEHOLDER_KEY)
-    assert_equal "Type a little",
-                 RecordingStudio::Translation.shipped_english.fetch(EMPTY_TITLE_KEY)
+    assert_search_en_yml_merged_into_shipped_english
   ensure
     Rails.application.config.cache_classes = previous_cache_classes unless previous_cache_classes.nil?
   end
@@ -140,6 +126,32 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
   def refute_search_translation_missing!
     refute_match(/translation missing: [a-z]+\.recording_studio\.search/i, @response.body)
     assert_select "h3", text: "Type a little"
+  end
+
+  def assert_search_en_yml_merged_into_shipped_english
+    expected = File.expand_path(RecordingStudioSearch::Engine.root.join("config/locales/en.yml"))
+    assert File.file?(expected), "engine must ship #{expected}"
+
+    search_tree = YAML.safe_load_file(expected, aliases: true).fetch("en").fetch("recording_studio").fetch("search")
+    table = RecordingStudio::Translation.shipped_english
+    flatten_search_keys(search_tree).each do |key, value|
+      assert_equal value, table.fetch(key),
+                   "engine boot must register this gem's en.yml (#{expected}); do not call the initializer in the test"
+    end
+
+    assert_equal "Try a name", table.fetch(PLACEHOLDER_KEY)
+    assert_equal "Type a little", table.fetch(EMPTY_TITLE_KEY)
+  end
+
+  def flatten_search_keys(node, prefix = "recording_studio.search")
+    case node
+    when Hash
+      node.each_with_object({}) do |(key, value), acc|
+        acc.merge!(flatten_search_keys(value, "#{prefix}.#{key}"))
+      end
+    else
+      { prefix => node }
+    end
   end
 
   def i18n_config_snapshot
