@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Stop tracking SimpleCov output under `coverage/` and `test/dummy/coverage/`
 - Bundler Audit lockfile bumps: `crass` `>= 1.0.8`, `net-ssh` 7.3.8
-- CI: lint and security jobs use Ruby 3.3 (runner no longer has 3.3.6)
+- CI pins Ruby 3.3
+- FlatPack bumped to v0.1.311 to fix Bundler Audit (view_component >= 4.14)
 
 ### Upgrade notes
 
