@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-10-28
+
+### Changed
+
+- Stop tracking SimpleCov output under `coverage/` and `test/dummy/coverage/`
+- Bundler Audit lockfile bumps: `crass` `>= 1.0.8`, `net-ssh` 7.3.8
+- CI pins Ruby 3.3
+- FlatPack bumped to v0.1.311 to fix Bundler Audit (view_component >= 4.14)
+
+### Upgrade notes
+
+- No migration or host code change is required.
+
 ## [0.7.0] - 2026-10-14
 
 ### Added
@@ -156,7 +169,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.1...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_search/releases/tag/v0.5.0
