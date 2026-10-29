@@ -4,17 +4,17 @@ require "test_helper"
 
 class RecordingStudioSearchTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.7.2", ::RecordingStudioSearch::VERSION
+    assert_equal "0.8.0", ::RecordingStudioSearch::VERSION
   end
 
   def test_engine_exists
     assert_kind_of Class, ::RecordingStudioSearch::Engine
   end
 
-  def test_gemspec_pins_recording_studio_4_2_to_6
+  def test_gemspec_pins_recording_studio_6_1
     gemspec = File.read(File.expand_path("../recording_studio_search.gemspec", __dir__))
 
-    assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 4.2", "< 7"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 6.1.0"'
     assert_includes gemspec, 'spec.add_dependency "pgvector"'
     assert_includes gemspec, 'spec.add_dependency "json", ">= 2.21", "< 3"'
   end

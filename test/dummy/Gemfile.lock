@@ -133,11 +133,11 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_search (0.7.2)
+    recording_studio_search (0.8.0)
       json (>= 2.21, < 3)
       pgvector (>= 0.3)
       rails (~> 8.1.0)
-      recording_studio (>= 4.2, < 7)
+      recording_studio (>= 6.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -805,7 +805,7 @@ CHECKSUMS
   recording_studio_logs (0.7.1)
   recording_studio_metrics (0.7.0)
   recording_studio_root_switchable (0.11.0)
-  recording_studio_search (0.7.2)
+  recording_studio_search (0.8.0)
   recording_studio_trashable (0.12.0)
   recording_studio_user (0.26.3)
   regexp_parser (2.12.0) sha256=35a916a1d63190ab5c9009457136ae5f3c0c7512d60291d0d1378ba18ce08ebb

@@ -162,7 +162,7 @@ helper's default placeholder) ships as English Rails I18n under
 through `RecordingStudio.t` (this gem's shipped keys only). When the active
 locale has no translation, fallback comes from the loaded English (host
 overrides included), then any caller `default:`, then the gem-shipped table
-registered at boot. Requires Recording Studio `>= 4.2, < 7`. A plain default with
+registered at boot. Requires Recording Studio `>= 6.1.0`. A plain default with
 no interpolation is returned as a plain (non-html_safe) String, so views will
 escape it. On a missing `_html` key (vs view `t` / `I18n.t` on recording_studio
 v4.7.0): a plain String caller `default:` matches and stays unsafe; an Array
@@ -217,7 +217,7 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 4.2, < 7` (dummy tag `v6.3.0`, FlatPack `v0.1.329`)
+- Recording Studio `>= 6.1.0` (dummy tag `v6.3.0`, FlatPack `v0.1.329`)
 - PostgreSQL 16
 
 ## Documentation
