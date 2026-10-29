@@ -1,28 +1,17 @@
-<div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
-  <% if flash[:notice].present? %>
-    <%= render FlatPack::Alert::Component.new(style: :success, title: flash[:notice]) %>
-  <% end %>
+<% content_for :title, @page_copy.fetch(:title) %>
+<% page_subtitle = @page_copy.fetch(:subtitle).presence %>
+<% content_for :subtitle, page_subtitle if page_subtitle %>
+<% flat_pack_page_nav(
+  round: true,
+  style: :default,
+  anchor_href: @return_anchor_url,
+  anchor_tooltip: t("recording_studio.root_switchable.navigation.close", default: "Close")
+) %>
+<% if @new_root_path.present? %>
+  <% register_page_nav(@new_root_label, @new_root_path, role: :primary, icon: @new_root_icon) %>
+<% end %>
 
-  <% if flash[:alert].present? %>
-    <%= render FlatPack::Alert::Component.new(style: :danger, title: flash[:alert]) %>
-  <% end %>
-
-  <%= render FlatPack::PageNav::Component.new do |page_nav| %>
-    <% if @return_anchor_url.present? %>
-      <% page_nav.with_close(
-        href: @return_anchor_url,
-        tooltip: t("recording_studio.root_switchable.navigation.close")
-      ) %>
-    <% end %>
-  <% end %>
-
-  <% page_subtitle = @page_copy.fetch(:subtitle).presence %>
-  <%= render FlatPack::PageTitle::Component.new(
-    title: @page_copy.fetch(:title),
-    subtitle: page_subtitle,
-    variant: :h1
-  ) %>
-
+<div class="flex w-full flex-col gap-6">
   <% if @available_roots.empty? %>
     <%= render FlatPack::Alert::Component.new(
       style: :info,
@@ -35,7 +24,12 @@
       <p class="text-sm text-(--surface-muted-content-color)"><%= persistence_hint %></p>
     <% end %>
 
-    <%= render FlatPack::Card::Component.new(class: "w-full") do |card| %>
+    <%= render FlatPack::Card::Component.new(
+      background: :default,
+      border: :default,
+      shadow: :none,
+      class: "w-full"
+    ) do |card| %>
       <% card.body do %>
         <%= render FlatPack::List::Component.new(selectable: true, class: "w-full") do %>
           <% @available_roots.each do |root_recording| %>

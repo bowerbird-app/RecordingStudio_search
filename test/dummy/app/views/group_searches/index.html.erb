@@ -1,12 +1,10 @@
-<% dummy_page_nav(title: "In this group", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "In this group",
+  subtitle: "Ada lives in two mailboxes. Search one of them.",
+  back_url: root_path
+) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "In this group",
-    subtitle: "Ada lives in two mailboxes. Search one of them.",
-    variant: :h1
-  ) %>
-
   <%= render FlatPack::SegmentedButtons::Component.new do |groups| %>
     <% groups.button(
       text: "Everyone",

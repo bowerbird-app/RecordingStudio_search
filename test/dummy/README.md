@@ -4,7 +4,7 @@ This Rails app exists to validate the Recording Studio search addon in a real ho
 
 ## What It Covers
 
-- Devise actor plus Recording Studio Users `v0.15.0` auth (email, then password)
+- Devise actor plus Recording Studio Users `v0.26.3` auth (email, then password)
 - `Current.actor` wiring for Recording Studio events
 - Root workspace plus seeded folder and page recordables
 - Trigram search on `User` and `Note`
@@ -51,6 +51,6 @@ Then open the app and sign in with:
 
 Use this app to verify search generators, embeddings, and fallback before a host enables models. If a layout, route, asset source, or Recording Studio initializer change breaks here, the gem likely needs adjustment before reuse.
 
-Authenticated pages include `RecordingStudio::UsesDefaultLayout` and render the gem's `recording_studio/default_layout` (theme `rounded` on `body`; dummy also stamps `html data-theme="rounded"`). Dummy overrides `recording_studio/shared/_default_layout` so PageNav uses `with_back` / `with_close` / `with_item` (FlatPack `v0.1.311` dropped the old constructor keywords). Dummy also overrides the root-switch show view: PageNav `anchor_label:` is now `with_close`, and Card no longer takes `style:`. Sign-in uses the Users gem layout `recording_studio_user/auth` (`Welcome back`, Continue with email). Dummy names the theme in `config/initializers/flat_pack.rb` (`FlatPack.configuration.default_theme = :rounded`).
+Authenticated pages call `recording_studio_layout` and render Recording Studio’s default layout (`html data-theme="rounded"`). Dummy keeps a host copy of `recording_studio/shared/_default_layout` aligned with core 6.3 (`content_for :title` / `:subtitle`, `flat_pack_page_nav`, `page_nav_button_group`). Dummy also overrides the root-switch show view so it matches Root Switchable `v0.11.0` (Card uses `border:` / `shadow:`, not `style:`). Sign-in uses the Users gem layout `recording_studio_user/auth` (`Welcome back`, Continue with email). Dummy names the theme in `config/initializers/flat_pack.rb` (`FlatPack.configuration.default_theme = :rounded`).
 
 The home page in `app/views/home/index.html.erb` is a minimal demo of `RecordingStudioSearch.search([User, Page, Note], q)` with a full-width `FlatPack::Search::Component` (`max_width: :none`) submitting GET `q`. `/people` is the same Search control calling `User.search` only. `/instant` copies `instant_search_field` plus `instant_search_results` against engine `InstantSearchesController#show` (type, no full-page reload). `/groups` keeps a mailbox scope. `/title-first` shows weighted ranking. Deeper explanations live in the product README.

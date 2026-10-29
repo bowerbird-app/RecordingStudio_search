@@ -4,10 +4,10 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio 4.x (`~> 4.7` in the gemspec; dummy GitHub tag `v4.7.0`)
-- Accessible dummy tag `v0.18.0` and Root Switchable dummy tag `v0.9.0`
-- Users dummy tag `v0.21.0` (Admin `v2.3.0` and Attachable `v0.15.0` as Users runtime deps)
-- FlatPack dummy tag `v0.1.311` (view_component `>= 4.14`; Attachable 0.12+ needs FlatPack `>= 0.1.213`)
+- Recording Studio `>= 4.2, < 7` (dummy GitHub tag `v6.3.0`)
+- Accessible dummy tag `v0.24.0` and Root Switchable dummy tag `v0.11.0`
+- Users dummy tag `v0.26.3` (Admin `v2.7.2`, Attachable `v0.22.0`, Logs `v0.7.1` as dummy runtime deps)
+- FlatPack dummy tag `v0.1.329` (core 6 needs FlatPack `>= 0.1.315`; Users 0.26 needs `>= 0.1.328`)
 - Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
 - `json` 2.x (`>= 2.21, < 3`) until Rails 8.1 can call json 3’s `JSON.parse`
 - PostgreSQL 16 with `pg_trgm` (always) and `vector` (only if a host enables `:pgvector`)
@@ -54,7 +54,7 @@ at boot. Fallback comes from the loaded English, host overrides included;
 hand-copied English `default:` on shipped keys is gone. Optional collection
 section titles stay on view `t` / `I18n.t` with main's `default:` the raw
 model-derived label (host-only keys). Host or other-namespace lookups stay on
-`I18n.t` with main's `default:`. Requires Recording Studio `~> 4.7`. English
+`I18n.t` with main's `default:`. Requires Recording Studio `>= 4.2, < 7`. English
 output is unchanged. A plain default with no interpolation is returned as a
 plain (non-html_safe) String, so views will escape it. On a missing `_html`
 key (vs view `t` / `I18n.t` on recording_studio v4.7.0): a plain String caller
