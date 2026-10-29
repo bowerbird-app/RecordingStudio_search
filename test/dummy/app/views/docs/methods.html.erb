@@ -1,11 +1,10 @@
-<% dummy_page_nav(title: "Methods", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "Methods",
+  subtitle: "Call search from any host page. One model or several.",
+  back_url: root_path
+) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Methods",
-    subtitle: "Call search from any host page. One model or several.",
-    variant: :h1
-  ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "One model",

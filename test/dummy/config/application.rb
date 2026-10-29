@@ -42,6 +42,7 @@ module Dummy
     end
 
     config.active_record.schema_format = :sql
+    config.i18n.fallbacks = true
 
     # Don't generate system test files.
     config.generators.system_tests = nil

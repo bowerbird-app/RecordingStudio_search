@@ -1,12 +1,10 @@
-<% dummy_page_nav(title: "People", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "People",
+  subtitle: "Names and emails. Nothing else on this page.",
+  back_url: root_path
+) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "People",
-    subtitle: "Names and emails. Nothing else on this page.",
-    variant: :h1
-  ) %>
-
   <%= form_with url: people_path, method: :get, html: { class: "w-full" } do %>
     <%= render FlatPack::Search::Component.new(
       name: "q",

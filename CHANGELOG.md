@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-10-29
+
+### Changed
+
+- Runtime `recording_studio` is now `>= 4.2, < 7` so hosts on 6.1+ can resolve this gem. 4.x and 5.x still match.
+- Dummy and development Gemfiles pin Recording Studio `v6.3.0` and FlatPack `v0.1.329`, plus sibling gems already on core 6.1+.
+
+### Upgrade notes
+
+- Bump to `0.7.2`. No migration. Dummy PageNav uses `content_for :title` / `:subtitle` and `flat_pack_page_nav` (core 6 removed `recording_studio_page_nav`).
+
 ## [0.7.1] - 2026-10-28
 
 ### Changed
@@ -169,7 +180,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.1...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.5.0...v0.6.0

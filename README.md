@@ -13,7 +13,7 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.7.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -162,7 +162,7 @@ helper's default placeholder) ships as English Rails I18n under
 through `RecordingStudio.t` (this gem's shipped keys only). When the active
 locale has no translation, fallback comes from the loaded English (host
 overrides included), then any caller `default:`, then the gem-shipped table
-registered at boot. Requires Recording Studio `~> 4.7`. A plain default with
+registered at boot. Requires Recording Studio `>= 4.2, < 7`. A plain default with
 no interpolation is returned as a plain (non-html_safe) String, so views will
 escape it. On a missing `_html` key (vs view `t` / `I18n.t` on recording_studio
 v4.7.0): a plain String caller `default:` matches and stays unsafe; an Array
@@ -207,7 +207,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.21.0`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.26.3`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 
@@ -217,7 +217,7 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio 4.x (`~> 4.7`; dummy tag `v4.7.0`)
+- Recording Studio `>= 4.2, < 7` (dummy tag `v6.3.0`, FlatPack `v0.1.329`)
 - PostgreSQL 16
 
 ## Documentation

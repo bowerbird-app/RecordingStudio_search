@@ -1,12 +1,10 @@
-<% dummy_page_nav(title: "As you type", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "As you type",
+  subtitle: "Names show up while you hunt. No extra click.",
+  back_url: root_path
+) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "As you type",
-    subtitle: "Names show up while you hunt. No extra click.",
-    variant: :h1
-  ) %>
-
   <%= recording_studio_search.instant_search_field(
     models: [User],
     frame_id: "people_results",

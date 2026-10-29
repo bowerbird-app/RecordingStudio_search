@@ -1,12 +1,10 @@
-<% dummy_page_nav(title: "Title first", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "Title first",
+  subtitle: "A hit in the title beats the same word buried in the body.",
+  back_url: root_path
+) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Title first",
-    subtitle: "A hit in the title beats the same word buried in the body.",
-    variant: :h1
-  ) %>
-
   <%= form_with url: title_first_path, method: :get, html: { class: "w-full" } do %>
     <%= render FlatPack::Search::Component.new(
       name: "q",
