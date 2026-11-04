@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-04
+
+### Changed
+
+- Rack is `>= 3.2.8` in both lockfiles (GHSA-2j8w-xcrc-x985, GHSA-5v64-555j-wjxm, GHSA-p8x9-v4hv-2w4g, GHSA-wvg4-6p58-3gh3).
+- Dummy and development pins: FlatPack `v0.1.341`, Users `v0.26.6`, Root Switchable `v0.11.4`, Metrics `v0.7.2`, Logs `v0.7.3`, Trashable `v0.12.2`, Cache `v0.6.2`. Dummy Admin is `v2.8.2` (this gem does not ship Admin). Core stays `v6.3.0`, Accessible stays `v0.24.0`.
+- Instant search wrapper no longer adds a Tailwind `w-full` class. The FlatPack Search control is unchanged.
+
+### Removed
+
+- Leftover gem-template docs (`docs/gem_template/`, `UPDATE_SUMMARY.md`, `MIGRATION_NOTES.md`), dummy `hello_controller.js`, and the nested dummy GitHub workflow that never ran.
+
+### Upgrade notes
+
+- Bump to `0.8.1`. No public API change. No migration. Instant search and the vector index are still not Accessible-filtered.
+
 ## [0.8.0] - 2026-10-29
 
 ### Changed
@@ -181,7 +197,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.6.1...v0.7.0

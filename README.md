@@ -207,7 +207,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.26.3`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.26.6`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 
@@ -217,9 +217,9 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 6.1.0` (dummy tag `v6.3.0`, FlatPack `v0.1.329`)
+- Recording Studio `>= 6.1.0` (dummy tag `v6.3.0`, FlatPack `v0.1.341`)
 - PostgreSQL 16
 
 ## Documentation
 
-The implementation plan lives in `docs/search-plan.md`. Engine conventions from the gem template remain in `docs/gem_template/`.
+The implementation plan lives in `docs/search-plan.md`.
