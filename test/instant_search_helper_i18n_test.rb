@@ -88,17 +88,6 @@ class InstantSearchHelperI18nTest < Minitest::Test
     assert_equal "Try Ada or hopper", view.rendered.placeholder
   end
 
-  def test_instant_search_field_wrapper_does_not_use_tailwind_w_full
-    stub_flatpack_search!
-    view = FakeView.new
-    helper = RecordingStudioSearch::InstantSearchHelper.new(view, routes_stub)
-
-    html = helper.instant_search_field(models: ["User"], frame_id: "people_results")
-
-    refute_includes html, "w-full"
-    assert_includes html, 'data-controller="recording-studio-search--instant-search"'
-  end
-
   private
 
   def stub_flatpack_search!

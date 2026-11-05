@@ -12,11 +12,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Rack is `>= 3.2.8` in both lockfiles (GHSA-2j8w-xcrc-x985, GHSA-5v64-555j-wjxm, GHSA-p8x9-v4hv-2w4g, GHSA-wvg4-6p58-3gh3).
 - Dummy and development pins: FlatPack `v0.1.341`, Users `v0.26.6`, Root Switchable `v0.11.4`, Metrics `v0.7.2`, Logs `v0.7.3`, Trashable `v0.12.2`, Cache `v0.6.2`. Dummy Admin is `v2.8.2` (this gem does not ship Admin). Core stays `v6.3.0`, Accessible stays `v0.24.0`.
-- Instant search wrapper no longer adds a Tailwind `w-full` class. The FlatPack Search control is unchanged.
-
-### Removed
-
-- Leftover gem-template docs (`docs/gem_template/`, `UPDATE_SUMMARY.md`, `MIGRATION_NOTES.md`), dummy `hello_controller.js`, and the nested dummy GitHub workflow that never ran.
 
 ### Upgrade notes
 
