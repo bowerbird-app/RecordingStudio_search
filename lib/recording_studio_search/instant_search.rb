@@ -16,16 +16,25 @@ module RecordingStudioSearch
   # Engine InstantSearchesController#show is the default results URL.
   # Only +config.instant_search_models+ may be searched. Unknown models are ignored.
   # Blank +q+ returns empty hits, not Model.search("") (which would list everyone).
+  # Hits are Accessible-scoped to +actor+ (:view on each record's recording).
+  # Blank actor, missing Accessible, or a model with no recording is empty.
   module InstantSearch
     RESERVED_PARAMS = %w[models frame_id controller action format authenticity_token].freeze
 
     module_function
 
-    def hits_for(requested, query, limit: 20)
+    def hits_for(requested, query, actor: nil, limit: 20)
       models = allowed_models(requested)
       return empty_hits(models) if models.empty? || query.to_s.strip.empty?
 
-      RecordingStudioSearch.search(models.one? ? models.first : models, query, limit: limit)
+      scoped = models.map { |model| AccessibleScope.relation_for(model, actor) }
+      if models.one?
+        RecordingStudioSearch.search(scoped.first, query, limit: limit)
+      else
+        models.zip(scoped).to_h do |model, relation|
+          [model, RecordingStudioSearch.search(relation, query, limit: limit)]
+        end
+      end
     end
 
     def empty_hits(models)

@@ -74,6 +74,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
   test "recordings tree page renders successfully" do
     workspace = Workspace.create!(name: "Tree Workspace")
     root_recording = RecordingStudio.root_recording_for(workspace)
+    DummyAccess.ensure_owner!(actor: @user, recording: root_recording)
     folder = Folder.create!(name: "Reference")
     folder_recording = record_child(folder, root_recording, root_recording)
     page = Page.create!(title: "API")
@@ -91,6 +92,21 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[role='treeitem']", minimum: 3
     refute_includes response.body, "Current structure"
     refute_includes response.body, "This tree is generated from RecordingStudio::Recording records"
+  end
+
+  test "recordings tree hides workspaces the signed-in person cannot view" do
+    visible = Workspace.create!(name: "Visible Tree")
+    visible_root = RecordingStudio.root_recording_for(visible)
+    DummyAccess.ensure_owner!(actor: @user, recording: visible_root)
+
+    hidden = Workspace.create!(name: "Hidden Tree")
+    RecordingStudio.root_recording_for(hidden)
+
+    get docs_recordings_tree_path
+
+    assert_response :success
+    assert_includes response.body, "Workspace: Visible Tree"
+    refute_includes response.body, "Workspace: Hidden Tree"
   end
 
   test "gem_views page renders successfully" do

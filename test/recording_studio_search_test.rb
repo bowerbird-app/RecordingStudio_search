@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioSearchTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.8.1", ::RecordingStudioSearch::VERSION
+    assert_equal "0.9.0", ::RecordingStudioSearch::VERSION
   end
 
   def test_engine_exists
@@ -47,19 +47,19 @@ class RecordingStudioSearchTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
     root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
 
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.5.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.5.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.11.4"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.26.6"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.27.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.8.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.22.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.133"'
@@ -231,6 +231,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes groups_view, "groups_path"
     assert_includes groups_view, "In this group"
     assert_includes weights_controller, "TrigramSearcher"
+    assert_includes weights_controller, "AccessibleScope.relation_for"
     assert_includes weights_view, "title_first_path"
     assert_includes weights_view, "Title first"
     assert_includes routes, 'get "groups"'
@@ -255,10 +256,10 @@ class RecordingStudioSearchTest < Minitest::Test
     view_source = File.read(File.expand_path("dummy/app/views/instant_people/index.html.erb", __dir__))
     routes = File.read(File.expand_path("dummy/config/routes.rb", __dir__))
 
-    assert_includes controller, "User.none"
+    assert_includes controller, "Page.none"
     assert_includes view_source, "instant_search_field"
     assert_includes view_source, "instant_search_results"
-    assert_includes view_source, 'frame_id: "people_results"'
+    assert_includes view_source, 'frame_id: "page_results"'
     assert_includes view_source, "recording_studio_search.instant_search_path"
     refute_includes view_source, "<turbo-frame"
     assert_includes routes, "instant_people"

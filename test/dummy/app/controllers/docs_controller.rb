@@ -17,8 +17,11 @@ class DocsController < ApplicationController
   end
 
   def recordings_tree
-    recordings = RecordingStudio::Recording.includes(:recordable).reorder(:created_at, :id).to_a
-    recordings_by_parent_id = recordings.group_by(&:parent_recording_id)
+    recordings = RecordingStudioSearch::AccessibleScope.recordings_for(Current.actor)
+    visible_ids = recordings.map(&:id).to_set
+    recordings_by_parent_id = recordings.group_by do |recording|
+      visible_ids.include?(recording.parent_recording_id) ? recording.parent_recording_id : nil
+    end
 
     @recording_tree = recordings_by_parent_id.fetch(nil, []).map do |recording|
       build_recording_node(recording, recordings_by_parent_id)

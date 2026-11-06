@@ -20,6 +20,10 @@ RecordingStudio.configure do |config|
   # Actor resolver for events when no actor is explicitly supplied
   config.actor = -> { Current.actor }
 
+  # Dummy seeds and demos still create tree rows before Accessible grants exist.
+  # Instant search and the recordings tree still check Accessible on read.
+  config.allow_unauthorized_writes = true
+
   # Emit ActiveSupport::Notifications events
   config.event_notifications_enabled = true
 

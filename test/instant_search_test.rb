@@ -44,6 +44,7 @@ class InstantSearchTest < Minitest::Test
 
     assert_equal({}, RecordingStudioSearch::InstantSearch.hits_for(["User"], "Ada"))
     assert_equal({}, RecordingStudioSearch::InstantSearch.hits_for(["User"], "   "))
+    assert_equal({}, RecordingStudioSearch::InstantSearch.hits_for(["User"], "Ada", actor: Object.new))
   end
 
   def test_configuration_to_h_lists_allowlist_names

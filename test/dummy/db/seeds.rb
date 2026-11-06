@@ -24,7 +24,11 @@ user = User.find_or_create_by!(email: "admin@admin.com") do |account|
 end
 user.update!(name: "Ada Admin") if user.name.blank?
 
-RecordingStudioUser.record_profile!(user, first_name: "Ada", last_name: "Admin", time_zone: "UTC") unless RecordingStudioUser.profile_for(user)
+previous_actor = Current.actor
+Current.actor = user
+
+begin
+  RecordingStudioUser.record_profile!(user, first_name: "Ada", last_name: "Admin", time_zone: "UTC") unless RecordingStudioUser.profile_for(user)
 
 lovelace = User.find_or_create_by!(email: "ada@example.com") do |account|
   account.password = "Password"
@@ -74,17 +78,16 @@ end
 
 Note.find_or_create_by!(title: "Sticky reminder")
 
-previous_actor = Current.actor
-Current.actor = user
-
-begin
   root_recording = RecordingStudio.root_recording_for(workspace)
   accessible_root_recording = RecordingStudio.root_recording_for(accessible_workspace)
   private_root_recording = RecordingStudio.root_recording_for(private_workspace)
+  DummyAccess.ensure_owner!(actor: user, recording: root_recording)
 
   folder_recording = find_or_record_child.call(folder, root_recording, root_recording)
   find_or_record_child.call(page, root_recording, folder_recording)
   find_or_record_child.call(refund_page, root_recording, folder_recording)
+  DummyAccess.record_under_workspace!(widgets_page, actor: user)
+  DummyAccess.record_under_workspace!(body_widgets_page, actor: user)
 ensure
   Current.actor = previous_actor
 end

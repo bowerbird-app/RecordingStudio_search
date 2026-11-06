@@ -6,8 +6,8 @@ RecordingStudioUser.configure do |config|
   config.mount_path = "/recording_studio_users"
   config.profile_route_path = "profile"
   config.admin_route_path = "admin"
-  # Layout for the engine's signed-in screens. Sign in and sign up keep the
-  # gem's own centered layout, "recording_studio_user/auth".
+  # Layout for Users screens, including signed-out auth (Users 0.27+).
+  # Auth content stays centered in `auth/_shell` inside this layout.
   config.layout = "recording_studio/default_layout"
   # Leave unset so the gem default (:locale) stays on the allowlist.
   # config.additional_profile_attributes |= [:nickname]

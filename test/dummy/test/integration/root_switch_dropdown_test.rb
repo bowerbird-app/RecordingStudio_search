@@ -15,7 +15,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "admin@admin.com"
     assert_select 'html[data-theme="rounded"]', count: 1
     assert_includes response.body, "min-h-dvh"
-    refute_includes response.body, "data-recording-studio-default-layout"
+    assert_select "body[data-recording-studio-default-layout='true']", count: 1
     refute_includes response.body, "mt-28"
     refute_includes response.body, "fixed inset-0"
   end
