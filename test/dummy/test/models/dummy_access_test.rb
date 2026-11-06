@@ -44,6 +44,9 @@ class DummyAccessTest < ActiveSupport::TestCase
 
     refute_includes source, "grant_access"
     refute_includes source, "ensure_owner!"
+    refute_includes source, "trusted_write?"
+    refute_includes source, "TRUSTED_WRITE_KEY"
     assert_includes source, "raise(result.error"
+    assert_includes source, "bootstrap_owner_access!"
   end
 end

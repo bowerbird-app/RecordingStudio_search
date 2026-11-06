@@ -2,33 +2,23 @@
 
 # Dummy-only Accessible grants and tree placement. Not part of the gem API.
 module DummyAccess
-  TRUSTED_WRITE_KEY = :dummy_access_trusted_write
-
   module_function
 
-  def with_trusted_writes
-    previous = Thread.current[TRUSTED_WRITE_KEY]
-    Thread.current[TRUSTED_WRITE_KEY] = true
-    yield
-  ensure
-    Thread.current[TRUSTED_WRITE_KEY] = previous
-  end
-
-  def trusted_write?
-    Thread.current[TRUSTED_WRITE_KEY] == true
-  end
-
-  def trusted_as(actor)
+  def as_actor(actor)
     previous = Current.actor
     Current.actor = actor
-    with_trusted_writes { yield }
+    yield
   ensure
     Current.actor = previous
   end
 
-  def authorize_write?(actor:, recording: nil, parent_recording: nil, root_recording: nil, **)
+  def authorize_write?(actor:, recording: nil, parent_recording: nil, root_recording: nil, recordable: nil, **)
     return false if actor.blank?
-    return true if trusted_write?
+
+    # Accessible grant/bootstrap writes Access rows inside AccessCreationContext.
+    return true if RecordingStudioAccessible::AccessCreationContext.allowed?
+    # Users records a Profile under shared People before bootstrap_owner_access!.
+    return true if recordable.is_a?(RecordingStudioUser::Profile) && recording.blank?
 
     target = recording || parent_recording || root_recording
     return false if target.blank?
@@ -40,7 +30,7 @@ module DummyAccess
     raise ArgumentError, "actor is required" if actor.blank?
     raise ArgumentError, "name is required" if name.blank?
 
-    trusted_as(actor) do
+    as_actor(actor) do
       workspace = Workspace.find_or_create_by!(name: name)
       root = RecordingStudio.root_recording_for(workspace)
       result = RecordingStudioAccessible.bootstrap_owner_access!(recording: root, actor: actor)

@@ -31,7 +31,7 @@ bin/rails db:migrate
 
 Declare matching `searchable backend:` on each model. Boot warns if the DSL and schema disagree.
 
-`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`). Dummy `/instant` is Accessible-scoped page search through a Turbo Frame (bulk `root_recordings_for` / `recordings_for` before ranking). Dummy `/groups` is scoped people search. Dummy `/title-first` is weighted page ranking inside Accessible `:view`. Dummy writes use `config.authorize_write` through Accessible; seeds bootstrap owner grants in a trusted write.
+`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`). Dummy `/instant` is Accessible-scoped page search through a Turbo Frame (bulk `root_recordings_for` / `recordings_for` before ranking). Dummy `/groups` is scoped people search. Dummy `/title-first` is weighted page ranking inside Accessible `:view`. Dummy writes use `config.authorize_write` through Accessible; seeds bootstrap owner grants with `bootstrap_owner_access!`.
 
 ## Instant search (0.4.0)
 

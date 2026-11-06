@@ -20,7 +20,7 @@ RecordingStudio.configure do |config|
   # Actor resolver for events when no actor is explicitly supplied
   config.actor = -> { Current.actor }
 
-  # Writes fail closed. Seeds bootstrap owner grants in DummyAccess.trusted_as.
+  # Writes fail closed. Seeds bootstrap owner grants, then authorize_write is Accessible-only.
   config.authorize_write = ->(**context) { DummyAccess.authorize_write?(**context) }
 
   # Emit ActiveSupport::Notifications events

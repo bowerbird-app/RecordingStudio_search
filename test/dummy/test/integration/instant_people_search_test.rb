@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "devise/test/integration_helpers"
+require "minitest/mock"
 
 class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -169,13 +170,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
   private
 
   def without_accessible
-    singleton = RecordingStudioSearch::AccessibleScope.singleton_class
-    singleton.alias_method :accessible_was, :accessible?
-    singleton.define_method(:accessible?) { false }
-    yield
-  ensure
-    singleton.alias_method :accessible?, :accessible_was
-    singleton.remove_method :accessible_was
+    RecordingStudioSearch::AccessibleScope.stub(:accessible?, false) { yield }
   end
 
   def grant_refunds_page!

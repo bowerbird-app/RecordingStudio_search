@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `InstantSearch.hits_for` takes `actor:`. Blank actor, missing Accessible, or a model with no recording is empty, not everyone.
 - Dummy `/instant` allowlists `Page` (a tree type with grants) instead of unscoped `User`.
-- Dummy Core `v6.5.0` writes go through `config.authorize_write` and Accessible. Seeds bootstrap owner grants in a trusted write. Dummy Users `v0.27.1` signs people in through Default Layout plus the Users auth shell.
+- Dummy Core `v6.5.0` writes go through `config.authorize_write` and Accessible. Seeds bootstrap owner grants, then writes use Accessible `:edit`. Dummy Users `v0.27.1` signs people in through Default Layout plus the Users auth shell.
 - Dummy and development pins: Recording Studio `v6.5.0`, Accessible `v0.24.2`, Users `v0.27.1`, Metrics `v0.7.3`, Logs `v0.7.4`, Trashable `v0.12.3`. Dummy Admin stays `v2.8.2` (this gem does not ship Admin; host policy is 2.5.1). Instant search calls Accessible when the host has it and returns nothing when it does not.
 
 ### Upgrade notes
@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Engine instant search bulk-scopes through Accessible, then ranks. People lookup that is not a recording (`User.search` on `/people`) is unchanged.
 - Allowlist instant-search models that live on the tree and have grants. A model with no recording (typical `User`) now returns no instant hits.
 - Pass the signed-in actor (dummy uses `Current.actor`). Unauthenticated instant search is empty.
-- Dummy hosts should set `config.authorize_write` through Accessible and bootstrap owner grants in trusted seeds. Do not set `allow_unauthorized_writes`.
+- Dummy hosts should set `config.authorize_write` through Accessible and bootstrap owner grants with `bootstrap_owner_access!` / `grant_access`. Do not set `allow_unauthorized_writes`.
 - **Behaviour change:** signed-in people no longer see every page or the full recordings tree from instant search, `/title-first`, or `/docs/recordings_tree`. They see what Accessible already grants.
 
 ## [0.8.1] - 2026-11-04

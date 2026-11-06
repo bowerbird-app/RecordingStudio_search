@@ -94,10 +94,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
 
   test "recordings tree hides workspaces the signed-in person cannot view" do
     DummyAccess.bootstrap_workspace!(name: "Visible Tree", actor: @user)
-
-    DummyAccess.trusted_as(@user) do
-      RecordingStudio.root_recording_for(Workspace.create!(name: "Hidden Tree"))
-    end
+    RecordingStudio.root_recording_for(Workspace.create!(name: "Hidden Tree"))
 
     get docs_recordings_tree_path
 
@@ -141,16 +138,13 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     folder_recordings_before = RecordingStudio::Recording.where(recordable_type: "Folder").count
     folders_before = Folder.count
 
-    DummyAccess.trusted_as(@user) do
-      workspace = Workspace.create!(name: "Counted Workspace")
-      2.times do
-        RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
-      end
-
-      root_recording = RecordingStudio.root_recording_for(workspace)
-      folder = Folder.create!(name: "Counted Folder")
-      record_child(folder, root_recording, root_recording)
+    root_recording = DummyAccess.bootstrap_workspace!(name: "Counted Workspace", actor: @user)
+    2.times do
+      RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
     end
+
+    folder = Folder.create!(name: "Counted Folder")
+    record_child(folder, root_recording, root_recording)
 
     {
       workspace: recordable_type_summary(

@@ -20,7 +20,7 @@ class UsersAuthTest < ActionDispatch::IntegrationTest
       account.password_confirmation = "Password"
       account.name = "Wipe Me"
     end
-    DummyAccess.trusted_as(user) do
+    DummyAccess.as_actor(user) do
       RecordingStudioUser.record_profile!(user, first_name: "Wipe", last_name: "Me", time_zone: "UTC") unless RecordingStudioUser.profile_for(user)
     end
 
