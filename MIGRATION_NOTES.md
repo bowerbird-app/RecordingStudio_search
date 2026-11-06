@@ -4,9 +4,9 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio `>= 4.2, < 7` (dummy GitHub tag `v6.3.0`)
-- Accessible dummy tag `v0.24.0` and Root Switchable dummy tag `v0.11.4`
-- Users dummy tag `v0.26.6` (Admin `v2.8.2`, Attachable `v0.22.0`, Logs `v0.7.3` as dummy runtime deps)
+- Recording Studio `>= 6.1.0` (dummy GitHub tag `v6.5.0`)
+- Accessible dummy tag `v0.24.2` and Root Switchable dummy tag `v0.11.4`
+- Users dummy tag `v0.27.1` (Admin `v2.8.2`, Attachable `v0.22.0`, Logs `v0.7.4` as dummy runtime deps)
 - FlatPack dummy tag `v0.1.341` (core 6 needs FlatPack `>= 0.1.315`; Users 0.26 needs `>= 0.1.328`)
 - Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
 - `json` 2.x (`>= 2.21, < 3`) until Rails 8.1 can call json 3’s `JSON.parse`
@@ -31,11 +31,11 @@ bin/rails db:migrate
 
 Declare matching `searchable backend:` on each model. Boot warns if the DSL and schema disagree.
 
-`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`). Dummy `/instant` is the same search through a Turbo Frame. Dummy `/groups` is scoped people search. Dummy `/title-first` is weighted page ranking.
+`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`). Dummy `/instant` is Accessible-scoped page search through a Turbo Frame (bulk `root_recordings_for` / `recordings_for` before ranking). Dummy `/groups` is scoped people search. Dummy `/title-first` is weighted page ranking inside Accessible `:view`. Dummy writes use `config.authorize_write` through Accessible; seeds bootstrap owner grants with `bootstrap_owner_access!`.
 
 ## Instant search (0.4.0)
 
-Off by default. Set `config.instant_search_models` (class names are safest at boot), mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, import Turbo, then copy `instant_search_field` plus `instant_search_results`. The engine show action is the results URL. Blank `q` is empty, not everyone. Models that are not allowlisted are ignored. The frame uses each model’s declared backend (`:pg_trgm` or `:pgvector`). New query strings still hit the embedding client once, then `recording_studio_search_queries`. Dummy `/instant` allowlists `User` only as a trigram proof. No Support `/help` wiring. See `docs/search-plan.md` Phase 4.
+Off by default. Set `config.instant_search_models` (class names are safest at boot), mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, import Turbo, then copy `instant_search_field` plus `instant_search_results`. The engine show action is the results URL. Blank `q` is empty, not everyone. Models that are not allowlisted are ignored. Hits need Accessible `:view` on the record's recording. The frame uses each model’s declared backend (`:pg_trgm` or `:pgvector`). New query strings still hit the embedding client once, then `recording_studio_search_queries`. Dummy `/instant` allowlists `Page`. No Support `/help` wiring. See `docs/search-plan.md` Phase 4.
 
 ## Interface text (0.5.0)
 

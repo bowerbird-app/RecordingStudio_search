@@ -2,6 +2,6 @@
 
 class InstantPeopleController < ApplicationController
   def index
-    @hits = User.none
+    @hits = Page.none
   end
 end

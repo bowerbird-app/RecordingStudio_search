@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-06
+
+### Added
+
+- Instant search asks Accessible for the actor's viewable recordings in bulk (`root_recordings_for` / `recordings_for`) before ranking or limit.
+- Dummy recordings tree and title-first page search use the same Accessible scope.
+
+### Changed
+
+- `InstantSearch.hits_for` takes `actor:`. Blank actor, missing Accessible, or a model with no recording is empty, not everyone.
+- Dummy `/instant` allowlists `Page` (a tree type with grants) instead of unscoped `User`.
+- Dummy Core `v6.5.0` writes go through `config.authorize_write` and Accessible. Seeds bootstrap owner grants, then writes use Accessible `:edit`. Dummy Users `v0.27.1` signs people in through Default Layout plus the Users auth shell.
+- Dummy and development pins: Recording Studio `v6.5.0`, Accessible `v0.24.2`, Users `v0.27.1`, Metrics `v0.7.3`, Logs `v0.7.4`, Trashable `v0.12.3`. Dummy Admin stays `v2.8.2` (this gem does not ship Admin; host policy is 2.5.1). Instant search calls Accessible when the host has it and returns nothing when it does not.
+
+### Upgrade notes
+
+- Bump to `0.9.0`. Hosts that mount instant search need Accessible (dummy pin `v0.24.2`). No new gemspec runtime dep: missing Accessible is empty hits, not everyone. No migration.
+- Engine instant search bulk-scopes through Accessible, then ranks. People lookup that is not a recording (`User.search` on `/people`) is unchanged.
+- Allowlist instant-search models that live on the tree and have grants. A model with no recording (typical `User`) now returns no instant hits.
+- Pass the signed-in actor (dummy uses `Current.actor`). Unauthenticated instant search is empty.
+- Dummy hosts should set `config.authorize_write` through Accessible and bootstrap owner grants with `bootstrap_owner_access!` / `grant_access`. Do not set `allow_unauthorized_writes`.
+- **Behaviour change:** signed-in people no longer see every page or the full recordings tree from instant search, `/title-first`, or `/docs/recordings_tree`. They see what Accessible already grants.
+
 ## [0.8.1] - 2026-11-04
 
 ### Changed
@@ -192,7 +215,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.0...v0.7.1

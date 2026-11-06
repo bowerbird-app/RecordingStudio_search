@@ -101,7 +101,7 @@ Hosts mount the engine and pin the controller. Installing the gem does **not** i
 
 ### Dummy
 
-`/instant` (“As you type”) allowlists `User` (trigram) and calls `User.search` through the engine frame. `/people` stays the older full-page GET. A host can allowlist a `:pgvector` model instead.
+`/instant` (“As you type”) allowlists `Page` and calls engine instant search through the Turbo Frame, Accessible-scoped to `:view`. `/people` stays the older full-page `User.search` GET. A host can allowlist another tree model instead.
 
 ### Out of scope here
 

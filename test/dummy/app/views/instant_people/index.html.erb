@@ -1,21 +1,21 @@
 <% dummy_page_nav(
   title: "As you type",
-  subtitle: "Names show up while you hunt. No extra click.",
+  subtitle: "Pages show up while you hunt. No extra click.",
   back_url: root_path
 ) %>
 
 <div class="flex w-full flex-col gap-6">
   <%= recording_studio_search.instant_search_field(
-    models: [User],
-    frame_id: "people_results",
+    models: [Page],
+    frame_id: "page_results",
     url: recording_studio_search.instant_search_path,
     param: :q,
     debounce_ms: 200,
-    placeholder: "Try Ada or hopper"
+    placeholder: "Try widgets or refund"
   ) %>
 
   <%= recording_studio_search.instant_search_results(
-    frame_id: "people_results",
+    frame_id: "page_results",
     hits: @hits,
     query: nil
   ) %>

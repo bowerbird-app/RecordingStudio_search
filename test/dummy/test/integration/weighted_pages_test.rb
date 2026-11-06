@@ -14,6 +14,15 @@ class WeightedPagesTest < ActionDispatch::IntegrationTest
     end
     @user.update!(name: "Ada Admin")
     sign_in @user
+    DummyAccess.bootstrap_workspace!(name: "Studio Workspace", actor: @user)
+    DummyAccess.record_under_workspace!(
+      Page.find_or_create_by!(title: "Widgets") { |page| page.body = "unrelated copy" },
+      actor: @user
+    )
+    DummyAccess.record_under_workspace!(
+      Page.find_or_create_by!(title: "Something else") { |page| page.body = "Widgets appear in the body only" },
+      actor: @user
+    )
   end
 
   test "blank title-first page waits for widgets" do
@@ -42,4 +51,28 @@ class WeightedPagesTest < ActionDispatch::IntegrationTest
     assert_match "Title", body
     assert_match "Body", body
   end
+
+  test "title-first search hides pages the signed-in person cannot view" do
+    stranger = User.find_or_create_by!(email: "stranger-weights@example.com") do |account|
+      account.password = "Password"
+      account.password_confirmation = "Password"
+      account.name = "Stranger"
+    end
+    hidden = Page.find_or_create_by!(title: "Secret widgets") do |page|
+      page.body = "widgets only this workspace should see"
+    end
+    DummyAccess.bootstrap_workspace!(name: "Weighted Private Workspace", actor: stranger)
+    DummyAccess.record_under_workspace!(
+      hidden,
+      actor: stranger,
+      workspace_name: "Weighted Private Workspace"
+    )
+
+    get title_first_path, params: { q: "widgets" }
+
+    assert_response :success
+    assert_match "Widgets", response.body
+    refute_match "Secret widgets", response.body
+  end
 end
+

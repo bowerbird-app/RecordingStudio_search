@@ -20,9 +20,14 @@ class UsersAuthTest < ActionDispatch::IntegrationTest
       account.password_confirmation = "Password"
       account.name = "Wipe Me"
     end
-    RecordingStudioUser.record_profile!(user, first_name: "Wipe", last_name: "Me", time_zone: "UTC") unless RecordingStudioUser.profile_for(user)
+    RecordingStudioUser::Profile.create!(
+      user: user,
+      first_name: "Wipe",
+      last_name: "Me",
+      time_zone: "UTC"
+    )
 
-    assert RecordingStudioUser.profile_for(user)
+    assert RecordingStudioUser::Profile.exists?(user_id: user.id)
     reset_users!
     refute User.exists?(user.id)
   end

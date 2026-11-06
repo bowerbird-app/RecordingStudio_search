@@ -15,7 +15,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "admin@admin.com"
     assert_select 'html[data-theme="rounded"]', count: 1
     assert_includes response.body, "min-h-dvh"
-    refute_includes response.body, "data-recording-studio-default-layout"
+    assert_select "body[data-recording-studio-default-layout='true']", count: 1
     refute_includes response.body, "mt-28"
     refute_includes response.body, "fixed inset-0"
   end
@@ -29,7 +29,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     sign_in user
 
     workspace = Workspace.create!(name: "Dropdown Workspace")
-    RecordingStudio.root_recording_for(workspace)
+    DummyAccess.bootstrap_workspace!(name: workspace.name, actor: user)
 
     get root_path
 
@@ -49,7 +49,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     sign_in user
 
     workspace = Workspace.create!(name: "Switch Page Workspace")
-    RecordingStudio.root_recording_for(workspace)
+    DummyAccess.bootstrap_workspace!(name: workspace.name, actor: user)
 
     get "/recording_studio_root_switchable/v1/root_switch?scope=all_workspaces"
 
@@ -70,8 +70,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     source_workspace = Workspace.create!(name: "Source Workspace")
     target_workspace = Workspace.create!(name: "Target Workspace")
-    target_root_recording = RecordingStudio.root_recording_for(target_workspace)
-    RecordingStudio.root_recording_for(source_workspace)
+    target_root_recording = DummyAccess.bootstrap_workspace!(name: target_workspace.name, actor: user)
+    DummyAccess.bootstrap_workspace!(name: source_workspace.name, actor: user)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -94,8 +94,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     source_workspace = Workspace.create!(name: "Fallback Source Workspace")
     target_workspace = Workspace.create!(name: "Fallback Target Workspace")
-    target_root_recording = RecordingStudio.root_recording_for(target_workspace)
-    RecordingStudio.root_recording_for(source_workspace)
+    target_root_recording = DummyAccess.bootstrap_workspace!(name: target_workspace.name, actor: user)
+    DummyAccess.bootstrap_workspace!(name: source_workspace.name, actor: user)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
