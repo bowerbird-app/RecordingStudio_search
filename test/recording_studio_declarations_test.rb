@@ -34,8 +34,6 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   end
 
   test "allowed child can be recorded under a workspace root" do
-    root_recording = nil
-    folder = nil
     root_recording = DummyAccess.bootstrap_workspace!(name: unique_name("Child Workspace"), actor: @actor)
     folder = Folder.new(name: unique_name("Allowed Folder"))
     event = DummyAccess.as_actor(@actor) do
