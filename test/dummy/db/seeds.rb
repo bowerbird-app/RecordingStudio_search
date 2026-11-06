@@ -33,8 +33,6 @@ previous_actor = Current.actor
 Current.actor = user
 
 begin
-  RecordingStudioUser.record_profile!(user, first_name: "Ada", last_name: "Admin", time_zone: "UTC") unless RecordingStudioUser.profile_for(user)
-
   lovelace = User.find_or_create_by!(email: "ada@example.com") do |account|
     account.password = "Password"
     account.password_confirmation = "Password"
@@ -42,16 +40,12 @@ begin
   end
   lovelace.update!(name: "Ada Lovelace") if lovelace.name.blank?
 
-  RecordingStudioUser.record_profile!(lovelace, first_name: "Ada", last_name: "Lovelace", time_zone: "UTC") unless RecordingStudioUser.profile_for(lovelace)
-
   hopper = User.find_or_create_by!(email: "grace@hopper.test") do |account|
     account.password = "Password"
     account.password_confirmation = "Password"
     account.name = "Grace Hopper"
   end
   hopper.update!(name: "Grace Hopper") if hopper.name.blank?
-
-  RecordingStudioUser.record_profile!(hopper, first_name: "Grace", last_name: "Hopper", time_zone: "UTC") unless RecordingStudioUser.profile_for(hopper)
 
   workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
   accessible_workspace = Workspace.find_or_create_by!(name: "Client Workspace")

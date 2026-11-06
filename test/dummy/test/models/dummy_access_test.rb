@@ -46,7 +46,49 @@ class DummyAccessTest < ActiveSupport::TestCase
     refute_includes source, "ensure_owner!"
     refute_includes source, "trusted_write?"
     refute_includes source, "TRUSTED_WRITE_KEY"
+    refute_includes source, "RecordingStudioUser::Profile"
     assert_includes source, "raise(result.error"
     assert_includes source, "bootstrap_owner_access!"
+  end
+
+  test "AccessCreationContext does not authorize a Page with no grant" do
+    page = Page.new(title: "No grant page", body: "stay out")
+
+    allowed = RecordingStudioAccessible::AccessCreationContext.allow do
+      DummyAccess.authorize_write?(actor: @stranger, recordable: page)
+    end
+
+    refute allowed
+  end
+
+  test "a new Profile with a blank recording is not authorized" do
+    profile = RecordingStudioUser::Profile.new(
+      user: @stranger,
+      first_name: "Stranger",
+      last_name: "Profile",
+      time_zone: "UTC"
+    )
+
+    refute DummyAccess.authorize_write?(actor: @stranger, recordable: profile, recording: nil)
+  end
+
+  test "Access outside AccessCreationContext requires admin not edit" do
+    root = DummyAccess.bootstrap_workspace!(name: "Edit Role Workspace", actor: @owner)
+    result = RecordingStudioAccessible.grant_access(
+      recording: root,
+      actor: @stranger,
+      role: :edit,
+      manager_actor: @owner
+    )
+    raise result.error if result.failure?
+
+    access = RecordingStudio::Access.new(actor: @stranger, role: "edit")
+
+    refute DummyAccess.authorize_write?(
+      actor: @stranger,
+      recordable: access,
+      parent_recording: root,
+      root_recording: root
+    )
   end
 end

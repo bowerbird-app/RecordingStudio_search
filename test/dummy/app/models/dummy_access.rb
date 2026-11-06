@@ -15,15 +15,16 @@ module DummyAccess
   def authorize_write?(actor:, recording: nil, parent_recording: nil, root_recording: nil, recordable: nil, **)
     return false if actor.blank?
 
-    # Accessible grant/bootstrap writes Access rows inside AccessCreationContext.
-    return true if RecordingStudioAccessible::AccessCreationContext.allowed?
-    # Users records a Profile under shared People before bootstrap_owner_access!.
-    return true if recordable.is_a?(RecordingStudioUser::Profile) && recording.blank?
+    # Grant/bootstrap may write Access rows only. Other recordables stay closed.
+    if RecordingStudioAccessible::AccessCreationContext.allowed?
+      return recordable.is_a?(RecordingStudio::Access)
+    end
 
     target = recording || parent_recording || root_recording
     return false if target.blank?
 
-    RecordingStudioAccessible.authorized?(actor: actor, recording: target, role: :edit)
+    required_role = recordable.is_a?(RecordingStudio::Access) ? :admin : :edit
+    RecordingStudioAccessible.authorized?(actor: actor, recording: target, role: required_role)
   end
 
   def bootstrap_workspace!(name:, actor:)
