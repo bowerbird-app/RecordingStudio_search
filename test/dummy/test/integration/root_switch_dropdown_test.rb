@@ -29,7 +29,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     sign_in user
 
     workspace = Workspace.create!(name: "Dropdown Workspace")
-    RecordingStudio.root_recording_for(workspace)
+    DummyAccess.trusted_as(user) { RecordingStudio.root_recording_for(workspace) }
 
     get root_path
 
@@ -49,7 +49,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     sign_in user
 
     workspace = Workspace.create!(name: "Switch Page Workspace")
-    RecordingStudio.root_recording_for(workspace)
+    DummyAccess.trusted_as(user) { RecordingStudio.root_recording_for(workspace) }
 
     get "/recording_studio_root_switchable/v1/root_switch?scope=all_workspaces"
 
@@ -70,8 +70,10 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     source_workspace = Workspace.create!(name: "Source Workspace")
     target_workspace = Workspace.create!(name: "Target Workspace")
-    target_root_recording = RecordingStudio.root_recording_for(target_workspace)
-    RecordingStudio.root_recording_for(source_workspace)
+    target_root_recording = DummyAccess.trusted_as(user) do
+      RecordingStudio.root_recording_for(target_workspace)
+    end
+    DummyAccess.trusted_as(user) { RecordingStudio.root_recording_for(source_workspace) }
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -94,8 +96,10 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     source_workspace = Workspace.create!(name: "Fallback Source Workspace")
     target_workspace = Workspace.create!(name: "Fallback Target Workspace")
-    target_root_recording = RecordingStudio.root_recording_for(target_workspace)
-    RecordingStudio.root_recording_for(source_workspace)
+    target_root_recording = DummyAccess.trusted_as(user) do
+      RecordingStudio.root_recording_for(target_workspace)
+    end
+    DummyAccess.trusted_as(user) { RecordingStudio.root_recording_for(source_workspace) }
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",

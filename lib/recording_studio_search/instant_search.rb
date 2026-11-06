@@ -16,7 +16,7 @@ module RecordingStudioSearch
   # Engine InstantSearchesController#show is the default results URL.
   # Only +config.instant_search_models+ may be searched. Unknown models are ignored.
   # Blank +q+ returns empty hits, not Model.search("") (which would list everyone).
-  # Hits are Accessible-scoped to +actor+ (:view on each record's recording).
+  # Hits are Accessible-scoped to +actor+ before ranking or limit.
   # Blank actor, missing Accessible, or a model with no recording is empty.
   module InstantSearch
     RESERVED_PARAMS = %w[models frame_id controller action format authenticity_token].freeze

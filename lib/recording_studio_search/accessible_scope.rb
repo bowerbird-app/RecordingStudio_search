@@ -3,6 +3,7 @@
 module RecordingStudioSearch
   # Instant search and dummy lookups ask Accessible which recordings the actor
   # may view. Missing Accessible or a blank actor is empty, not everyone.
+  # Scope is bulk-loaded from Accessible before ranking or limit.
   module AccessibleScope
     VIEW_ROLE = :view
 
@@ -21,9 +22,10 @@ module RecordingStudioSearch
       return [] unless accessible?
       return [] if actor.blank?
 
-      RecordingStudio::Recording.includes(:recordable).reorder(:created_at, :id).select do |recording|
-        authorized?(actor, recording)
-      end
+      ids = descendant_recording_ids(actor)
+      return [] if ids.empty?
+
+      RecordingStudio::Recording.where(id: ids).includes(:recordable).reorder(:created_at, :id).to_a
     end
 
     def recordable_ids(model, actor)
@@ -31,13 +33,9 @@ module RecordingStudioSearch
       return [] if actor.blank?
       return [] unless defined?(RecordingStudio::Recording)
 
-      RecordingStudio::Recording.where(recordable_type: model.name).filter_map do |recording|
-        recording.recordable_id if authorized?(actor, recording)
+      recordings_for(actor).filter_map do |recording|
+        recording.recordable_id if recording.recordable_type == model.name
       end
-    end
-
-    def authorized?(actor, recording)
-      RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: VIEW_ROLE)
     end
 
     def accessible?
@@ -51,5 +49,28 @@ module RecordingStudioSearch
     def none_for(model)
       searchable_model?(model) ? model.none : []
     end
+
+    def descendant_recording_ids(actor)
+      seen = {}
+      queue = Array(
+        RecordingStudioAccessible.root_recordings_for(actor: actor, minimum_role: VIEW_ROLE)
+      )
+
+      until queue.empty?
+        recording = queue.shift
+        next if recording.blank? || seen[recording.id]
+
+        seen[recording.id] = true
+        children = RecordingStudioAccessible.recordings_for(
+          actor: actor,
+          parent_recording: recording,
+          minimum_role: VIEW_ROLE
+        )
+        Array(children).each { |child| queue << child }
+      end
+
+      seen.keys
+    end
+    private_class_method :descendant_recording_ids
   end
 end

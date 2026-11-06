@@ -114,6 +114,30 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     refute_match "<html", response.body
   end
 
+  test "engine instant search is empty when Accessible is missing" do
+    grant_refunds_page!
+
+    without_accessible do
+      get recording_studio_search.instant_search_path, params: {
+        q: "refund",
+        models: ["Page"],
+        frame_id: "page_results"
+      }
+
+      assert_response :success
+      refute_match "Refunds", response.body
+      assert_match "No luck", response.body
+    end
+  end
+
+  test "engine instant search is empty for a blank actor" do
+    grant_refunds_page!
+
+    hits = RecordingStudioSearch::InstantSearch.hits_for(["Page"], "refund", actor: nil)
+
+    assert_equal 0, hits.count
+  end
+
   test "engine instant search hides pages the actor cannot view" do
     grant_refunds_page!
     stranger = User.find_or_create_by!(email: "stranger-instant@example.com") do |account|
@@ -124,6 +148,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
     hidden = Page.find_or_create_by!(title: "Hidden refunds") do |page|
       page.body = "A refund note in another workspace."
     end
+    DummyAccess.bootstrap_workspace!(name: "Instant Private Workspace", actor: stranger)
     DummyAccess.record_under_workspace!(
       hidden,
       actor: stranger,
@@ -143,7 +168,18 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
 
   private
 
+  def without_accessible
+    singleton = RecordingStudioSearch::AccessibleScope.singleton_class
+    singleton.alias_method :accessible_was, :accessible?
+    singleton.define_method(:accessible?) { false }
+    yield
+  ensure
+    singleton.alias_method :accessible?, :accessible_was
+    singleton.remove_method :accessible_was
+  end
+
   def grant_refunds_page!
+    DummyAccess.bootstrap_workspace!(name: "Studio Workspace", actor: @user)
     page = Page.find_or_create_by!(title: "Refunds") do |record|
       record.body = "How to request a refund when a charge looks wrong."
     end

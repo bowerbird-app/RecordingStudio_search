@@ -72,9 +72,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "recordings tree page renders successfully" do
-    workspace = Workspace.create!(name: "Tree Workspace")
-    root_recording = RecordingStudio.root_recording_for(workspace)
-    DummyAccess.ensure_owner!(actor: @user, recording: root_recording)
+    root_recording = DummyAccess.bootstrap_workspace!(name: "Tree Workspace", actor: @user)
     folder = Folder.create!(name: "Reference")
     folder_recording = record_child(folder, root_recording, root_recording)
     page = Page.create!(title: "API")
@@ -95,12 +93,11 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "recordings tree hides workspaces the signed-in person cannot view" do
-    visible = Workspace.create!(name: "Visible Tree")
-    visible_root = RecordingStudio.root_recording_for(visible)
-    DummyAccess.ensure_owner!(actor: @user, recording: visible_root)
+    DummyAccess.bootstrap_workspace!(name: "Visible Tree", actor: @user)
 
-    hidden = Workspace.create!(name: "Hidden Tree")
-    RecordingStudio.root_recording_for(hidden)
+    DummyAccess.trusted_as(@user) do
+      RecordingStudio.root_recording_for(Workspace.create!(name: "Hidden Tree"))
+    end
 
     get docs_recordings_tree_path
 
@@ -144,14 +141,16 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     folder_recordings_before = RecordingStudio::Recording.where(recordable_type: "Folder").count
     folders_before = Folder.count
 
-    workspace = Workspace.create!(name: "Counted Workspace")
-    2.times do
-      RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
-    end
+    DummyAccess.trusted_as(@user) do
+      workspace = Workspace.create!(name: "Counted Workspace")
+      2.times do
+        RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
+      end
 
-    root_recording = RecordingStudio.root_recording_for(workspace)
-    folder = Folder.create!(name: "Counted Folder")
-    record_child(folder, root_recording, root_recording)
+      root_recording = RecordingStudio.root_recording_for(workspace)
+      folder = Folder.create!(name: "Counted Folder")
+      record_child(folder, root_recording, root_recording)
+    end
 
     {
       workspace: recordable_type_summary(
@@ -171,11 +170,15 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def record_child(recordable, root_recording, parent_recording)
+    previous = Current.actor
+    Current.actor = @user
     RecordingStudio.record!(
       action: "created",
       recordable: recordable,
       root_recording: root_recording,
       parent_recording: parent_recording
     ).recording
+  ensure
+    Current.actor = previous
   end
 end

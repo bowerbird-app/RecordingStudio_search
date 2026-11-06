@@ -6,7 +6,7 @@ This Rails app exists to validate the Recording Studio search addon in a real ho
 
 - Devise actor plus Recording Studio Users `v0.27.1` auth (email, then password)
 - `Current.actor` wiring for Recording Studio events
-- Root workspace plus seeded folder and page recordables
+- Root workspace plus seeded folder and page recordables, owner-bootstrapped through Accessible
 - Trigram search on `User` and `Note`
 - Vector search on `Page` with trigram fallback and title `A` / body `D` weights
 - Recording Studio default layout with Flatpack `rounded` on `html` and `body` (no vendored layout copy)

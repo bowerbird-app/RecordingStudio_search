@@ -148,6 +148,9 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes initializer_source, "RecordingStudioUser::People"
     assert_includes initializer_source, "RecordingStudioUser::Profile"
     assert_includes initializer_source, "RecordingStudioAttachable::Attachment"
+    assert_includes initializer_source, "config.authorize_write"
+    assert_includes initializer_source, "DummyAccess.authorize_write?"
+    refute_includes initializer_source, "allow_unauthorized_writes = true"
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
@@ -232,6 +235,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes groups_view, "In this group"
     assert_includes weights_controller, "TrigramSearcher"
     assert_includes weights_controller, "AccessibleScope.relation_for"
+    refute_includes weights_controller, "DummyAccess"
     assert_includes weights_view, "title_first_path"
     assert_includes weights_view, "Title first"
     assert_includes routes, 'get "groups"'

@@ -69,16 +69,15 @@ class PageVectorSearchTest < ActiveSupport::TestCase
     page = Page.create!(title: "Stable identity", body: "refund wording")
     workspace = Workspace.create!(name: "Search Root")
     user = User.create!(name: "Embedder", email: "embed-#{SecureRandom.hex(4)}@example.com", password: "Password")
-    previous = Current.actor
-    Current.actor = user
-    root = RecordingStudio.root_recording_for(workspace)
-    recording = RecordingStudio.record!(
-      action: "created",
-      recordable: page,
-      root_recording: root,
-      parent_recording: root
-    ).recording
-    Current.actor = previous
+    recording = DummyAccess.trusted_as(user) do
+      root = RecordingStudio.root_recording_for(workspace)
+      RecordingStudio.record!(
+        action: "created",
+        recordable: page,
+        root_recording: root,
+        parent_recording: root
+      ).recording
+    end
 
     RecordingStudioSearch::DocumentEmbedder.call(
       searchable_type: "Page",
