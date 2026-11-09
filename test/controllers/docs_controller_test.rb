@@ -72,8 +72,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "recordings tree page renders successfully" do
-    workspace = Workspace.create!(name: "Tree Workspace")
-    root_recording = RecordingStudio.root_recording_for(workspace)
+    root_recording = DummyAccess.bootstrap_workspace!(name: "Tree Workspace", actor: @user)
     folder = Folder.create!(name: "Reference")
     folder_recording = record_child(folder, root_recording, root_recording)
     page = Page.create!(title: "API")
@@ -91,6 +90,17 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[role='treeitem']", minimum: 3
     refute_includes response.body, "Current structure"
     refute_includes response.body, "This tree is generated from RecordingStudio::Recording records"
+  end
+
+  test "recordings tree hides workspaces the signed-in person cannot view" do
+    DummyAccess.bootstrap_workspace!(name: "Visible Tree", actor: @user)
+    RecordingStudio.root_recording_for(Workspace.create!(name: "Hidden Tree"))
+
+    get docs_recordings_tree_path
+
+    assert_response :success
+    assert_includes response.body, "Workspace: Visible Tree"
+    refute_includes response.body, "Workspace: Hidden Tree"
   end
 
   test "gem_views page renders successfully" do
@@ -128,12 +138,11 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     folder_recordings_before = RecordingStudio::Recording.where(recordable_type: "Folder").count
     folders_before = Folder.count
 
-    workspace = Workspace.create!(name: "Counted Workspace")
+    root_recording = DummyAccess.bootstrap_workspace!(name: "Counted Workspace", actor: @user)
     2.times do
       RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
     end
 
-    root_recording = RecordingStudio.root_recording_for(workspace)
     folder = Folder.create!(name: "Counted Folder")
     record_child(folder, root_recording, root_recording)
 
@@ -155,11 +164,15 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def record_child(recordable, root_recording, parent_recording)
+    previous = Current.actor
+    Current.actor = @user
     RecordingStudio.record!(
       action: "created",
       recordable: recordable,
       root_recording: root_recording,
       parent_recording: parent_recording
     ).recording
+  ensure
+    Current.actor = previous
   end
 end

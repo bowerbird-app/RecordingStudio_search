@@ -13,7 +13,8 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.5.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.2"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -130,7 +131,7 @@ Document vectors already live in `recording_studio_search_documents`. The **quer
 2. Allowlist models. Only these may be searched via the engine endpoint. Prefer class **names** in the initializer so boot does not load models early:
 
 ```ruby
-config.instant_search_models = ["User"]
+config.instant_search_models = ["Page"]
 ```
 
 3. Pin `controllers/recording_studio_search` and `eagerLoadControllersFrom` it. Import Turbo (`import "@hotwired/turbo-rails"`).
@@ -138,21 +139,21 @@ config.instant_search_models = ["User"]
 
 ```erb
 <%= recording_studio_search.instant_search_field(
-      models: [User],
-      frame_id: "people_results",
+      models: [Page],
+      frame_id: "page_results",
       url: recording_studio_search.instant_search_path,
       param: :q,
       debounce_ms: 200
     ) %>
 <%= recording_studio_search.instant_search_results(
-      frame_id: "people_results",
+      frame_id: "page_results",
       hits: @hits
     ) %>
 ```
 
-On the host action, start with empty hits (`User.none`). Do not call `User.search("")` for a blank box — that would list everyone. The engine show action does the same: blank `q` renders the empty frame, not the full table.
+On the host action, start with empty hits (`Page.none`). Do not call `Page.search("")` for a blank box — that would list everyone. The engine show action does the same: blank `q` renders the empty frame, not the full table. Hits are Accessible-scoped to the current actor (`:view` on each record's recording). Blank actor or a model with no recording is empty.
 
-`url:` defaults to `InstantSearchesController#show` (`GET …/instant_search?models[]=User&frame_id=…`). Pass a host path only when that action should render the frame instead. Requested models that are not allowlisted are ignored.
+`url:` defaults to `InstantSearchesController#show` (`GET …/instant_search?models[]=Page&frame_id=…`). Pass a host path only when that action should render the frame instead. Requested models that are not allowlisted are ignored.
 
 Override `app/views/recording_studio_search/_results.html.erb` if the default Name / Detail table is wrong for a type.
 
@@ -176,7 +177,7 @@ rows stay untranslated — they are model data. `instant_search_collection_label
 still returns raw English; the results partial translates at render via
 `instant_search_translated_collection_label`.
 
-Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `User` (trigram) so typing updates the frame and leaves the URL at `/instant`. That is a demo choice, not a backend limit. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
+Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `Page` so typing updates the frame and leaves the URL at `/instant`. Pages without a grant do not appear. `/people` still uses unscoped `User.search` as the people-lookup demo. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
 
 ## Data
 
@@ -207,7 +208,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.26.6`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D`.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.27.1`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame of pages the signed-in person can view. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D` for pages they can view.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 
@@ -217,7 +218,8 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 6.1.0` (dummy tag `v6.3.0`, FlatPack `v0.1.341`)
+- Recording Studio `>= 6.1.0` (dummy tag `v6.5.0`, FlatPack `v0.1.341`)
+- Accessible on the host for instant search, recordings tree, and title-first demos (dummy tag `v0.24.2`). Missing Accessible returns no instant hits.
 - PostgreSQL 16
 
 ## Documentation

@@ -53,7 +53,7 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
       assert_select "h1", text: "As you type"
       assert_select "h3", text: "Type a little"
       assert_select "p", text: "Hits land here as you go."
-      assert_select "input[name=q][placeholder='Try Ada or hopper']"
+      assert_select "input[name=q][placeholder='Try widgets or refund']"
       refute_search_translation_missing!
     end
   end
