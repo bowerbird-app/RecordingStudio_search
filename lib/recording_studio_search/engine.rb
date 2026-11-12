@@ -155,5 +155,9 @@ module RecordingStudioSearch
         end
       end
     end
+
+    initializer "recording_studio_search.api" do
+      config.to_prepare { RecordingStudioSearch::Api.register! }
+    end
   end
 end

@@ -179,6 +179,20 @@ still returns raw English; the results partial translates at render via
 
 Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `Page` so typing updates the frame and leaves the URL at `/instant`. Pages without a grant do not appear. `/people` still uses unscoped `User.search` as the people-lookup demo. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
 
+## API and MCP (`search.query`)
+
+Agents and API clients should not rely on core list `q` (ILIKE). This gem registers one public endpoint when Recording Studio API is loaded:
+
+- Name: `search.query`
+- Path: `GET search/query`
+- Handler: `InstantSearch.hits_for` after `access_grant.authorize!(role: :view)` on the request root
+
+MCP lists registered endpoints. This gem does not add MCP tool code.
+
+Pass `q`. Optionally pass `models` (allowlisted type names) and `limit` (default 10, max 20). `limit` is top-N, not paginated. Omit `models` to search every `config.instant_search_models` type. Hits are Accessible-scoped the same way as instant search, then kept to the request root. A caller without `:view` on the root is denied.
+
+This gem does not depend on `recording_studio_api` at runtime. It is a development dependency so the dummy and gem tests can use the real module. Hosts that already mount that gem get the endpoint from this engine's `to_prepare` registration.
+
 ## Data
 
 Keyword cache rows and embedding rows are ordinary tables, not Recordings.

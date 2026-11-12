@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-12
+
+### Added
+
+- Public API endpoint `search.query` (`GET search/query`) wrapping `InstantSearch.hits_for`. Hosts that load Recording Studio API get the action automatically. MCP picks it up as a registered endpoint. No MCP tool code in this gem. `limit` is top-N, not paginated. Hits are filtered to `context.root_recording` after InstantSearch so a caller with `:view` on two roots cannot see the other workspace.
+
+### Fixed
+
+- `search.query` no longer returns hits from every root the actor can view. The request root is the bound. A missing or nil root keeps no hits.
+
+- Dummy mounts Recording Studio API and covers `search.query` over HTTP (200 / 401 / 403). `recording_studio_api` is a development Gemfile dependency so tests use the real module.
+
+### Removed
+
+- Leftover template mixin `RecordingStudio::Capabilities::Example` and its dummy/test references.
+
+### Upgrade notes
+
+- Bump to `0.10.0`. No migration. No new gemspec runtime dependency. `recording_studio_api` is a development dependency (hosts still supply it at runtime). When that gem is loaded, this engine registers `search.query` on the public API.
+- Hits stay Accessible-scoped through the existing `AccessibleScope` path used by instant search, then kept to the request root. Callers without `:view` on the request root are denied. A caller who can view two workspaces still does not see the other root's pages.
+- Hosts that copied `include RecordingStudio::Capabilities::Example.to(...)` should drop that line. Search never used the mixin.
+
 ## [0.9.0] - 2026-11-06
 
 ### Added
@@ -215,7 +237,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.7.1...v0.8.0

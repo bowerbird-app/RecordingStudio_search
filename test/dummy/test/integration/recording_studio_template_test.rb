@@ -73,23 +73,17 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     Current.actor = nil
   end
 
-  test "workspace opts into accessible and the example mixin without enabling them globally" do
+  test "workspace opts into accessible and the example mixin is gone" do
     workspace_source = File.read(Rails.root.join("app/models/workspace.rb"))
-    example_source = File.read(RecordingStudioSearch::Engine.root.join("lib/recording_studio_search/capabilities/example.rb"))
 
-    assert_includes workspace_source, "include RecordingStudio::Capabilities::Example.to(label: \"dummy workspace\")"
-    assert_includes example_source, "RecordingStudio::Capabilities.include_for(:example, **)"
-    refute_includes example_source, "enable_capability"
-    refute_includes example_source, "set_capability_options"
+    refute_includes workspace_source, "Capabilities::Example"
+    refute File.exist?(RecordingStudioSearch::Engine.root.join("lib/recording_studio_search/capabilities/example.rb"))
 
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
-    assert RecordingStudio.capability_enabled?(:example, for: Workspace)
-    assert_equal({ label: "dummy workspace" }, RecordingStudio.capability_options(:example, for: Workspace))
+    refute RecordingStudio.registered_capabilities.key?(:example)
+    refute RecordingStudio.capability_enabled?(:example, for: Workspace)
     refute RecordingStudio.capability_enabled?(:accessible, for: Folder)
     refute RecordingStudio.capability_enabled?(:accessible, for: Page)
-    refute RecordingStudio.capability_enabled?(:example, for: Folder)
-    refute RecordingStudio.capability_enabled?(:example, for: Page)
-    assert_equal [ "Workspace" ], RecordingStudio.configuration.enabled_recordable_types_for(:example)
     assert ApplicationController.respond_to?(:recording_studio_layout)
   end
 end

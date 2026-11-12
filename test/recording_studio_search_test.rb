@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioSearchTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.0", ::RecordingStudioSearch::VERSION
+    assert_equal "0.10.0", ::RecordingStudioSearch::VERSION
   end
 
   def test_engine_exists
@@ -49,6 +49,7 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.5.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.21.3"'
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.2"'
@@ -60,6 +61,9 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.8.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.22.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.21.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.133"'
@@ -79,16 +83,12 @@ class RecordingStudioSearchTest < Minitest::Test
     refute File.exist?(File.expand_path("../lib/recording_studio_search/services/example_service.rb", __dir__))
   end
 
-  def test_example_capability_wraps_include_for_and_is_not_enabled_globally
-    source = File.read(File.expand_path("../lib/recording_studio_search/capabilities/example.rb", __dir__))
+  def test_example_capability_is_removed
+    refute File.exist?(File.expand_path("../lib/recording_studio_search/capabilities/example.rb", __dir__))
+    source = File.read(File.expand_path("../lib/recording_studio_search.rb", __dir__))
 
-    assert_includes source, "def self.to(**)"
-    assert_includes source, "RecordingStudio::Capabilities.include_for(:example, **)"
-    refute_includes source, "enable_capability"
-    refute_includes source, "set_capability_options"
-    refute RecordingStudio.capability_enabled?(:example, for: "Folder")
-    refute RecordingStudio.capability_enabled?(:example, for: "Page")
-    assert_empty RecordingStudio.configuration.enabled_recordable_types_for(:example)
+    refute_includes source, "capabilities/example"
+    refute RecordingStudio.registered_capabilities.key?(:example)
   end
 
   def test_dummy_app_uses_recording_studio_default_layout
@@ -187,6 +187,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme, "instant_search_models"
     assert_includes readme, "trigram or vector"
     assert_includes readme, "recording_studio_search_queries"
+    assert_includes readme, "search.query"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"
     refute_includes readme, "ExampleService"

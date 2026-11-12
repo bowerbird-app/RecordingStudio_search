@@ -211,6 +211,159 @@ CREATE TABLE public.recording_studio_accesses (
 
 
 --
+-- Name: recording_studio_api_admin_apis; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_admin_apis (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    key character varying NOT NULL,
+    name character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_api_api_access_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_api_access_tokens (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    api_credential_id uuid NOT NULL,
+    token_digest character varying NOT NULL,
+    token_prefix character varying NOT NULL,
+    expires_at timestamp(6) without time zone NOT NULL,
+    last_used_at timestamp(6) without time zone,
+    revoked_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_api_api_clients; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_api_clients (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    access_recording_id uuid,
+    name character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    api_key character varying DEFAULT 'public'::character varying NOT NULL
+);
+
+
+--
+-- Name: recording_studio_api_api_credentials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_api_credentials (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    api_client_id uuid NOT NULL,
+    access_recording_id uuid NOT NULL,
+    token_public_id character varying NOT NULL,
+    token_digest character varying NOT NULL,
+    token_prefix character varying NOT NULL,
+    expires_at timestamp(6) without time zone,
+    last_used_at timestamp(6) without time zone,
+    revoked_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_api_api_daily_latency_histogram_buckets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_api_daily_latency_histogram_buckets (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    metric_date date NOT NULL,
+    route_name character varying NOT NULL,
+    request_method character varying NOT NULL,
+    status_class integer NOT NULL,
+    upper_bound_ms integer NOT NULL,
+    request_count bigint DEFAULT 0 NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    api_key character varying DEFAULT 'public'::character varying NOT NULL
+);
+
+
+--
+-- Name: recording_studio_api_api_daily_metrics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_api_daily_metrics (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    metric_date date NOT NULL,
+    route_name character varying NOT NULL,
+    controller_name character varying,
+    action_name character varying,
+    request_method character varying NOT NULL,
+    status_class integer NOT NULL,
+    request_count bigint DEFAULT 0 NOT NULL,
+    rate_limited_count bigint DEFAULT 0 NOT NULL,
+    client_error_count bigint DEFAULT 0 NOT NULL,
+    server_error_count bigint DEFAULT 0 NOT NULL,
+    duration_count bigint DEFAULT 0 NOT NULL,
+    duration_sum_ms bigint DEFAULT 0 NOT NULL,
+    duration_max_ms integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    api_key character varying DEFAULT 'public'::character varying NOT NULL
+);
+
+
+--
+-- Name: recording_studio_api_api_request_logs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_api_request_logs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    occurred_at timestamp(6) without time zone NOT NULL,
+    request_id character varying,
+    request_method character varying NOT NULL,
+    request_path character varying NOT NULL,
+    route_name character varying,
+    controller_name character varying,
+    action_name character varying,
+    status_code integer NOT NULL,
+    duration_ms integer NOT NULL,
+    rate_limited boolean DEFAULT false NOT NULL,
+    api_client_id uuid,
+    api_credential_id uuid,
+    access_recording_id uuid,
+    root_recording_id uuid,
+    remote_ip character varying,
+    user_agent character varying,
+    error_class character varying,
+    error_message character varying,
+    request_params jsonb DEFAULT '{}'::jsonb NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    api_key character varying DEFAULT 'public'::character varying NOT NULL,
+    arrived_at timestamp(6) without time zone DEFAULT clock_timestamp(),
+    latency_bucket_ms integer
+);
+
+
+--
+-- Name: recording_studio_api_api_settings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_api_api_settings (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    key character varying NOT NULL,
+    api_access_enabled boolean DEFAULT true NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    runtime_overrides jsonb DEFAULT '{}'::jsonb NOT NULL
+);
+
+
+--
 -- Name: recording_studio_attachable_attachments; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -271,6 +424,38 @@ CREATE TABLE public.recording_studio_events (
     recordable_id uuid NOT NULL,
     recordable_type character varying NOT NULL,
     recording_id uuid NOT NULL
+);
+
+
+--
+-- Name: recording_studio_logs_aggregation_runs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_logs_aggregation_runs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    aggregation_name character varying NOT NULL,
+    period_start timestamp(6) without time zone NOT NULL,
+    status character varying NOT NULL,
+    error_message text,
+    finished_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_logs_maintenance_runs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_logs_maintenance_runs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    task character varying NOT NULL,
+    subject character varying NOT NULL,
+    status character varying NOT NULL,
+    details text,
+    finished_at timestamp(6) without time zone NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -541,6 +726,70 @@ ALTER TABLE ONLY public.recording_studio_accesses
 
 
 --
+-- Name: recording_studio_api_admin_apis recording_studio_api_admin_apis_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_admin_apis
+    ADD CONSTRAINT recording_studio_api_admin_apis_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_api_api_access_tokens recording_studio_api_api_access_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_access_tokens
+    ADD CONSTRAINT recording_studio_api_api_access_tokens_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_api_api_clients recording_studio_api_api_clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_clients
+    ADD CONSTRAINT recording_studio_api_api_clients_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_api_api_credentials recording_studio_api_api_credentials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_credentials
+    ADD CONSTRAINT recording_studio_api_api_credentials_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_api_api_daily_latency_histogram_buckets recording_studio_api_api_daily_latency_histogram_buckets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_daily_latency_histogram_buckets
+    ADD CONSTRAINT recording_studio_api_api_daily_latency_histogram_buckets_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_api_api_daily_metrics recording_studio_api_api_daily_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_daily_metrics
+    ADD CONSTRAINT recording_studio_api_api_daily_metrics_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_api_api_request_logs recording_studio_api_api_request_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_request_logs
+    ADD CONSTRAINT recording_studio_api_api_request_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_api_api_settings recording_studio_api_api_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_settings
+    ADD CONSTRAINT recording_studio_api_api_settings_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: recording_studio_attachable_attachments recording_studio_attachable_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -570,6 +819,22 @@ ALTER TABLE ONLY public.recording_studio_attachable_placements
 
 ALTER TABLE ONLY public.recording_studio_events
     ADD CONSTRAINT recording_studio_events_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_logs_aggregation_runs recording_studio_logs_aggregation_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_logs_aggregation_runs
+    ADD CONSTRAINT recording_studio_logs_aggregation_runs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_logs_maintenance_runs recording_studio_logs_maintenance_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_logs_maintenance_runs
+    ADD CONSTRAINT recording_studio_logs_maintenance_runs_pkey PRIMARY KEY (id);
 
 
 --
@@ -661,6 +926,20 @@ ALTER TABLE ONLY public.workspaces
 
 
 --
+-- Name: idx_on_access_recording_id_103368144f; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_on_access_recording_id_103368144f ON public.recording_studio_api_api_credentials USING btree (access_recording_id);
+
+
+--
+-- Name: idx_on_api_credential_id_89874cbf51; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_on_api_credential_id_89874cbf51 ON public.recording_studio_api_api_access_tokens USING btree (api_credential_id);
+
+
+--
 -- Name: idx_on_attachment_kind_d683071625; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -672,6 +951,13 @@ CREATE INDEX idx_on_attachment_kind_d683071625 ON public.recording_studio_attach
 --
 
 CREATE INDEX idx_on_attachment_recording_id_76c6286907 ON public.recording_studio_attachable_placements USING btree (attachment_recording_id);
+
+
+--
+-- Name: idx_on_metric_date_8723beba88; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_on_metric_date_8723beba88 ON public.recording_studio_api_api_daily_latency_histogram_buckets USING btree (metric_date);
 
 
 --
@@ -843,6 +1129,111 @@ CREATE INDEX index_recording_studio_accesses_on_depends_on_recording_id ON publi
 
 
 --
+-- Name: index_recording_studio_api_admin_apis_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_api_admin_apis_on_key ON public.recording_studio_api_admin_apis USING btree (key);
+
+
+--
+-- Name: index_recording_studio_api_api_access_tokens_on_expires_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_access_tokens_on_expires_at ON public.recording_studio_api_api_access_tokens USING btree (expires_at);
+
+
+--
+-- Name: index_recording_studio_api_api_access_tokens_on_token_digest; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_api_api_access_tokens_on_token_digest ON public.recording_studio_api_api_access_tokens USING btree (token_digest);
+
+
+--
+-- Name: index_recording_studio_api_api_clients_on_access_recording_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_api_api_clients_on_access_recording_id ON public.recording_studio_api_api_clients USING btree (access_recording_id);
+
+
+--
+-- Name: index_recording_studio_api_api_clients_on_api_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_clients_on_api_key ON public.recording_studio_api_api_clients USING btree (api_key);
+
+
+--
+-- Name: index_recording_studio_api_api_credentials_on_api_client_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_credentials_on_api_client_id ON public.recording_studio_api_api_credentials USING btree (api_client_id);
+
+
+--
+-- Name: index_recording_studio_api_api_credentials_on_token_digest; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_api_api_credentials_on_token_digest ON public.recording_studio_api_api_credentials USING btree (token_digest);
+
+
+--
+-- Name: index_recording_studio_api_api_credentials_on_token_public_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_api_api_credentials_on_token_public_id ON public.recording_studio_api_api_credentials USING btree (token_public_id);
+
+
+--
+-- Name: index_recording_studio_api_api_daily_metrics_on_metric_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_daily_metrics_on_metric_date ON public.recording_studio_api_api_daily_metrics USING btree (metric_date);
+
+
+--
+-- Name: index_recording_studio_api_api_request_logs_on_occurred_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_request_logs_on_occurred_at ON public.recording_studio_api_api_request_logs USING btree (occurred_at);
+
+
+--
+-- Name: index_recording_studio_api_api_request_logs_on_request_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_request_logs_on_request_id ON public.recording_studio_api_api_request_logs USING btree (request_id);
+
+
+--
+-- Name: index_recording_studio_api_api_request_logs_on_request_path; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_request_logs_on_request_path ON public.recording_studio_api_api_request_logs USING btree (request_path);
+
+
+--
+-- Name: index_recording_studio_api_api_request_logs_on_status_code; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recording_studio_api_api_request_logs_on_status_code ON public.recording_studio_api_api_request_logs USING btree (status_code);
+
+
+--
+-- Name: index_recording_studio_api_api_settings_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_api_api_settings_on_key ON public.recording_studio_api_api_settings USING btree (key);
+
+
+--
+-- Name: index_recording_studio_api_credentials_on_active_client; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_recording_studio_api_credentials_on_active_client ON public.recording_studio_api_api_credentials USING btree (api_client_id) WHERE (revoked_at IS NULL);
+
+
+--
 -- Name: index_recording_studio_attachable_libraries_on_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -927,6 +1318,41 @@ CREATE INDEX index_recording_studio_user_profiles_on_user_id ON public.recording
 
 
 --
+-- Name: index_rs_api_daily_latency_histogram_on_dimensions; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_rs_api_daily_latency_histogram_on_dimensions ON public.recording_studio_api_api_daily_latency_histogram_buckets USING btree (api_key, metric_date, route_name, request_method, status_class, upper_bound_ms);
+
+
+--
+-- Name: index_rs_api_daily_metrics_on_dimensions; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_rs_api_daily_metrics_on_dimensions ON public.recording_studio_api_api_daily_metrics USING btree (api_key, metric_date, route_name, request_method, status_class);
+
+
+--
+-- Name: index_rs_api_request_logs_on_api_and_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_api_request_logs_on_api_and_time ON public.recording_studio_api_api_request_logs USING btree (api_key, occurred_at);
+
+
+--
+-- Name: index_rs_api_request_logs_on_client_and_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_api_request_logs_on_client_and_time ON public.recording_studio_api_api_request_logs USING btree (api_client_id, occurred_at);
+
+
+--
+-- Name: index_rs_api_request_logs_on_credential_and_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_api_request_logs_on_credential_and_time ON public.recording_studio_api_api_request_logs USING btree (api_credential_id, occurred_at);
+
+
+--
 -- Name: index_rs_attachable_attachments_on_root_recording_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -952,6 +1378,20 @@ CREATE INDEX index_rs_events_on_actor_and_occurred_at ON public.recording_studio
 --
 
 CREATE INDEX index_rs_events_on_recording_and_timeline ON public.recording_studio_events USING btree (recording_id, occurred_at DESC, created_at DESC);
+
+
+--
+-- Name: index_rs_logs_aggregation_runs_on_name_and_period; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_rs_logs_aggregation_runs_on_name_and_period ON public.recording_studio_logs_aggregation_runs USING btree (aggregation_name, period_start);
+
+
+--
+-- Name: index_rs_logs_maintenance_runs_on_task_and_subject; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_logs_maintenance_runs_on_task_and_subject ON public.recording_studio_logs_maintenance_runs USING btree (task, subject, finished_at);
 
 
 --
@@ -1067,6 +1507,14 @@ CREATE INDEX index_users_on_search_vector ON public.users USING gin (search_vect
 
 
 --
+-- Name: recording_studio_api_api_access_tokens fk_rails_18fdda3058; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_access_tokens
+    ADD CONSTRAINT fk_rails_18fdda3058 FOREIGN KEY (api_credential_id) REFERENCES public.recording_studio_api_api_credentials(id);
+
+
+--
 -- Name: recording_studio_user_profiles fk_rails_19efa4e96e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1123,6 +1571,14 @@ ALTER TABLE ONLY public.active_storage_attachments
 
 
 --
+-- Name: recording_studio_api_api_credentials fk_rails_f6ccfdb35b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_api_api_credentials
+    ADD CONSTRAINT fk_rails_f6ccfdb35b FOREIGN KEY (api_client_id) REFERENCES public.recording_studio_api_api_clients(id);
+
+
+--
 -- Name: recording_studio_events fk_rails_ff21937ccd; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1145,6 +1601,9 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261019000023'),
+('20261019000022'),
+('20261019000021'),
 ('20261012044049'),
 ('20261012044048'),
 ('20261009101701'),
@@ -1170,10 +1629,32 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20260910001002'),
 ('20260910001001'),
 ('20260910001000'),
+('20260831000020'),
 ('20260821000000'),
 ('20260815120000'),
 ('20260815093000'),
+('20260815000019'),
+('20260730000018'),
+('20260730000017'),
+('20260710000016'),
 ('20260612000000'),
+('20260609000015'),
+('20260527000016'),
+('20260527000015'),
+('20260527000014'),
+('20260526000013'),
+('20260525000012'),
+('20260519000011'),
+('20260519000010'),
+('20260519000009'),
+('20260519000008'),
+('20260519000007'),
+('20260519000006'),
+('20260519000005'),
+('20260519000004'),
+('20260518000003'),
+('20260518000002'),
+('20260518000001'),
 ('20260505000001'),
 ('20260421000000'),
 ('20260217233016'),
