@@ -189,9 +189,9 @@ Agents and API clients should not rely on core list `q` (ILIKE). This gem regist
 
 MCP lists registered endpoints. This gem does not add MCP tool code.
 
-Pass `q`. Optionally pass `models` (allowlisted type names) and `limit` (default 20). Omit `models` to search every `config.instant_search_models` type. Hits are Accessible-scoped the same way as instant search. A caller without `:view` on the root is denied.
+Pass `q`. Optionally pass `models` (allowlisted type names) and `limit` (default 10, max 20). `limit` is top-N, not paginated. Omit `models` to search every `config.instant_search_models` type. Hits are Accessible-scoped the same way as instant search, then kept to the request root. A caller without `:view` on the root is denied.
 
-This gem does not depend on `recording_studio_api`. Hosts that already mount that gem get the endpoint from this engine's `to_prepare` registration.
+This gem does not depend on `recording_studio_api` at runtime. It is a development dependency so the dummy and gem tests can use the real module. Hosts that already mount that gem get the endpoint from this engine's `to_prepare` registration.
 
 ## Data
 

@@ -67,6 +67,32 @@ class SearchQueryApiTest < ActiveSupport::TestCase
     assert_match(/not authorized/, error.message)
   end
 
+  test "same actor with view on two roots does not see the other root's page" do
+    root_a = DummyAccess.bootstrap_workspace!(name: "Search Query Root A", actor: @owner)
+    root_b = DummyAccess.bootstrap_workspace!(name: "Search Query Root B", actor: @owner)
+    hidden = Page.find_or_create_by!(title: "Cross Root Zebra") do |record|
+      record.body = "A zebra page that lives only under root B."
+    end
+    DummyAccess.record_under_workspace!(
+      hidden,
+      actor: @owner,
+      workspace_name: "Search Query Root B"
+    )
+
+    payload = RecordingStudioSearch::Api::Query.call(
+      Context.new(
+        access_grant: AccessGrant.new(@owner),
+        root_recording: root_a,
+        params: { q: "zebra", models: ["Page"] }
+      )
+    )
+    ids = payload.fetch(:hits).map { |row| row[:id] }
+
+    refute_includes ids, hidden.id
+    assert RecordingStudioAccessible.authorized?(actor: @owner, recording: root_a, role: :view)
+    assert RecordingStudioAccessible.authorized?(actor: @owner, recording: root_b, role: :view)
+  end
+
   test "authorized caller does not see a page granted only to someone else" do
     owner_payload = RecordingStudioSearch::Api::Query.call(owner_context(q: "refund"))
     stranger_payload = RecordingStudioSearch::Api::Query.call(
@@ -101,5 +127,91 @@ class SearchQueryApiTest < ActiveSupport::TestCase
       root_recording: @owner_root,
       params: { q: q, models: ["Page"] }
     )
+  end
+end
+
+class SearchQueryApiHttpTest < ActionDispatch::IntegrationTest
+  setup do
+    @owner = User.find_or_create_by!(email: "search-query-http-owner@example.com") do |account|
+      account.password = "Password"
+      account.password_confirmation = "Password"
+      account.name = "Owner"
+    end
+    @root = DummyAccess.bootstrap_workspace!(name: "Search Query HTTP Workspace", actor: @owner)
+    @page = Page.find_or_create_by!(title: "Search Query HTTP Refunds") do |record|
+      record.body = "How to request a refund when a charge looks wrong."
+    end
+    DummyAccess.record_under_workspace!(
+      @page,
+      actor: @owner,
+      workspace_name: "Search Query HTTP Workspace"
+    )
+  end
+
+  test "search.query returns 200 for a token with view on the root" do
+    get "/recording_studio_api/api/v1/search/query",
+        params: { q: "refund", models: ["Page"] },
+        headers: bearer_headers(issue_token_for(@owner, @root).fetch(:token))
+
+    assert_response :success
+    ids = JSON.parse(response.body).fetch("hits").map { |row| row.fetch("id") }
+    assert_includes ids, @page.id
+  end
+
+  test "search.query returns 401 without a token" do
+    get "/recording_studio_api/api/v1/search/query", params: { q: "refund", models: ["Page"] }
+
+    assert_response :unauthorized
+  end
+
+  test "search.query returns 403 when the actor cannot view the root" do
+    issued = issue_token_for(@owner, @root)
+    RecordingStudio::Access.where(id: issued.fetch(:access_recording).recordable_id).update_all(role: "")
+    refute RecordingStudioAccessible.authorized?(
+      actor: issued.fetch(:access_recording).recordable.reload.actor,
+      recording: @root,
+      role: :view
+    )
+
+    get "/recording_studio_api/api/v1/search/query",
+        params: { q: "refund", models: ["Page"] },
+        headers: bearer_headers(issued.fetch(:token))
+
+    assert_response :forbidden
+  end
+
+  private
+
+  def bearer_headers(token)
+    { "Authorization" => "Bearer #{token}" }
+  end
+
+  def access_recording_for(actor, root)
+    RecordingStudioAccessible.access_recordings_for_actor(recording: root, actor: actor).first
+  end
+
+  def issue_token_for(actor, root)
+    access_recording = access_recording_for(actor, root)
+    raise "missing access recording" if access_recording.blank?
+
+    provision = RecordingStudioApi::Services::ProvisionApiClient.call(
+      access_point_recording: root,
+      manager_actor: actor,
+      role: access_recording.recordable.role,
+      name: "Search query HTTP client #{SecureRandom.hex(4)}"
+    )
+    raise provision.error unless provision.success?
+
+    token_result = RecordingStudioApi::Services::IssueOauthAccessToken.call(
+      grant_type: "client_credentials",
+      client_id: provision.value.fetch(:credential).oauth_client_id,
+      client_secret: provision.value.fetch(:token)
+    )
+    raise token_result.error unless token_result.success?
+
+    {
+      token: token_result.value.fetch(:access_token),
+      access_recording: provision.value.fetch(:access_recording)
+    }
   end
 end

@@ -15,7 +15,8 @@ module RecordingStudioSearch
       title: "Search - Query",
       summary: "Search - Query",
       description: "Ranked search of allowlisted types you can already view. " \
-                   "Same ranking as instant search, not list q. Blank search returns no hits.",
+                   "Same ranking as instant search, not list q. Blank search returns no hits. " \
+                   "Limit is top-N, not paginated.",
       tags: ["Search"],
       parameters: [
         {
@@ -36,7 +37,7 @@ module RecordingStudioSearch
           name: "limit",
           in: "query",
           required: false,
-          description: "Max hits per type. Default 20.",
+          description: "Max ranked hits to return (top-N, not paginated). Default 20.",
           schema: { type: "integer" }
         }
       ]
@@ -51,7 +52,11 @@ module RecordingStudioSearch
           required: false,
           description: "Allowlisted type names. Omit to search every allowlisted type."
         },
-        limit: { type: :integer, required: false, description: "Max hits per type. Default 20." }
+        limit: {
+          type: :integer,
+          required: false,
+          description: "Max ranked hits to return (top-N, not paginated). Default 20."
+        }
       }
     }.freeze
 
@@ -73,11 +78,12 @@ module RecordingStudioSearch
 
       def available?
         defined?(RecordingStudioApi) &&
-          RecordingStudioApi.respond_to?(:register_endpoint)
+          RecordingStudioApi.respond_to?(:register_endpoint) &&
+          RecordingStudioApi.respond_to?(:registered_endpoint)
       end
 
       def already_registered?
-        return false unless RecordingStudioApi.respond_to?(:registered_endpoint)
+        return false unless available?
 
         RecordingStudioApi.registered_endpoint(NAME).present?
       end

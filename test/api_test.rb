@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "recording_studio_api"
 
 class ApiTest < Minitest::Test
   class FakeGrant
@@ -58,18 +59,21 @@ class ApiTest < Minitest::Test
 
   def teardown
     RecordingStudioSearch.instance_variable_set(:@configuration, @original)
-    remove_test_recording_studio_api!
   end
 
-  def test_registration_is_a_noop_without_recording_studio_api
-    refute Object.const_defined?(:RecordingStudioApi, false)
-    assert_nil RecordingStudioSearch::Api.register!
+  def test_register_is_a_noop_when_api_is_unavailable
+    RecordingStudioSearch::Api.stub(:available?, false) do
+      assert_nil RecordingStudioSearch::Api.register!
+    end
   end
 
-  def test_gemspec_omits_recording_studio_api_dependency
+  def test_gemspec_omits_runtime_recording_studio_api_dependency
     gemspec = File.read(File.expand_path("../recording_studio_search.gemspec", __dir__))
+    gemfile = File.read(File.expand_path("../Gemfile", __dir__))
 
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
+    refute_includes gemspec, 'spec.add_development_dependency "recording_studio_api"'
+    assert_includes gemfile, "recording_studio_api"
   end
 
   def test_engine_registers_api_when_present
@@ -88,26 +92,32 @@ class ApiTest < Minitest::Test
     assert_includes api, "PATH = \"search/query\""
     assert_includes api, 'title: "Search - Query"'
     assert_includes api, 'summary: "Search - Query"'
+    assert_includes api, "not paginated"
     refute_includes api, "register_capability_action"
     refute File.exist?(File.expand_path("../lib/recording_studio_search/mcp.rb", __dir__))
     assert_includes query, "grant.authorize!"
     assert_includes query, "InstantSearch.hits_for"
     assert_includes query, "actor: grant.actor"
+    assert_includes query, "root_recording_id"
     refute_includes query, "Pundit"
   end
 
   def test_search_query_registration_is_idempotent
-    api = install_test_recording_studio_api!
+    registrations = []
+    RecordingStudioApi.stub(:registered_endpoint, ->(*) { registrations.first }) do
+      RecordingStudioApi.stub(:register_endpoint, lambda { |name, **options|
+        registrations << { name: name, **options }
+      }) do
+        2.times { RecordingStudioSearch::Api.register! }
+      end
+    end
 
-    2.times { RecordingStudioSearch::Api.register! }
-
-    names = api.registrations.map { |entry| entry.fetch(:name) }
+    names = registrations.map { |entry| entry.fetch(:name) }
     assert_equal ["search.query"], names
-    registration = api.registrations.first
+    registration = registrations.first
     assert_equal :get, registration.fetch(:http_verb)
     assert_equal "search/query", registration.fetch(:path)
     assert_equal RecordingStudioSearch::Api::Query, registration.fetch(:handler)
-    assert_equal :public, registration.fetch(:api, :public)
   end
 
   def test_query_returns_hits_when_authorized
@@ -157,38 +167,5 @@ class ApiTest < Minitest::Test
     end
 
     assert_equal ["ApiTest::FakePage"], captured
-  end
-
-  private
-
-  def install_test_recording_studio_api!
-    remove_test_recording_studio_api!
-    refute Object.const_defined?(:RecordingStudioApi, false)
-
-    api = Module.new do
-      class << self
-        attr_accessor :registrations
-
-        def register_endpoint(name, **options)
-          self.registrations ||= []
-          registrations << { name: name, **options }
-        end
-
-        def registered_endpoint(name, api: :public)
-          Array(registrations).find { |entry| entry[:name] == name && entry.fetch(:api, :public) == api }
-        end
-      end
-    end
-    Object.const_set(:RecordingStudioApi, api)
-    @test_recording_studio_api = api
-  end
-
-  def remove_test_recording_studio_api!
-    return unless defined?(@test_recording_studio_api) && @test_recording_studio_api
-    return unless Object.const_defined?(:RecordingStudioApi, false)
-    return unless RecordingStudioApi.equal?(@test_recording_studio_api)
-
-    Object.send(:remove_const, :RecordingStudioApi)
-    @test_recording_studio_api = nil
   end
 end

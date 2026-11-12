@@ -10,7 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Public API endpoint `search.query` (`GET search/query`) wrapping `InstantSearch.hits_for`. Hosts that load Recording Studio API get the action automatically. MCP picks it up as a registered endpoint. No MCP tool code in this gem.
+- Public API endpoint `search.query` (`GET search/query`) wrapping `InstantSearch.hits_for`. Hosts that load Recording Studio API get the action automatically. MCP picks it up as a registered endpoint. No MCP tool code in this gem. `limit` is top-N, not paginated. Hits are filtered to `context.root_recording` after InstantSearch so a caller with `:view` on two roots cannot see the other workspace.
+
+### Fixed
+
+- `search.query` no longer returns hits from every root the actor can view. The request root is the bound.
+
+- Dummy mounts Recording Studio API and covers `search.query` over HTTP (200 / 401 / 403). `recording_studio_api` is a development Gemfile dependency so tests use the real module.
 
 ### Removed
 
@@ -18,8 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Upgrade notes
 
-- Bump to `0.10.0`. No migration. No new gemspec runtime dependency. `recording_studio_api` stays a host gem. When that gem is loaded, this engine registers `search.query` on the public API.
-- Hits stay Accessible-scoped through the existing `AccessibleScope` path used by instant search. Callers without `:view` on the request root are denied. A caller who can view one workspace still does not see pages from another.
+- Bump to `0.10.0`. No migration. No new gemspec runtime dependency. `recording_studio_api` is a development dependency (hosts still supply it at runtime). When that gem is loaded, this engine registers `search.query` on the public API.
+- Hits stay Accessible-scoped through the existing `AccessibleScope` path used by instant search, then kept to the request root. Callers without `:view` on the request root are denied. A caller who can view two workspaces still does not see the other root's pages.
 - Hosts that copied `include RecordingStudio::Capabilities::Example.to(...)` should drop that line. Search never used the mixin.
 
 ## [0.9.0] - 2026-11-06

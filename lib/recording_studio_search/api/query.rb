@@ -13,12 +13,11 @@ module RecordingStudioSearch
           actor: grant.actor,
           limit: limit(context.params)
         )
-        { hits: rows_for(hits) }
+        { hits: rows_for(in_root(hits, context.root_recording)) }
       end
 
       def self.requested_models(params)
         raw = params[:models]
-        raw = raw.values if raw.respond_to?(:values)
         requested = Array(raw).filter_map(&:presence)
         return requested if requested.any?
 
@@ -31,6 +30,30 @@ module RecordingStudioSearch
 
       def self.limit(params)
         Integer(params[:limit], exception: false) || DEFAULT_LIMIT
+      end
+
+      def self.in_root(hits, root)
+        return hits if hits.blank? || root.blank?
+
+        if hits.is_a?(Hash)
+          hits.transform_values { |relation| relation_in_root(relation, root) }
+        else
+          relation_in_root(hits, root)
+        end
+      end
+
+      def self.relation_in_root(relation, root)
+        return relation unless relation.respond_to?(:where) && relation.respond_to?(:klass)
+        return relation unless root.respond_to?(:id)
+
+        ids = RecordingStudio::Recording.where(
+          recordable_type: relation.klass.name,
+          root_recording_id: root.id
+        ).pluck(:recordable_id)
+
+        return relation.none if ids.empty?
+
+        relation.where(id: ids)
       end
 
       def self.rows_for(hits)
@@ -55,7 +78,8 @@ module RecordingStudioSearch
         }
       end
 
-      private_class_method :requested_models, :query, :limit, :rows_for, :rows_for_relation, :row_for
+      private_class_method :requested_models, :query, :limit, :in_root, :relation_in_root,
+                           :rows_for, :rows_for_relation, :row_for
     end
   end
 end
