@@ -15,7 +15,8 @@ class ApiTest < Minitest::Test
     def authorize!(recording:, role:, **)
       raise "API access grant is not authorized for this capability" unless @authorized
       raise "view role required" unless role == :view
-      raise "root recording required" if recording.nil?
+
+      recording
     end
   end
 
@@ -147,7 +148,7 @@ class ApiTest < Minitest::Test
       hits
     }) do
       RecordingStudioSearch.stub(:recording_id_for, "rec-1") do
-        stub_recordings_in_root do
+        RecordingStudioSearch::Api::Query.stub(:relation_in_root, ->(relation, *) { relation }) do
           payload = RecordingStudioSearch::Api::Query.call(
             FakeContext.new(actor: :owner, params: { q: "refund", models: ["FakePage"], limit: "5" })
           )
@@ -198,29 +199,16 @@ class ApiTest < Minitest::Test
     end
   end
 
-  private
+  def test_query_returns_no_hits_when_root_is_nil
+    page = Struct.new(:id).new("page-1")
+    hits = FakeHits.new([page])
 
-  def stub_recordings_in_root(&)
-    ids = Object.new
-    def ids.select(*)
-      self
-    end
+    RecordingStudioSearch::InstantSearch.stub(:hits_for, hits) do
+      payload = RecordingStudioSearch::Api::Query.call(
+        FakeContext.new(actor: :owner, params: { q: "refund" }, root_recording: nil)
+      )
 
-    def ids.empty?
-      false
+      assert_equal [], payload.fetch(:hits)
     end
-
-    created = false
-    unless RecordingStudio.const_defined?(:Recording, false)
-      RecordingStudio.const_set(:Recording, Class.new do
-        def self.where(*)
-          raise "stub Recording.where"
-        end
-      end)
-      created = true
-    end
-    RecordingStudio::Recording.stub(:where, ->(*) { ids }, &)
-  ensure
-    RecordingStudio.send(:remove_const, :Recording) if created
   end
 end

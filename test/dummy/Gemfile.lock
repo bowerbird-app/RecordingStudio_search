@@ -700,7 +700,6 @@ DEPENDENCIES
   recording_studio_search!
   recording_studio_trashable!
   recording_studio_user!
-  redis (~> 5.3)
   rubocop-rails-omakase
   solid_cable
   solid_cache

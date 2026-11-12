@@ -33,7 +33,7 @@ module RecordingStudioSearch
       end
 
       def self.in_root(hits, root)
-        return hits if hits.blank? || root.blank?
+        return hits if hits.blank?
 
         if hits.is_a?(Hash)
           hits.transform_values { |relation| relation_in_root(relation, root) }
@@ -50,8 +50,6 @@ module RecordingStudioSearch
           recordable_type: relation.klass.name,
           root_recording_id: root.id
         ).select(:recordable_id)
-
-        return relation.none if ids.empty?
 
         relation.where(id: ids)
       end

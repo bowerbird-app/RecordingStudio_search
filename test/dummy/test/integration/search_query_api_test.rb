@@ -70,24 +70,37 @@ class SearchQueryApiTest < ActiveSupport::TestCase
   test "same actor with view on two roots does not see the other root's page" do
     root_a = DummyAccess.bootstrap_workspace!(name: "Search Query Root A", actor: @owner)
     root_b = DummyAccess.bootstrap_workspace!(name: "Search Query Root B", actor: @owner)
-    hidden = Page.find_or_create_by!(title: "Cross Root Zebra") do |record|
-      record.body = "A zebra page that lives only under root B."
+    visible = Page.find_or_create_by!(title: "Cross Root Quokka A") do |record|
+      record.body = "A quokka page that lives only under root A."
     end
+    hidden = Page.find_or_create_by!(title: "Cross Root Quokka B") do |record|
+      record.body = "A quokka page that lives only under root B."
+    end
+    DummyAccess.record_under_workspace!(
+      visible,
+      actor: @owner,
+      workspace_name: "Search Query Root A"
+    )
     DummyAccess.record_under_workspace!(
       hidden,
       actor: @owner,
       workspace_name: "Search Query Root B"
     )
 
+    unfiltered = RecordingStudioSearch::InstantSearch.hits_for(["Page"], "quokka", actor: @owner)
+    unfiltered_ids = Array(unfiltered).map(&:id)
     payload = RecordingStudioSearch::Api::Query.call(
       Context.new(
         access_grant: AccessGrant.new(@owner),
         root_recording: root_a,
-        params: { q: "zebra", models: ["Page"] }
+        params: { q: "quokka", models: ["Page"] }
       )
     )
     ids = payload.fetch(:hits).map { |row| row[:id] }
 
+    assert_includes unfiltered_ids, visible.id
+    assert_includes unfiltered_ids, hidden.id
+    assert_includes ids, visible.id
     refute_includes ids, hidden.id
     assert RecordingStudioAccessible.authorized?(actor: @owner, recording: root_a, role: :view)
     assert RecordingStudioAccessible.authorized?(actor: @owner, recording: root_b, role: :view)

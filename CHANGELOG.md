@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- `search.query` no longer returns hits from every root the actor can view. The request root is the bound.
+- `search.query` no longer returns hits from every root the actor can view. The request root is the bound. A missing or nil root keeps no hits.
 
 - Dummy mounts Recording Studio API and covers `search.query` over HTTP (200 / 401 / 403). `recording_studio_api` is a development Gemfile dependency so tests use the real module.
 
