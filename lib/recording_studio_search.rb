@@ -18,7 +18,7 @@ require "recording_studio_search/boot_checks"
 require "recording_studio_search/accessible_scope"
 require "recording_studio_search/instant_search"
 require "recording_studio_search/routes_proxy"
-require "recording_studio_search/capabilities/example"
+require "recording_studio_search/api"
 require "recording_studio_search/engine"
 
 module RecordingStudioSearch

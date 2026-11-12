@@ -298,6 +298,15 @@ class EngineTest < Minitest::Test
     Object.send(:remove_const, parent_name) unless parent_defined
   end
 
+  def test_api_initializer_registers_the_search_query_endpoint
+    initializer = find_initializer("recording_studio_search.api")
+
+    refute_nil initializer, "engine must declare recording_studio_search.api"
+    source = File.read(File.expand_path("../lib/recording_studio_search/engine.rb", __dir__))
+
+    assert_includes source, "RecordingStudioSearch::Api.register!"
+  end
+
   def test_register_shipped_english_initializer_is_ordered_before_base_load
     initializer = find_initializer("recording_studio_search.register_shipped_english")
 
