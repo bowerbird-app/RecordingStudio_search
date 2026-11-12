@@ -19,8 +19,14 @@ class ApiTest < Minitest::Test
     end
   end
 
+  class FakeRoot
+    def id
+      1
+    end
+  end
+
   class FakeContext
-    def initialize(actor:, params: {}, root_recording: :root, authorized: true)
+    def initialize(actor:, params: {}, root_recording: FakeRoot.new, authorized: true)
       @access_grant = FakeGrant.new(actor: actor, authorized: authorized)
       @params = params
       @root_recording = root_recording
@@ -40,6 +46,14 @@ class ApiTest < Minitest::Test
 
     def klass
       FakePage
+    end
+
+    def where(*)
+      self
+    end
+
+    def none
+      self.class.new([])
     end
 
     def to_ary
@@ -133,11 +147,13 @@ class ApiTest < Minitest::Test
       hits
     }) do
       RecordingStudioSearch.stub(:recording_id_for, "rec-1") do
-        payload = RecordingStudioSearch::Api::Query.call(
-          FakeContext.new(actor: :owner, params: { q: "refund", models: ["FakePage"], limit: "5" })
-        )
+        stub_recordings_in_root do
+          payload = RecordingStudioSearch::Api::Query.call(
+            FakeContext.new(actor: :owner, params: { q: "refund", models: ["FakePage"], limit: "5" })
+          )
 
-        assert_equal [{ type: "ApiTest::FakePage", id: "page-1", recording_id: "rec-1" }], payload.fetch(:hits)
+          assert_equal [{ type: "ApiTest::FakePage", id: "page-1", recording_id: "rec-1" }], payload.fetch(:hits)
+        end
       end
     end
 
@@ -167,5 +183,44 @@ class ApiTest < Minitest::Test
     end
 
     assert_equal ["ApiTest::FakePage"], captured
+  end
+
+  def test_query_returns_no_hits_when_root_is_missing
+    page = Struct.new(:id).new("page-1")
+    hits = FakeHits.new([page])
+
+    RecordingStudioSearch::InstantSearch.stub(:hits_for, hits) do
+      payload = RecordingStudioSearch::Api::Query.call(
+        FakeContext.new(actor: :owner, params: { q: "refund" }, root_recording: Object.new)
+      )
+
+      assert_equal [], payload.fetch(:hits)
+    end
+  end
+
+  private
+
+  def stub_recordings_in_root(&)
+    ids = Object.new
+    def ids.select(*)
+      self
+    end
+
+    def ids.empty?
+      false
+    end
+
+    created = false
+    unless RecordingStudio.const_defined?(:Recording, false)
+      RecordingStudio.const_set(:Recording, Class.new do
+        def self.where(*)
+          raise "stub Recording.where"
+        end
+      end)
+      created = true
+    end
+    RecordingStudio::Recording.stub(:where, ->(*) { ids }, &)
+  ensure
+    RecordingStudio.send(:remove_const, :Recording) if created
   end
 end

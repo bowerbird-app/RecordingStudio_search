@@ -43,13 +43,13 @@ module RecordingStudioSearch
       end
 
       def self.relation_in_root(relation, root)
-        return relation unless relation.respond_to?(:where) && relation.respond_to?(:klass)
-        return relation unless root.respond_to?(:id)
+        return [] unless relation.respond_to?(:where) && relation.respond_to?(:klass) && relation.respond_to?(:none)
+        return relation.none unless root.respond_to?(:id)
 
         ids = RecordingStudio::Recording.where(
           recordable_type: relation.klass.name,
           root_recording_id: root.id
-        ).pluck(:recordable_id)
+        ).select(:recordable_id)
 
         return relation.none if ids.empty?
 
