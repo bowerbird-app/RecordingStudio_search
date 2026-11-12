@@ -198,12 +198,13 @@ class ApiTest < Minitest::Test
     end
   end
 
-  def test_query_returns_no_hits_when_root_is_nil
-    page = Struct.new(:id).new("page-1")
-    hits = FakeHits.new([page])
+  def test_query_requires_a_root_recording
+    error = assert_raises(RuntimeError) do
+      RecordingStudioSearch::Api::Query.call(
+        FakeContext.new(actor: :owner, params: { q: "refund" }, root_recording: nil)
+      )
+    end
 
-    scoped = RecordingStudioSearch::Api::Query.send(:in_root, hits, nil)
-
-    assert_equal [], scoped.to_ary
+    assert_match(/root recording required/, error.message)
   end
 end
