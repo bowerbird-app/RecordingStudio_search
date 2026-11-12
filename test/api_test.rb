@@ -15,8 +15,7 @@ class ApiTest < Minitest::Test
     def authorize!(recording:, role:, **)
       raise "API access grant is not authorized for this capability" unless @authorized
       raise "view role required" unless role == :view
-
-      recording
+      raise "root recording required" if recording.nil?
     end
   end
 
@@ -203,12 +202,8 @@ class ApiTest < Minitest::Test
     page = Struct.new(:id).new("page-1")
     hits = FakeHits.new([page])
 
-    RecordingStudioSearch::InstantSearch.stub(:hits_for, hits) do
-      payload = RecordingStudioSearch::Api::Query.call(
-        FakeContext.new(actor: :owner, params: { q: "refund" }, root_recording: nil)
-      )
+    scoped = RecordingStudioSearch::Api::Query.send(:in_root, hits, nil)
 
-      assert_equal [], payload.fetch(:hits)
-    end
+    assert_equal [], scoped.to_ary
   end
 end
