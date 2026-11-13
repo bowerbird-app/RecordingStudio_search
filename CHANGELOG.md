@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Dummy and development pins: Recording Studio `v6.7.0`, FlatPack `v0.1.356`, Accessible `v0.31.0`, API `v0.22.1`, Icons `v0.2.1`, Logs `v0.7.4`, Metrics `v0.8.0`, Moveable `v4.1.1`, Trashable `v0.14.0`, Users `v0.28.1`, Admin `v2.13.0`, Attachable `v0.22.4`, Root Switchable `v0.15.0`, Cache `v0.6.3`.
+
 ## [0.10.0] - 2026-11-12
 
 ### Added
