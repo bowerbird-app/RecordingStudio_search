@@ -55,4 +55,78 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
     assert_equal scoped.to_sql, scoped.search("").to_sql
     assert_equal 1, scoped.search("").count
   end
+
+  test "filter uses index operators and ranks matched rows" do
+    sql = User.search("Lovelace").to_sql
+    where_sql, order_sql = sql.split("ORDER BY", 2)
+
+    assert_match(/"users"\."name" % /, where_sql)
+    assert_match(/"users"\."email" % /, where_sql)
+    assert_match(/search_vector @@ plainto_tsquery\('english'/, where_sql)
+    refute_match(/similarity\s*\(/, where_sql)
+    assert_match(/similarity\s*\(/, order_sql)
+    assert_match(/ts_rank\(/, order_sql)
+    assert_includes sql, "pg_trgm.similarity_threshold=0.300000"
+  end
+
+  test "order by quotes the query" do
+    sql = User.search("O'Brien").to_sql
+
+    assert_includes sql, "O''Brien"
+  end
+
+  test "trigram search uses a gin index" do
+    plan = nil
+    User.transaction do
+      User.connection.execute("SET LOCAL enable_seqscan = off")
+      plan = User.search("Lovelace").explain.inspect
+    end
+
+    assert_match(
+      /Bitmap Index Scan on index_users_on_(?:name_trgm|email_trgm|search_vector)/,
+      plan
+    )
+  end
+
+  test "configured threshold bounds trigram matches and full text still matches" do
+    original = RecordingStudioSearch.configuration.trigram_threshold
+    RecordingStudioSearch.configuration.trigram_threshold = 0.99
+
+    assert_equal ["Ada Lovelace"], User.search("Lovelace").map(&:name)
+    refute_includes User.search("Lovlace").map(&:name), "Ada Lovelace"
+  ensure
+    RecordingStudioSearch.configuration.trigram_threshold = original
+  end
+
+  test "search restores the caller's similarity threshold" do
+    User.transaction do
+      User.connection.execute("SET LOCAL pg_trgm.similarity_threshold = 0.85")
+      User.search("Lovelace").load
+      current = User.connection.select_value("SHOW pg_trgm.similarity_threshold")
+
+      assert_in_delta 0.85, current.to_f
+    end
+  end
+
+  test "building the relation does not change the similarity threshold" do
+    User.transaction do
+      User.connection.execute("SET LOCAL pg_trgm.similarity_threshold = 0.77")
+      User.search("Lovelace").to_sql
+      current = User.connection.select_value("SHOW pg_trgm.similarity_threshold")
+
+      assert_in_delta 0.77, current.to_f
+    end
+  end
+
+  test "a failed search restores the similarity threshold" do
+    User.transaction do
+      User.connection.execute("SET LOCAL pg_trgm.similarity_threshold = 0.81")
+      assert_raises(ActiveRecord::StatementInvalid) do
+        User.search("Lovelace").where("1/0 = 1").load
+      end
+      current = User.connection.select_value("SHOW pg_trgm.similarity_threshold")
+
+      assert_in_delta 0.81, current.to_f
+    end
+  end
 end

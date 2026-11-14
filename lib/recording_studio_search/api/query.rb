@@ -29,7 +29,10 @@ module RecordingStudioSearch
       end
 
       def self.limit(params)
-        Integer(params[:limit], exception: false) || DEFAULT_LIMIT
+        requested = Integer(params[:limit], exception: false)
+        return DEFAULT_LIMIT if requested.nil?
+
+        requested.clamp(1, MAX_LIMIT)
       end
 
       def self.in_root(hits, root)
