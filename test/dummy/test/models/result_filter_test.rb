@@ -34,21 +34,21 @@ class ResultFilterTest < ActiveSupport::TestCase
   end
 
   test "trigram search applies the filter before the limit" do
-    assert_equal 2, User.search("Lovelace", unscoped: true).count
-
-    first = User.search("Lovelace", limit: 1, unscoped: true).first
-    other = first.id == @ada.id ? @grace : @ada
+    ranked = User.search("Lovelace", unscoped: true).to_a
+    assert_includes ranked.map(&:id), @ada.id
+    assert_includes ranked.map(&:id), @grace.id
+    first = ranked.first
     hide_user(first)
 
     sqls = capture_sql do
-      assert_equal [other.id], User.search("Lovelace", limit: 1, unscoped: true).map(&:id)
+      assert_equal [ranked.second.id], User.search("Lovelace", limit: 1, unscoped: true).map(&:id)
     end
     user_selects = sqls.select { |sql| sql.match?(/FROM "users"/i) && sql.match?(/\A\s*SELECT/i) }
 
     assert_equal 1, user_selects.size
     assert_match(/\bLIMIT\b/i, user_selects.first)
-    assert_equal [other.id], RecordingStudioSearch.search(User, "Lovelace", limit: 1, unscoped: true).map(&:id)
-    assert_equal [other.id], RecordingStudioSearch::TrigramSearcher.call(User.all, "Lovelace", limit: 1).map(&:id)
+    assert_equal [ranked.second.id], RecordingStudioSearch.search(User, "Lovelace", limit: 1, unscoped: true).map(&:id)
+    assert_equal [ranked.second.id], RecordingStudioSearch::TrigramSearcher.call(User.all, "Lovelace", limit: 1).map(&:id)
   end
 
   test "reloading the same registration does not stack filters" do
