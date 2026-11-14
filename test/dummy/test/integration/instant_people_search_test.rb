@@ -174,7 +174,7 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
   end
 
   def grant_refunds_page!
-    DummyAccess.bootstrap_workspace!(name: "Studio Workspace", actor: @user)
+    root = DummyAccess.bootstrap_workspace!(name: "Studio Workspace", actor: @user)
     page = Page.find_or_create_by!(title: "Refunds") do |record|
       record.body = "How to request a refund when a charge looks wrong."
     end
@@ -184,6 +184,17 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
       searchable_id: page.id,
       recording_id: page.search_recording_id
     )
+    switch_root!(root)
     page
+  end
+
+  def switch_root!(root)
+    patch "/recording_studio_root_switchable/v1/root_switch", params: {
+      scope: "all_workspaces",
+      root_switch: { root_recording_id: root.id, return_to: "/" }
+    }
+    assert_response :redirect
+    integration_session.instance_variable_set(:@controller, nil)
+    integration_session.instance_variable_set(:@url_options, nil)
   end
 end

@@ -2,15 +2,15 @@
 
 module RecordingStudioSearch
   class Searcher
-    def self.call(model, query, limit: nil, root_recording_id: nil)
-      new(model, query, limit: limit, root_recording_id: root_recording_id).call
+    def self.call(model, query, limit: nil, access: Access.new)
+      new(model, query, limit: limit, access: access).call
     end
 
-    def initialize(model, query, limit: nil, root_recording_id: nil)
+    def initialize(model, query, limit: nil, access: Access.new)
       @model = model
       @query = query
       @limit = limit
-      @root_recording_id = root_recording_id
+      @access = access
     end
 
     def call
@@ -24,17 +24,48 @@ module RecordingStudioSearch
 
     private
 
-    attr_reader :model, :query, :limit, :root_recording_id
+    attr_reader :model, :query, :limit, :access
 
     def perform
-      return model.all if query.to_s.strip.empty?
+      relation = scoped_relation
+      return relation if query.to_s.strip.empty?
 
       case backend
       when :pgvector
-        EmbeddingSearcher.call(model, query, limit: limit, root_recording_id: root_recording_id)
+        EmbeddingSearcher.call(
+          relation,
+          query,
+          limit: limit,
+          root_recording_id: access.vector_root_id,
+          recording_ids: recording_ids
+        )
       else
-        TrigramSearcher.call(model, query, limit: limit)
+        TrigramSearcher.call(relation, query, limit: limit)
       end
+    end
+
+    def scoped_relation
+      base = model.respond_to?(:all) ? model.all : model
+      return base if access.unscoped?
+
+      require_access_scope!
+      AccessibleScope.relation_for(base, access.actor, root: access.root)
+    end
+
+    def require_access_scope!
+      return if access.actor.present? && access.root.present?
+
+      raise ArgumentError, "Pass actor: and root: to scope search, or unscoped: true to search without access."
+    end
+
+    def recording_ids
+      return if access.unscoped?
+
+      AccessibleScope.recording_ids_for(
+        access.actor,
+        root: access.root,
+        recordable_type: Registry.model_class(model).name
+      )
     end
 
     def backend

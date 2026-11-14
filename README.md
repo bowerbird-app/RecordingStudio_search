@@ -13,8 +13,8 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.10.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.37.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.13.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.41.0"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -85,25 +85,35 @@ If you already have an unweighted `search_vector`, drop and recreate that column
 | `:pg_trgm` | Full-text + typo-tolerant trigram search on that model's table |
 | `:pgvector` | Semantic search via embeddings; **also** keeps trigram schema so search can fall back |
 
-`User.search("ada")` is trigram/FTS only.  
-`SupportPage.search("refund")` uses embeddings; on failure or empty hits it uses trigram and logs a warning.
+`User.search("ada", unscoped: true)` is trigram/FTS only.  
+`SupportPage.search("refund", actor: current_user, root: current_root_recording)` uses embeddings; on failure or empty hits it uses trigram and logs a warning.
 
-`Model.search("")` (or blank `q`) returns the **unchanged relation**. Scopes stick: `SupportPage.published.search(q)` and `RecordingStudioSearch.search(SupportPage.published, q)` search inside that relation.
+Every search passes `actor:` and `root:` (the root recording the actor is in), or `unscoped: true`. Omitting both raises. The scope is recordings that actor can view under that root. Trashed recordings are left out. `unscoped: true` is for a model that is not a recording.
 
-`RecordingStudioSearch.search(Model, q)` is the same facade and returns an `ActiveRecord::Relation`.
+`Model.search("", actor:, root:)` returns that viewable relation. `Model.search("", unscoped: true)` returns the **unchanged relation**. Other scopes stick: `SupportPage.published.search(q, actor:, root:)` searches inside the published rows the actor can view.
 
-Pass an array when a screen needs several types (for example Section + Page). That returns a **Hash** of model class => relation, in the order you passed, with each model using its own backend. Lists stay separate; scores are not merged across types.
+`RecordingStudioSearch.search(Model, q, actor:, root:)` is the same facade and returns an `ActiveRecord::Relation`.
+
+Pass an array when a screen needs several types (for example Section + Page). That returns a **Hash** of model class => relation, in the order you passed, with each model using its own backend. The same actor and root apply to each model. Lists stay separate; scores are not merged across types.
 
 ```ruby
-RecordingStudioSearch.search(User, "ada")
+RecordingStudioSearch.search(User, "ada", unscoped: true)
 # => User::ActiveRecord_Relation
 
-RecordingStudioSearch.search([User, SupportPage], "refund", limit: 20)
+RecordingStudioSearch.search(
+  [User, SupportPage],
+  "refund",
+  actor: current_user,
+  root: current_root_recording,
+  limit: 20
+)
 # => { User => relation, SupportPage => relation }
 
-hits = RecordingStudioSearch.search([User, SupportPage], "refund")
-hits[User]         # people
-hits[SupportPage]  # pages
+hits = RecordingStudioSearch.search(
+  [User, SupportPage], "refund", actor: current_user, root: current_root_recording
+)
+hits[User]         # people, only when User recordings exist under that root
+hits[SupportPage]  # pages the actor can view
 ```
 
 ## One model, one page
@@ -114,12 +124,16 @@ hits[SupportPage]  # pages
 class PeopleController < ApplicationController
   def index
     @q = params[:q].to_s
-    @people = @q.present? ? User.search(@q, limit: 20) : User.none
+    @people = @q.present? ? User.search(@q, limit: 20, unscoped: true) : User.none
   end
 end
 ```
 
-`User.search` and `RecordingStudioSearch.search(User, q)` are the same relation. Blank `q` returns the **unchanged** relation (everyone), so a lookup screen should use `User.none` when the box is empty.
+`User.search(..., unscoped: true)` and `RecordingStudioSearch.search(User, q, unscoped: true)` are the same relation. People are not recordings, so this lookup opts out of the access scope. Blank `q` with `unscoped: true` returns the **unchanged** relation (everyone), so a lookup screen should use `User.none` when the box is empty. A tree model passes the actor and the current root instead:
+
+```ruby
+Page.search(@q, actor: Current.actor, root: current_root_recording, limit: 20)
+```
 
 The dummy app proves this at `/people` (home → **Just people**). That page never asks Page or Note. `/groups` searches inside a mailbox (`User.where(...).search`). `/title-first` ranks a title hit above a body hit.
 
@@ -153,7 +167,7 @@ config.instant_search_models = ["Page"]
     ) %>
 ```
 
-On the host action, start with empty hits (`Page.none`). Do not call `Page.search("")` for a blank box — that would list everyone. The engine show action does the same: blank `q` renders the empty frame, not the full table. Hits are Accessible-scoped to the current actor (`:view` on each record's recording). Blank actor or a model with no recording is empty.
+On the host action, start with empty hits (`Page.none`). Do not call `Page.search("", unscoped: true)` for a blank box — that would list everyone. The engine show action does the same: blank `q` renders the empty frame, not the full table. Hits are Accessible-scoped to the current actor and `current_root_recording` (`:view`, trashed recordings left out). Blank actor, blank root, or a model with no recording is empty.
 
 `url:` defaults to `InstantSearchesController#show` (`GET …/instant_search?models[]=Page&frame_id=…`). Pass a host path only when that action should render the frame instead. Requested models that are not allowlisted are ignored.
 
@@ -179,7 +193,7 @@ rows stay untranslated — they are model data. `instant_search_collection_label
 still returns raw English; the results partial translates at render via
 `instant_search_translated_collection_label`.
 
-Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `Page` so typing updates the frame and leaves the URL at `/instant`. Pages without a grant do not appear. `/people` still uses unscoped `User.search` as the people-lookup demo. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
+Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `Page` so typing updates the frame and leaves the URL at `/instant`. Pages without a grant, and trashed pages, do not appear. `/people` passes `unscoped: true` on `User.search` because a person is not a recording. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
 
 ## API and MCP (`search.query`)
 
@@ -200,7 +214,7 @@ This gem does not depend on `recording_studio_api` at runtime. It is a developme
 Keyword cache rows and embedding rows are ordinary tables, not Recordings.
 
 - Trigram columns (`search_vector` + GIN / trigram indexes) live on the **model table**, owned by `searchable_pg_trgm` (and by `searchable_pgvector`, which also ensures trigram). Safe for immutable recordables: each new snapshot row gets a fresh computed vector on insert.
-- Embeddings live in gem-owned `recording_studio_search_documents` (`searchable_type`, `searchable_id`, optional `recording_id`, and `root_recording_id`). **Do not** add `embedding` columns to the model. `recording_id` upserts the stable Recording Studio identity so later snapshots do not orphan vectors. `root_recording_id` is the root of that recording's tree. Vector search filters on root and type inside SQL before ordering by distance and applying `LIMIT`. Pass `root_recording_id:` to rank inside one root (`search.query` does this with the request root). Instant search without that argument uses the roots behind the Accessible relation. The Accessible scope still applies to the returned relation, so a row the actor cannot view is left out.
+- Embeddings live in gem-owned `recording_studio_search_documents` (`searchable_type`, `searchable_id`, optional `recording_id`, and `root_recording_id`). **Do not** add `embedding` columns to the model. `recording_id` upserts the stable Recording Studio identity so later snapshots do not orphan vectors. `root_recording_id` is the root of that recording's tree. Vector search filters on root, type, and the actor's viewable recording ids inside SQL before ordering by distance and applying `LIMIT`. Pass `actor:` and `root:` (`search.query` uses the request actor and root). `root_recording_id:` still selects the tenant for the vector index. A row the actor cannot view, and a trashed recording, are left out before that top-N.
 - Query embeddings live in `recording_studio_search_queries` as JSON so trigram-only hosts never need the `vector` extension.
 
 ## Fallback (`:pgvector` only)
@@ -234,8 +248,8 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 6.1.0` (dummy tag `v6.10.0`, FlatPack `v0.1.366`). Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events.
-- Accessible on the host for instant search, recordings tree, and title-first demos (dummy tag `v0.37.0`). Missing Accessible returns no instant hits.
+- Recording Studio `>= 6.1.0` (dummy tag `v6.13.0`, FlatPack `v0.1.366`). Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events. Scoped search needs Recording Studio `>= 6.13.0`.
+- Accessible `>= 0.41.0` on the host (dummy tag `v0.41.0`) for `authorized_recording_ids`. Missing Accessible, or an authorization service that does not support that query, returns no hits.
 - PostgreSQL 16 and pgvector. 0.8 or newer (CI image `pgvector/pgvector:0.8.1-pg16`) for iterative filtered HNSW scans. Older pgvector returns the same tenant rows with an exact filtered scan.
 
 ## Documentation

@@ -2,23 +2,20 @@
 
 module RecordingStudioSearch
   class EmbeddingSearcher
-    DISTANCE_OPERATORS = {
-      l2: "<->",
-      inner_product: "<#>",
-      cosine: "<=>"
-    }.freeze
+    DISTANCE_OPERATORS = { l2: "<->", inner_product: "<#>", cosine: "<=>" }.freeze
 
-    def self.call(model, query, limit: nil, root_recording_id: nil)
-      new(model, query, limit: limit, root_recording_id: root_recording_id).call
+    def self.call(model, query, limit: nil, root_recording_id: nil, recording_ids: nil)
+      new(model, query, limit: limit, root_recording_id: root_recording_id, recording_ids: recording_ids).call
     end
 
-    def initialize(model, query, limit: nil, root_recording_id: nil)
+    def initialize(model, query, limit: nil, root_recording_id: nil, recording_ids: nil)
       @model = model
       @query = query.to_s
       @limit = limit || RecordingStudioSearch.configuration.vector_result_limit
       @entry = Registry.entry_for(model)
       @adapter = EmbeddingAdapter.new
       @root_recording_ids = Array(root_recording_id).filter_map(&:presence)
+      @recording_ids = recording_ids
     end
 
     def call
@@ -37,7 +34,7 @@ module RecordingStudioSearch
 
     private
 
-    attr_reader :model, :query, :limit, :entry, :adapter, :root_recording_ids
+    attr_reader :model, :query, :limit, :entry, :adapter, :root_recording_ids, :recording_ids
 
     def cached_or_create_query_embedding
       keyword = Normalize.keyword(query)
@@ -73,6 +70,7 @@ module RecordingStudioSearch
     def nearest_scope(vector)
       scope = Document.where(searchable_type: Registry.model_class(model).name).where.not(embedding: nil)
       scope = scope.where.not(recording_id: nil) if entry&.recording_id_method
+      scope = scope.where(recording_id: recording_ids) unless recording_ids.nil?
       scope = restrict_to_tenant(scope)
       scope.order(distance_order(vector))
     end

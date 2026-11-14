@@ -21,7 +21,7 @@ Hosts choose per model. Installing the gem does not change host tables. Hosts ru
 - For recordables, upsert embeddings by optional `recording_id`.
 - Use `recording_studio_ai` for embeddings when possible; allow an injectable `embedding_client`. Do not hard-code provider SDKs or API keys here.
 - If `RecordingStudioAI::Embeddings.create!` is missing, hosts inject `embedding_client`.
-- Blank `Model.search("")` returns the unchanged relation (including any incoming scope).
+- `Model.search` requires `actor:` and `root:`, or `unscoped: true`. Blank `q` returns that scoped relation, or the unchanged relation when `unscoped: true`.
 - `against:` may be a column list or `{ column => "A"|"B"|"C"|"D" }` weights.
 - Vector dimensions freeze at the first pgvector migration from `config.embedding_dimensions`.
 
@@ -53,11 +53,11 @@ include RecordingStudioSearch::Searchable
 searchable backend: :pg_trgm, against: %i[name email]
 searchable backend: :pgvector, against: { title: "A", body: "D" }, recording_id: :recording_id
 
-Model.search("refund policy")
-Model.published.search(q)                              # keeps the scope
-RecordingStudioSearch.search(Model, q)                 # => Relation
-RecordingStudioSearch.search(Model.published, q)       # => Relation
-RecordingStudioSearch.search([ModelA, ModelB], q)      # => { ModelA => Relation, ModelB => Relation }
+Model.search("refund policy", actor: actor, root: root)
+Model.published.search(q, actor: actor, root: root)    # keeps the scope
+Model.search("refund policy", unscoped: true)          # explicit opt-out
+RecordingStudioSearch.search(Model, q, actor: actor, root: root)
+RecordingStudioSearch.search([ModelA, ModelB], q, actor: actor, root: root)
 RecordingStudioSearch.embed_later(record)
 ```
 
@@ -92,7 +92,7 @@ Hosts mount the engine and pin the controller. Installing the gem does **not** i
 
 ### Behaviour
 
-- Blank `q` on the instant endpoint is an empty list, not `Model.search("")` (which keeps the full relation).
+- Blank `q` on the instant endpoint is an empty list. Hits use `authorized_recording_ids` for the actor and the current root, with `LIMIT` in that statement.
 - Models in the request that are missing from the allowlist are dropped. If nothing remains, the frame is empty.
 - One allowlisted model returns a relation. Several return a Hash of class => relation. Types stay separate; ranks are not merged.
 - `url:` defaults to the engine show path. A host can point the field at their own frame action instead.
@@ -101,7 +101,7 @@ Hosts mount the engine and pin the controller. Installing the gem does **not** i
 
 ### Dummy
 
-`/instant` (“As you type”) allowlists `Page` and calls engine instant search through the Turbo Frame, Accessible-scoped to `:view`. `/people` stays the older full-page `User.search` GET. A host can allowlist another tree model instead.
+`/instant` (“As you type”) allowlists `Page` and calls engine instant search through the Turbo Frame, scoped with `authorized_recording_ids` under the current root. `/people` is `User.search(..., unscoped: true)` because a person is not a recording. A host can allowlist another tree model instead.
 
 ### Out of scope here
 

@@ -23,15 +23,15 @@ class SearchFacadeTest < ActiveSupport::TestCase
   end
 
   test "single model facade returns a relation" do
-    result = RecordingStudioSearch.search(User, "Lovelace")
+    result = RecordingStudioSearch.search(User, "Lovelace", unscoped: true)
 
     assert_kind_of ActiveRecord::Relation, result
     assert_equal ["Ada Lovelace"], result.map(&:name)
-    assert_equal User.search("Lovelace").to_sql, result.to_sql
+    assert_equal User.search("Lovelace", unscoped: true).to_sql, result.to_sql
   end
 
   test "array facade returns a hash of per-model relations" do
-    result = RecordingStudioSearch.search([User, Page, Note], "refund", limit: 20)
+    result = RecordingStudioSearch.search([User, Page, Note], "refund", limit: 20, unscoped: true)
 
     assert_equal [User, Page, Note], result.keys
     assert_kind_of ActiveRecord::Relation, result[User]
@@ -43,21 +43,21 @@ class SearchFacadeTest < ActiveSupport::TestCase
   end
 
   test "array facade keeps each model on its own backend" do
-    people = RecordingStudioSearch.search([User, Page], "Lovlace")
+    people = RecordingStudioSearch.search([User, Page], "Lovlace", unscoped: true)
 
     assert_includes people[User].map(&:name), "Ada Lovelace"
     assert_empty people[Page]
   end
 
   test "array blank query returns each model's unchanged relation" do
-    result = RecordingStudioSearch.search([User, Note], "")
+    result = RecordingStudioSearch.search([User, Note], "", unscoped: true)
 
     assert_equal User.all.to_sql, result[User].to_sql
     assert_equal Note.all.to_sql, result[Note].to_sql
   end
 
   test "relation argument is not treated as an array of records" do
-    result = RecordingStudioSearch.search(User.where(id: @ada.id), "Lovelace")
+    result = RecordingStudioSearch.search(User.where(id: @ada.id), "Lovelace", unscoped: true)
 
     assert_kind_of ActiveRecord::Relation, result
     assert_equal ["Ada Lovelace"], result.map(&:name)

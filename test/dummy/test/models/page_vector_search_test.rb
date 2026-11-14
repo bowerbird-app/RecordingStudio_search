@@ -14,20 +14,20 @@ class PageVectorSearchTest < ActiveSupport::TestCase
   end
 
   test "vector search returns embedding hits only" do
-    titles = Page.search("refund").map(&:title)
+    titles = Page.search("refund", unscoped: true).map(&:title)
     assert_includes titles, "Refunds"
     refute_includes titles, "Passwords"
   end
 
   test "query cache hit skips the embedding client" do
-    Page.search("refund")
+    Page.search("refund", unscoped: true)
     calls = 0
     RecordingStudioSearch.configuration.embedding_client = lambda { |text:, model:|
       calls += 1
       DummyEmbeddings.vector_for(text: text, model: model)
     }
 
-    Page.search("refund")
+    Page.search("refund", unscoped: true)
     assert_equal 0, calls
     query = RecordingStudioSearch::Query.find_by!(keyword: "refund")
     assert query.hit_count >= 1
@@ -37,7 +37,7 @@ class PageVectorSearchTest < ActiveSupport::TestCase
 
   test "cache miss stores a query row" do
     assert_difference -> { RecordingStudioSearch::Query.count }, 1 do
-      Page.search("password reset")
+      Page.search("password reset", unscoped: true)
     end
     stored = RecordingStudioSearch::Query.find_by!(keyword: "password reset")
     assert_equal "text-embedding-3-small", stored.embedding_model
@@ -49,7 +49,7 @@ class PageVectorSearchTest < ActiveSupport::TestCase
       raise RecordingStudioSearch::EmbeddingAdapter::Error, "upstream"
     }
 
-    logs = capture_logs { @titles = Page.search("Refunds").map(&:title) }
+    logs = capture_logs { @titles = Page.search("Refunds", unscoped: true).map(&:title) }
     assert_includes @titles, "Refunds"
     assert_match(/falling back to trigram/, logs)
     assert_match(/Page/, logs)
@@ -60,7 +60,7 @@ class PageVectorSearchTest < ActiveSupport::TestCase
   test "empty documents fall back to trigram and warn" do
     RecordingStudioSearch::Document.delete_all
 
-    logs = capture_logs { @titles = Page.search("refund").map(&:title) }
+    logs = capture_logs { @titles = Page.search("refund", unscoped: true).map(&:title) }
     assert_includes @titles, "Refunds"
     assert_match(/cold start/, logs)
   end
@@ -130,7 +130,7 @@ class PageVectorSearchTest < ActiveSupport::TestCase
     Page.create!(title: "Widgets", body: "unrelated copy")
     Page.create!(title: "Something else", body: "Widgets appear in the body only")
 
-    titles = Page.search("Widgets").map(&:title)
+    titles = Page.search("Widgets", unscoped: true).map(&:title)
 
     assert_equal "Widgets", titles.first
     assert_includes titles, "Something else"
@@ -163,7 +163,7 @@ class PageVectorSearchTest < ActiveSupport::TestCase
   test "notes stay on trigram after being enabled later" do
     Note.delete_all
     Note.create!(title: "Sticky reminder")
-    assert_includes Note.search("sticky").map(&:title), "Sticky reminder"
+    assert_includes Note.search("sticky", unscoped: true).map(&:title), "Sticky reminder"
   end
 
   private

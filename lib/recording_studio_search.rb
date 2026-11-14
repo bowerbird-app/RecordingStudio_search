@@ -13,6 +13,7 @@ require "recording_studio_search/vector_scan"
 require "recording_studio_search/document_roots"
 require "recording_studio_search/trigram_searcher"
 require "recording_studio_search/embedding_searcher"
+require "recording_studio_search/access"
 require "recording_studio_search/searcher"
 require "recording_studio_search/searchable"
 require "recording_studio_search/document_embedder"
@@ -42,15 +43,22 @@ module RecordingStudioSearch
     # One class or relation returns an +ActiveRecord::Relation+ that keeps any
     # existing scope. An array of classes returns a Hash of class => relation
     # in input order. Types are not merged or re-ranked across models.
-    def search(model, query, limit: nil, root_recording_id: nil)
-      if model.is_a?(Array)
-        model.uniq.to_h do |one|
-          [one, Searcher.call(one, query, limit: limit, root_recording_id: root_recording_id)]
-        end
-      else
-        Searcher.call(model, query, limit: limit, root_recording_id: root_recording_id)
-      end
+    #
+    # Pass +actor+ and +root+ so hits are recordings that actor can view under
+    # that root. Pass +unscoped: true+ to search without that access scope.
+    # Omitting both raises. A blank query returns the scoped relation, or the
+    # unchanged relation when +unscoped+ is set.
+    def search(model, query, actor: nil, root: nil, limit: nil, root_recording_id: nil, unscoped: false) # rubocop:disable Metrics/ParameterLists
+      access = Access.new(actor: actor, root: root, root_recording_id: root_recording_id, unscoped: unscoped)
+      return search_each(model, query, limit, access) if model.is_a?(Array)
+
+      Searcher.call(model, query, limit: limit, access: access)
     end
+
+    def search_each(models, query, limit, access)
+      models.uniq.to_h { |model| [model, Searcher.call(model, query, limit: limit, access: access)] }
+    end
+    private :search_each
 
     def embed_later(record, recording_id: nil)
       RecordingStudioSearch::EmbedDocumentJob.perform_later(

@@ -14,7 +14,8 @@ class WeightedPagesTest < ActionDispatch::IntegrationTest
     end
     @user.update!(name: "Ada Admin")
     sign_in @user
-    DummyAccess.bootstrap_workspace!(name: "Studio Workspace", actor: @user)
+    root = DummyAccess.bootstrap_workspace!(name: "Studio Workspace", actor: @user)
+    switch_root!(root)
     DummyAccess.record_under_workspace!(
       Page.find_or_create_by!(title: "Widgets") { |page| page.body = "unrelated copy" },
       actor: @user
@@ -73,6 +74,18 @@ class WeightedPagesTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Widgets", response.body
     refute_match "Secret widgets", response.body
+  end
+
+  private
+
+  def switch_root!(root)
+    patch "/recording_studio_root_switchable/v1/root_switch", params: {
+      scope: "all_workspaces",
+      root_switch: { root_recording_id: root.id, return_to: "/" }
+    }
+    assert_response :redirect
+    integration_session.instance_variable_set(:@controller, nil)
+    integration_session.instance_variable_set(:@url_options, nil)
   end
 end
 

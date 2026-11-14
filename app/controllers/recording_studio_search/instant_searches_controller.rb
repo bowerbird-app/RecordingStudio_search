@@ -7,7 +7,13 @@ module RecordingStudioSearch
 
     def show
       @query = search_query
-      @hits = InstantSearch.hits_for(requested_models, @query, actor: search_actor, limit: 20)
+      @hits = InstantSearch.hits_for(
+        requested_models,
+        @query,
+        actor: search_actor,
+        root: search_root,
+        limit: 20
+      )
       render layout: false
     end
 
@@ -17,6 +23,12 @@ module RecordingStudioSearch
       actor = Current.actor if defined?(Current) && Current.respond_to?(:actor)
       return actor if actor.present?
       return current_user if respond_to?(:current_user, true)
+
+      nil
+    end
+
+    def search_root
+      return current_root_recording if respond_to?(:current_root_recording, true)
 
       nil
     end
