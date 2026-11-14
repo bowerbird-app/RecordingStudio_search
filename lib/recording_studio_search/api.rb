@@ -38,7 +38,8 @@ module RecordingStudioSearch
           name: "limit",
           in: "query",
           required: false,
-          description: "Max ranked hits to return (top-N, not paginated). Default 20. Values outside 1..20 are clamped.",
+          description: "Max ranked hits to return (top-N, not paginated). " \
+                       "Default 20. Values outside 1..20 are clamped.",
           schema: { type: "integer" }
         }
       ]
@@ -56,7 +57,8 @@ module RecordingStudioSearch
         limit: {
           type: :integer,
           required: false,
-          description: "Max ranked hits to return (top-N, not paginated). Default 20. Values outside 1..20 are clamped."
+          description: "Max ranked hits to return (top-N, not paginated). " \
+                       "Default 20. Values outside 1..20 are clamped."
         }
       }
     }.freeze
