@@ -62,14 +62,20 @@ done
 sudo -u postgres psql -tAc "ALTER USER postgres PASSWORD 'postgres';" >/dev/null 2>&1 || true
 
 log "Enabling pg_trgm and pgvector"
-if ! sudo apt-get install -y --no-install-recommends postgresql-16-pgvector; then
+sudo apt-get install -y --no-install-recommends postgresql-16-pgvector postgresql-server-dev-16 build-essential || true
+available="$(sudo -u postgres psql -d postgres -tAc "SELECT default_version FROM pg_available_extensions WHERE name = 'vector'" | tr -d '[:space:]')"
+lowest="$(printf '%s\n%s\n' "0.8.0" "${available:-0}" | sort -V | head -n1)"
+if [ "$lowest" != "0.8.0" ]; then
+  log "Building pgvector 0.8.1 (packaged: ${available:-none})"
   rm -rf /tmp/pgvector
-  git clone --depth 1 --branch v0.8.0 https://github.com/pgvector/pgvector.git /tmp/pgvector
+  git clone --depth 1 --branch v0.8.1 https://github.com/pgvector/pgvector.git /tmp/pgvector
   make -C /tmp/pgvector
   sudo make -C /tmp/pgvector install
+  sudo pg_ctlcluster 16 main restart
 fi
 sudo -u postgres psql -d postgres -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm;' >/dev/null
 sudo -u postgres psql -d postgres -c 'CREATE EXTENSION IF NOT EXISTS vector;' >/dev/null
+sudo -u postgres psql -d postgres -c 'ALTER EXTENSION vector UPDATE;' >/dev/null
 
 # ---------------------------------------------------------------------------
 # 4. Gem dependencies (gem itself + dummy host app)

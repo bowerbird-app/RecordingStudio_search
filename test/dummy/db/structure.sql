@@ -512,7 +512,8 @@ CREATE TABLE public.recording_studio_search_documents (
     embedding_model character varying,
     content_digest character varying,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    root_recording_id uuid
 );
 
 
@@ -1459,6 +1460,13 @@ CREATE UNIQUE INDEX index_rss_documents_on_recording_id_unique ON public.recordi
 
 
 --
+-- Name: index_rss_documents_on_root_and_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rss_documents_on_root_and_type ON public.recording_studio_search_documents USING btree (root_recording_id, searchable_type);
+
+
+--
 -- Name: index_rss_documents_on_searchable; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1624,6 +1632,7 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261114120000'),
 ('20261114090000'),
 ('20261019000023'),
 ('20261019000022'),

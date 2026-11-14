@@ -191,7 +191,7 @@ Agents and API clients should not rely on core list `q` (ILIKE). This gem regist
 
 MCP lists registered endpoints. This gem does not add MCP tool code.
 
-Pass `q`. Optionally pass `models` (allowlisted type names) and `limit` (default 20, max 20). `limit` is top-N, not paginated. Values below 1 become 1 and values above 20 become 20. A missing or non-numeric `limit` stays 20. Omit `models` to search every `config.instant_search_models` type. Hits are Accessible-scoped the same way as instant search, then kept to the request root. A caller without `:view` on the root is denied.
+Pass `q`. Optionally pass `models` (allowlisted type names) and `limit` (default 20, max 20). `limit` is top-N, not paginated. Values below 1 become 1 and values above 20 become 20. A missing or non-numeric `limit` stays 20. Omit `models` to search every `config.instant_search_models` type. Ranking happens inside the request root before that top-N. Hits then stay on recordings the caller can view. A caller who can view two workspaces still does not see the other root, including when that root's vectors are closer. A caller without `:view` on the root is denied.
 
 This gem does not depend on `recording_studio_api` at runtime. It is a development dependency so the dummy and gem tests can use the real module. Hosts that already mount that gem get the endpoint from this engine's `to_prepare` registration.
 
@@ -200,7 +200,7 @@ This gem does not depend on `recording_studio_api` at runtime. It is a developme
 Keyword cache rows and embedding rows are ordinary tables, not Recordings.
 
 - Trigram columns (`search_vector` + GIN / trigram indexes) live on the **model table**, owned by `searchable_pg_trgm` (and by `searchable_pgvector`, which also ensures trigram). Safe for immutable recordables: each new snapshot row gets a fresh computed vector on insert.
-- Embeddings live in gem-owned `recording_studio_search_documents` (`searchable_type` + `searchable_id`). **Do not** add `embedding` columns to the model. Optional `recording_id` upserts the stable Recording Studio identity so later snapshots do not orphan vectors.
+- Embeddings live in gem-owned `recording_studio_search_documents` (`searchable_type`, `searchable_id`, optional `recording_id`, and `root_recording_id`). **Do not** add `embedding` columns to the model. `recording_id` upserts the stable Recording Studio identity so later snapshots do not orphan vectors. `root_recording_id` is the root of that recording's tree. Vector search filters on root and type inside SQL before ordering by distance and applying `LIMIT`. Pass `root_recording_id:` to rank inside one root (`search.query` does this with the request root). Instant search without that argument uses the roots behind the Accessible relation. The Accessible scope still applies to the returned relation, so a row the actor cannot view is left out.
 - Query embeddings live in `recording_studio_search_queries` as JSON so trigram-only hosts never need the `vector` extension.
 
 ## Fallback (`:pgvector` only)
@@ -226,7 +226,7 @@ bin/rails recording_studio_search:reembed
 
 Sign in at `/users/sign_in` with Recording Studio Users (`v0.29.0`): email, then password (`admin@admin.com` / `Password123!`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame of pages the signed-in person can view. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D` for pages they can view.
 
-PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
+PostgreSQL 16 with `pg_trgm` and `vector`. pgvector 0.8 or newer walks a filtered HNSW index iteratively (`strict_order`). Older pgvector still filters before the limit and sorts those rows exactly. The cosine HNSW index stays either way. Dummy embeddings use an injected client so you do not need AI keys.
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
 
@@ -236,7 +236,7 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 - Rails 8.1+
 - Recording Studio `>= 6.1.0` (dummy tag `v6.14.0`, FlatPack `v0.1.374`). Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events. Core 6.11 through 6.14 add no migrations.
 - Accessible on the host for instant search, recordings tree, and title-first demos (dummy tag `v0.41.0`, which needs Recording Studio `>= 6.13.0`). Missing Accessible returns no instant hits.
-- PostgreSQL 16
+- PostgreSQL 16 and pgvector. 0.8 or newer (CI image `pgvector/pgvector:0.8.1-pg16`) for iterative filtered HNSW scans. Older pgvector returns the same tenant rows with an exact filtered scan.
 
 ## Documentation
 

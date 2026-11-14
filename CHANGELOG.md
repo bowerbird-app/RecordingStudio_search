@@ -12,6 +12,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events` so Recording Studio 6.9+ can write events. Dummy passwords are at least 12 characters (`Password123!`) for Users 0.29.
 - Dummy root switch scope lists workspaces the actor can view. Root Switchable 0.15 forbids the switcher when the current root is not viewable.
 
+## [0.11.0] - 2026-11-14
+
+### Fixed
+
+- Vector search no longer takes a global top-N and then drops other tenants. Each document stores `root_recording_id` (the root of its recording tree) and `searchable_type`. The nearest-neighbour query filters on both before `ORDER BY` distance `LIMIT`.
+- `search.query` passes the request root into that filter, so a caller who can view two workspaces still gets this root's nearest rows when the other root is closer.
+
+### Changed
+
+- pgvector 0.8 and newer uses an iterative HNSW scan (`SET LOCAL hnsw.iterative_scan = strict_order`, `hnsw.max_scan_tuples = 100000`, `hnsw.scan_mem_multiplier = 2`) so a filtered cosine index still fills the limit. Older pgvector sorts the filtered rows exactly. The cosine HNSW index stays.
+- CI Postgres image is `pgvector/pgvector:0.8.1-pg16`.
+- New `searchable_pgvector` document migrations include `root_recording_id` and `index_rss_documents_on_root_and_type`.
+
+### Upgrade notes
+
+- Bump to `0.11.0`. No new gem dependency. There is no compatibility path that ranks globally and filters tenants afterwards.
+- Hosts that already created `recording_studio_search_documents` add the column, backfill it, and add the index. New installs get both from `searchable_pgvector`. The cosine HNSW index stays.
+
+```sql
+ALTER TABLE recording_studio_search_documents
+  ADD COLUMN root_recording_id uuid;
+
+UPDATE recording_studio_search_documents AS documents
+SET root_recording_id = COALESCE(recordings.root_recording_id, recordings.id)
+FROM recording_studio_recordings AS recordings
+WHERE documents.recording_id = recordings.id
+  AND documents.root_recording_id IS NULL;
+
+CREATE INDEX index_rss_documents_on_root_and_type
+  ON recording_studio_search_documents (root_recording_id, searchable_type);
+```
+
+- Re-embedding is optional. The backfill fills rows that already have `recording_id`. Later embeds stamp `root_recording_id` from that recording's root, including when the text did not change.
+- pgvector 0.8 or newer is required for iterative filtered HNSW scans. Older extensions still return the right tenant; they disable index scans for that one statement and sort the filtered rows. `strict_order` keeps distance order. `hnsw.max_scan_tuples` (100000 here) caps how far an iterative scan walks, so a very small tenant in a huge index can still come back short.
+- Pass `root_recording_id:` to `RecordingStudioSearch.search` or `InstantSearch.hits_for` to rank inside one root. Instant search without that argument uses the roots of the Accessible relation. Accessible scoping still applies to the relation after the vector prefilter.
+
 ## [0.10.1] - 2026-11-14
 
 ### Changed
@@ -256,7 +292,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.1...v0.9.0

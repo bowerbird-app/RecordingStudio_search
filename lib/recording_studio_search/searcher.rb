@@ -2,14 +2,15 @@
 
 module RecordingStudioSearch
   class Searcher
-    def self.call(model, query, limit: nil)
-      new(model, query, limit: limit).call
+    def self.call(model, query, limit: nil, root_recording_id: nil)
+      new(model, query, limit: limit, root_recording_id: root_recording_id).call
     end
 
-    def initialize(model, query, limit: nil)
+    def initialize(model, query, limit: nil, root_recording_id: nil)
       @model = model
       @query = query
       @limit = limit
+      @root_recording_id = root_recording_id
     end
 
     def call
@@ -23,14 +24,14 @@ module RecordingStudioSearch
 
     private
 
-    attr_reader :model, :query, :limit
+    attr_reader :model, :query, :limit, :root_recording_id
 
     def perform
       return model.all if query.to_s.strip.empty?
 
       case backend
       when :pgvector
-        EmbeddingSearcher.call(model, query, limit: limit)
+        EmbeddingSearcher.call(model, query, limit: limit, root_recording_id: root_recording_id)
       else
         TrigramSearcher.call(model, query, limit: limit)
       end
