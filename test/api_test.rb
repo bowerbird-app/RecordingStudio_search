@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "minitest/mock"
 require "recording_studio_api"
 
 class ApiTest < Minitest::Test
@@ -161,6 +162,29 @@ class ApiTest < Minitest::Test
     assert_equal "refund", captured[:query]
     assert_equal :owner, captured[:actor]
     assert_equal 5, captured[:limit]
+  end
+
+  def test_query_clamps_limit_to_1_through_20
+    captured = []
+    RecordingStudioSearch::InstantSearch.stub(:hits_for, lambda { |*, **kwargs|
+      captured << kwargs[:limit]
+      FakeHits.new([])
+    }) do
+      [nil, "", "0", "1", "20", "21", "100", "-3", "nope", 50].each do |limit|
+        params = { q: "refund" }
+        params[:limit] = limit unless limit.nil?
+        RecordingStudioSearch::Api::Query.call(FakeContext.new(actor: :owner, params: params))
+      end
+    end
+
+    assert_equal [20, 20, 1, 1, 20, 20, 20, 1, 20, 20], captured
+  end
+
+  def test_readme_states_the_query_limit_default_and_max
+    readme = File.read(File.expand_path("../README.md", __dir__))
+
+    assert_includes readme, "limit` (default 20, max 20)"
+    refute_includes readme, "default 10"
   end
 
   def test_query_denies_unauthorized_callers

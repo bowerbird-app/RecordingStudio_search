@@ -47,6 +47,8 @@ RecordingStudioSearch.configure do |config|
 end
 ```
 
+`config.trigram_threshold` (default `0.3`) is Postgres `pg_trgm.similarity_threshold` for the `%` operator on each `against` column. A row matches when any of those columns is at least that similar to the query, or when `search_vector` matches `plainto_tsquery`. `ts_rank` and `similarity()` sort the matches. The threshold is set for that query and then restored.
+
 Secrets stay in the host or in `recording_studio_ai`. This gem never ships API keys.
 
 `embedding_client` signature: `->(text:, model:) { Array<Float> }`. Use it in tests and until `RecordingStudioAI::Embeddings.create!` ships.
@@ -189,7 +191,7 @@ Agents and API clients should not rely on core list `q` (ILIKE). This gem regist
 
 MCP lists registered endpoints. This gem does not add MCP tool code.
 
-Pass `q`. Optionally pass `models` (allowlisted type names) and `limit` (default 10, max 20). `limit` is top-N, not paginated. Omit `models` to search every `config.instant_search_models` type. Hits are Accessible-scoped the same way as instant search, then kept to the request root. A caller without `:view` on the root is denied.
+Pass `q`. Optionally pass `models` (allowlisted type names) and `limit` (default 20, max 20). `limit` is top-N, not paginated. Values below 1 become 1 and values above 20 become 20. A missing or non-numeric `limit` stays 20. Omit `models` to search every `config.instant_search_models` type. Hits are Accessible-scoped the same way as instant search, then kept to the request root. A caller without `:view` on the root is denied.
 
 This gem does not depend on `recording_studio_api` at runtime. It is a development dependency so the dummy and gem tests can use the real module. Hosts that already mount that gem get the endpoint from this engine's `to_prepare` registration.
 
