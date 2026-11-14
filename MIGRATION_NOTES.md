@@ -76,7 +76,7 @@ Query-cache embeddings are JSON so trigram-only hosts never load `vector`. Docum
 
 Do not rely on a silent `ALTER COLUMN`.
 
-## Trigram indexes and search limit (0.11.0)
+## Trigram indexes and search limit (0.10.1)
 
 No migration. Trigram search filters with `column % query` (pg_trgm similarity) or `search_vector @@ plainto_tsquery`, so the GIN indexes can be used. `config.trigram_threshold` is applied as `pg_trgm.similarity_threshold` for that query and then restored. Ranking is still `ts_rank`, then `similarity()`. `GET search/query` clamps `limit` to 1..20. The default stays 20.
 

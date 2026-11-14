@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events` so Recording Studio 6.9+ can write events. Dummy passwords are at least 12 characters (`Password123!`) for Users 0.29.
 - Dummy root switch scope lists workspaces the actor can view. Root Switchable 0.15 forbids the switcher when the current root is not viewable.
 
-## [0.11.0] - 2026-11-14
+## [0.10.1] - 2026-11-14
 
 ### Changed
 
@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Upgrade notes
 
-- Bump to `0.11.0`. No migration. No new dependency.
+- Bump to `0.10.1`. No migration. No new dependency.
 - The trigram filter uses the GIN `gin_trgm_ops` and `search_vector` indexes. Match rules stay full-text or whole-string similarity at `config.trigram_threshold`. Ranking is unchanged. The threshold is local to the query.
 - `GET search/query` turns `limit` below 1 into 1 and `limit` above 20 into 20. Omitted or non-numeric `limit` stays 20.
 
@@ -256,8 +256,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.11.0...HEAD
-[0.11.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.0...v0.11.0
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.8.0...v0.8.1
