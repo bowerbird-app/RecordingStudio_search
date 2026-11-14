@@ -6,8 +6,8 @@ source "https://rubygems.org"
 gemspec
 
 # recording_studio is not published to RubyGems; resolve the gemspec pin from GitHub.
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.366"
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.10.0"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.374"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.14.0"
 
 gem "devise"
 gem "puma"
@@ -17,13 +17,13 @@ gem "sprockets-rails"
 group :development, :test do
   gem "debug"
   gem "minitest-mock"
-  gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.37.0"
-  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.1"
+  gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.41.0"
+  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.3"
   gem "recording_studio_icons", github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.1"
-  gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4"
+  gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.5"
   gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.8.0"
-  gem "recording_studio_moveable", github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"
-  gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.14.1"
+  gem "recording_studio_moveable", github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.2.0"
+  gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.15.0"
   gem "simplecov", require: false
 end
 

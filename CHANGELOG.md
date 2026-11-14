@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Dummy and development pins: Recording Studio `v6.10.0`, FlatPack `v0.1.366`, Accessible `v0.37.0`, API `v0.23.1`, Icons `v0.2.1`, Logs `v0.7.4`, Metrics `v0.8.0`, Moveable `v4.1.1`, Trashable `v0.14.1`, Users `v0.29.0`, Admin `v2.13.0`, Attachable `v0.23.0`, Root Switchable `v0.15.0`, Cache `v0.6.3`.
+- Dummy and development pins: Recording Studio `v6.14.0`, FlatPack `v0.1.374`, Accessible `v0.41.0`, API `v0.23.3`, Icons `v0.2.1`, Logs `v0.7.5`, Metrics `v0.8.0`, Moveable `v4.2.0`, Trashable `v0.15.0`, Users `v0.29.0`, Admin `v2.13.1`, Attachable `v0.26.0`, Root Switchable `v0.15.0`, Cache `v0.6.3`. Core 6.11 through 6.14 add no migrations. Accessible 0.41 requires Recording Studio `>= 6.13.0`.
 - Dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events` so Recording Studio 6.9+ can write events. Dummy passwords are at least 12 characters (`Password123!`) for Users 0.29.
 - Dummy root switch scope lists workspaces the actor can view. Root Switchable 0.15 forbids the switcher when the current root is not viewable.
 
