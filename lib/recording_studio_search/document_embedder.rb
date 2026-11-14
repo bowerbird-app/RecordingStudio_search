@@ -23,7 +23,10 @@ module RecordingStudioSearch
 
       digest = Normalize.content_digest(record.recording_studio_search_text)
       document = find_document(record)
-      return if document && document.content_digest == digest && document.embedding.present?
+      if document && document.content_digest == digest && document.embedding.present?
+        assign_root!(document, record)
+        return
+      end
 
       unless adapter.available?
         Rails.logger.error(
@@ -38,6 +41,7 @@ module RecordingStudioSearch
         searchable_type: searchable_type,
         searchable_id: record.id,
         recording_id: recording_id_for(record),
+        root_recording_id: root_recording_id_for(record),
         embedding: vector,
         embedding_at: Time.current,
         embedding_model: RecordingStudioSearch.configuration.embedding_model,
@@ -72,6 +76,24 @@ module RecordingStudioSearch
 
     def recording_id_for(record)
       recording_id.presence || RecordingStudioSearch.recording_id_for(record)
+    end
+
+    def root_recording_id_for(record)
+      id = recording_id_for(record)
+      return if id.blank?
+      return unless defined?(RecordingStudio::Recording)
+
+      recording = RecordingStudio::Recording.find_by(id: id)
+      return if recording.blank?
+
+      recording.root_recording_id.presence || recording.id
+    end
+
+    def assign_root!(document, record)
+      root_id = root_recording_id_for(record)
+      return if root_id.blank? || document.root_recording_id == root_id
+
+      document.update!(root_recording_id: root_id)
     end
   end
 end

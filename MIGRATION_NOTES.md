@@ -10,7 +10,7 @@
 - FlatPack dummy tag `v0.1.366` (core 6 needs FlatPack `>= 0.1.315`; Users 0.26 needs `>= 0.1.328`)
 - Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
 - `json` 2.x (`>= 2.21, < 3`) until Rails 8.1 can call json 3’s `JSON.parse`
-- PostgreSQL 16 with `pg_trgm` (always) and `vector` (only if a host enables `:pgvector`)
+- PostgreSQL 16 with `pg_trgm` (always) and `vector` (only if a host enables `:pgvector`). pgvector 0.8 or newer runs filtered HNSW scans iteratively. Older pgvector still filters before the limit, with an exact scan. CI uses `pgvector/pgvector:0.8.1-pg16`.
 - Public RubyGems and GitHub access for dependency installation
 
 ## First install
@@ -75,6 +75,32 @@ Query-cache embeddings are JSON so trigram-only hosts never load `vector`. Docum
 3. Run `bin/rails recording_studio_search:reembed`.
 
 Do not rely on a silent `ALTER COLUMN`.
+
+## Tenant vector prefilter (0.11.0)
+
+`recording_studio_search_documents` stores `root_recording_id` (the recording tree root) next to `searchable_type`. Embed and upsert write both. Vector search filters on them inside SQL before `ORDER BY` distance `LIMIT`, then the caller's Accessible relation still applies.
+
+pgvector 0.8+ sets `hnsw.iterative_scan = strict_order` for that statement, with `hnsw.max_scan_tuples = 100000` and `hnsw.scan_mem_multiplier = 2`, and keeps the cosine HNSW index. Older pgvector turns index scans off for that statement and sorts the filtered rows. Results stay inside the tenant either way.
+
+Hosts that already generated the documents table run:
+
+```sql
+ALTER TABLE recording_studio_search_documents
+  ADD COLUMN root_recording_id uuid;
+
+UPDATE recording_studio_search_documents AS documents
+SET root_recording_id = COALESCE(recordings.root_recording_id, recordings.id)
+FROM recording_studio_recordings AS recordings
+WHERE documents.recording_id = recordings.id
+  AND documents.root_recording_id IS NULL;
+
+CREATE INDEX index_rss_documents_on_root_and_type
+  ON recording_studio_search_documents (root_recording_id, searchable_type);
+```
+
+`searchable_pgvector` includes the column and index for a new table. The dummy app migration `20261114120000_add_root_recording_id_to_recording_studio_search_documents` is the same backfill. A second run does not replace a root that is already set.
+
+`RecordingStudioSearch.search` and `InstantSearch.hits_for` take `root_recording_id:`. `search.query` passes the request root. Instant search without that argument uses the roots behind the Accessible relation.
 
 ## Trigram indexes and search limit (0.10.1)
 

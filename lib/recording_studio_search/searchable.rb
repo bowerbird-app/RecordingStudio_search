@@ -43,8 +43,8 @@ module RecordingStudioSearch
                                                            if: :recording_studio_search_vector_backend?
       end
 
-      def search(query, limit: nil)
-        RecordingStudioSearch.search(all, query, limit: limit)
+      def search(query, limit: nil, root_recording_id: nil)
+        RecordingStudioSearch.search(all, query, limit: limit, root_recording_id: root_recording_id)
       end
     end
 

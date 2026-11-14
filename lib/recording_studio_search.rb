@@ -9,6 +9,8 @@ require "recording_studio_search/normalize"
 require "recording_studio_search/schema"
 require "recording_studio_search/registry"
 require "recording_studio_search/embedding_adapter"
+require "recording_studio_search/vector_scan"
+require "recording_studio_search/document_roots"
 require "recording_studio_search/trigram_searcher"
 require "recording_studio_search/embedding_searcher"
 require "recording_studio_search/searcher"
@@ -40,11 +42,13 @@ module RecordingStudioSearch
     # One class or relation returns an +ActiveRecord::Relation+ that keeps any
     # existing scope. An array of classes returns a Hash of class => relation
     # in input order. Types are not merged or re-ranked across models.
-    def search(model, query, limit: nil)
+    def search(model, query, limit: nil, root_recording_id: nil)
       if model.is_a?(Array)
-        model.uniq.to_h { |one| [one, Searcher.call(one, query, limit: limit)] }
+        model.uniq.to_h do |one|
+          [one, Searcher.call(one, query, limit: limit, root_recording_id: root_recording_id)]
+        end
       else
-        Searcher.call(model, query, limit: limit)
+        Searcher.call(model, query, limit: limit, root_recording_id: root_recording_id)
       end
     end
 
