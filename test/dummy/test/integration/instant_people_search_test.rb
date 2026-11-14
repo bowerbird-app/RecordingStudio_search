@@ -9,8 +9,8 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
 
   setup do
     @user = User.find_or_create_by!(email: "admin@admin.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Ada Admin"
     end
     @user.update!(name: "Ada Admin")
@@ -142,8 +142,8 @@ class InstantPeopleSearchTest < ActionDispatch::IntegrationTest
   test "engine instant search hides pages the actor cannot view" do
     grant_refunds_page!
     stranger = User.find_or_create_by!(email: "stranger-instant@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Stranger"
     end
     hidden = Page.find_or_create_by!(title: "Hidden refunds") do |page|

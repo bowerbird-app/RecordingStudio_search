@@ -9,8 +9,8 @@ require "rails/test_help"
 class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   setup do
     @actor = User.find_or_create_by!(email: "declarations@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Declarations"
     end
   end

@@ -10,8 +10,8 @@ class SearchFacadeTest < ActiveSupport::TestCase
     RecordingStudioSearch::Document.delete_all
     RecordingStudioSearch::Query.delete_all
 
-    @ada = User.create!(name: "Ada Lovelace", email: "ada@example.com", password: "Password")
-    User.create!(name: "Grace Hopper", email: "grace@hopper.test", password: "Password")
+    @ada = User.create!(name: "Ada Lovelace", email: "ada@example.com", password: "Password123!")
+    User.create!(name: "Grace Hopper", email: "grace@hopper.test", password: "Password123!")
     @refund = Page.create!(title: "Refunds", body: "How to request a refund when a charge looks wrong.")
     Page.create!(title: "Passwords", body: "Set a password you can remember.")
     Note.create!(title: "Sticky reminder")

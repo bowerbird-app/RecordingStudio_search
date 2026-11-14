@@ -423,7 +423,8 @@ CREATE TABLE public.recording_studio_events (
     previous_recordable_type character varying,
     recordable_id uuid NOT NULL,
     recordable_type character varying NOT NULL,
-    recording_id uuid NOT NULL
+    recording_id uuid NOT NULL,
+    root_recording_id uuid NOT NULL
 );
 
 
@@ -1374,10 +1375,24 @@ CREATE INDEX index_rs_events_on_actor_and_occurred_at ON public.recording_studio
 
 
 --
+-- Name: index_rs_events_on_impersonator_and_occurred_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_events_on_impersonator_and_occurred_at ON public.recording_studio_events USING btree (impersonator_type, impersonator_id, occurred_at);
+
+
+--
 -- Name: index_rs_events_on_recording_and_timeline; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_rs_events_on_recording_and_timeline ON public.recording_studio_events USING btree (recording_id, occurred_at DESC, created_at DESC);
+
+
+--
+-- Name: index_rs_events_on_root_and_timeline; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_events_on_root_and_timeline ON public.recording_studio_events USING btree (root_recording_id, occurred_at DESC, created_at DESC, id DESC);
 
 
 --
@@ -1571,6 +1586,14 @@ ALTER TABLE ONLY public.active_storage_attachments
 
 
 --
+-- Name: recording_studio_events fk_rails_cc63a4d20c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_events
+    ADD CONSTRAINT fk_rails_cc63a4d20c FOREIGN KEY (root_recording_id) REFERENCES public.recording_studio_recordings(id);
+
+
+--
 -- Name: recording_studio_api_api_credentials fk_rails_f6ccfdb35b; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1601,6 +1624,7 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261114090000'),
 ('20261019000023'),
 ('20261019000022'),
 ('20261019000021'),

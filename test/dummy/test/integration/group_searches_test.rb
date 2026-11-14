@@ -8,19 +8,19 @@ class GroupSearchesTest < ActionDispatch::IntegrationTest
 
   setup do
     @user = User.find_or_create_by!(email: "admin@admin.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Ada Admin"
     end
     @user.update!(name: "Ada Admin")
     User.find_or_create_by!(email: "ada@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Ada Lovelace"
     end
     User.find_or_create_by!(email: "grace@hopper.test") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Grace Hopper"
     end
     sign_in @user

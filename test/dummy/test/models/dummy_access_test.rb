@@ -5,13 +5,13 @@ require "test_helper"
 class DummyAccessTest < ActiveSupport::TestCase
   setup do
     @owner = User.find_or_create_by!(email: "dummy-access-owner@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Owner"
     end
     @stranger = User.find_or_create_by!(email: "dummy-access-stranger@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Stranger"
     end
   end

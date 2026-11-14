@@ -8,8 +8,8 @@ class WeightedPagesTest < ActionDispatch::IntegrationTest
 
   setup do
     @user = User.find_or_create_by!(email: "admin@admin.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Ada Admin"
     end
     @user.update!(name: "Ada Admin")
@@ -54,8 +54,8 @@ class WeightedPagesTest < ActionDispatch::IntegrationTest
 
   test "title-first search hides pages the signed-in person cannot view" do
     stranger = User.find_or_create_by!(email: "stranger-weights@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Stranger"
     end
     hidden = Page.find_or_create_by!(title: "Secret widgets") do |page|

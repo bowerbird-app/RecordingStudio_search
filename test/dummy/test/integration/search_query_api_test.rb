@@ -23,13 +23,13 @@ class SearchQueryApiTest < ActiveSupport::TestCase
 
   setup do
     @owner = User.find_or_create_by!(email: "search-query-owner@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Owner"
     end
     @stranger = User.find_or_create_by!(email: "search-query-stranger@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Stranger"
     end
     @owner_root = DummyAccess.bootstrap_workspace!(name: "Search Query Owner Workspace", actor: @owner)
@@ -146,8 +146,8 @@ end
 class SearchQueryApiHttpTest < ActionDispatch::IntegrationTest
   setup do
     @owner = User.find_or_create_by!(email: "search-query-http-owner@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Owner"
     end
     @root = DummyAccess.bootstrap_workspace!(name: "Search Query HTTP Workspace", actor: @owner)
