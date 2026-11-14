@@ -13,8 +13,8 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.10.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.37.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.14.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.41.0"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -234,8 +234,8 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 6.1.0` (dummy tag `v6.10.0`, FlatPack `v0.1.366`). Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events.
-- Accessible on the host for instant search, recordings tree, and title-first demos (dummy tag `v0.37.0`). Missing Accessible returns no instant hits.
+- Recording Studio `>= 6.1.0` (dummy tag `v6.14.0`, FlatPack `v0.1.374`). Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events. Core 6.11 through 6.14 add no migrations.
+- Accessible on the host for instant search, recordings tree, and title-first demos (dummy tag `v0.41.0`, which needs Recording Studio `>= 6.13.0`). Missing Accessible returns no instant hits.
 - PostgreSQL 16
 
 ## Documentation
