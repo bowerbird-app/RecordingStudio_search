@@ -17,7 +17,10 @@ class DocsController < ApplicationController
   end
 
   def recordings_tree
-    recordings = RecordingStudioSearch::AccessibleScope.recordings_for(Current.actor)
+    recordings = RecordingStudioSearch::AccessibleScope.recordings_for(
+      Current.actor,
+      root: current_root_recording
+    )
     visible_ids = recordings.map(&:id).to_set
     recordings_by_parent_id = recordings.group_by do |recording|
       visible_ids.include?(recording.parent_recording_id) ? recording.parent_recording_id : nil

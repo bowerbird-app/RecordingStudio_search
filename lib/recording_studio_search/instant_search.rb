@@ -16,30 +16,39 @@ module RecordingStudioSearch
   # Engine InstantSearchesController#show is the default results URL.
   # Only +config.instant_search_models+ may be searched. Unknown models are ignored.
   # Blank +q+ returns empty hits, not Model.search("") (which would list everyone).
-  # Hits are Accessible-scoped to +actor+ before ranking or limit.
-  # Vector search prefilters by tenant root before that top-N.
-  # Pass +root_recording_id+ to rank inside one root. Otherwise the roots
-  # come from the recordings behind the Accessible relation.
-  # Blank actor, missing Accessible, or a model with no recording is empty.
+  # Hits are Accessible-scoped to +actor+ under +root+ inside the search statement.
+  # Vector search prefilters by that root and by authorized recording ids before LIMIT.
+  # Blank actor, blank root, missing Accessible, or a model with no recording is empty.
   module InstantSearch
     RESERVED_PARAMS = %w[models frame_id controller action format authenticity_token].freeze
 
     module_function
 
-    def hits_for(requested, query, actor: nil, limit: 20, root_recording_id: nil)
+    def hits_for(requested, query, actor: nil, root: nil, limit: 20)
       models = allowed_models(requested)
       return empty_hits(models) if models.empty? || query.to_s.strip.empty?
+      return empty_hits(models) if actor.blank? || root.blank?
 
-      scoped = models.map { |model| AccessibleScope.relation_for(model, actor) }
       if models.one?
-        RecordingStudioSearch.search(
-          scoped.first, query, limit: limit, root_recording_id: root_recording_id
-        )
+        search_model(models.first, query, actor: actor, root: root, limit: limit)
       else
-        models.zip(scoped).to_h do |model, relation|
-          [model, RecordingStudioSearch.search(relation, query, limit: limit, root_recording_id: root_recording_id)]
-        end
+        models.index_with { |model| search_model(model, query, actor: actor, root: root, limit: limit) }
       end
+    end
+
+    def search_model(model, query, actor:, root:, limit:)
+      RecordingStudioSearch.search(
+        model,
+        query,
+        actor: actor,
+        root: root,
+        limit: limit,
+        root_recording_id: root_recording_id(root)
+      )
+    end
+
+    def root_recording_id(root)
+      root.respond_to?(:id) ? root.id : nil
     end
 
     def empty_hits(models)

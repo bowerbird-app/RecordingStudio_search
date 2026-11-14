@@ -10,54 +10,54 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
   end
 
   test "token match on name" do
-    assert_equal ["Ada Lovelace"], User.search("Lovelace").map(&:name)
+    assert_equal ["Ada Lovelace"], User.search("Lovelace", unscoped: true).map(&:name)
   end
 
   test "token match on email" do
-    assert_equal ["Grace Hopper"], User.search("hopper.test").map(&:name)
+    assert_equal ["Grace Hopper"], User.search("hopper.test", unscoped: true).map(&:name)
   end
 
   test "typo tolerance on name" do
-    names = User.search("Lovlace").map(&:name)
+    names = User.search("Lovlace", unscoped: true).map(&:name)
     assert_includes names, "Ada Lovelace"
   end
 
   test "blank query returns the unchanged relation" do
-    assert_equal User.all.to_sql, User.search("").to_sql
-    assert_equal User.all.to_sql, User.search("   ").to_sql
-    assert_equal 2, User.search("").count
+    assert_equal User.all.to_sql, User.search("", unscoped: true).to_sql
+    assert_equal User.all.to_sql, User.search("   ", unscoped: true).to_sql
+    assert_equal 2, User.search("", unscoped: true).count
   end
 
   test "against fields ignore other columns" do
-    refute_includes User.search("Password").map(&:id), @ada.id
+    refute_includes User.search("Password", unscoped: true).map(&:id), @ada.id
   end
 
   test "limit is applied" do
-    assert_equal 1, User.search("Lovelace", limit: 1).size
+    assert_equal 1, User.search("Lovelace", limit: 1, unscoped: true).size
   end
 
   test "search keeps an existing where scope" do
     scoped = User.where(email: "ada@example.com")
 
-    assert_equal ["Ada Lovelace"], scoped.search("Lovelace").map(&:name)
-    assert_empty User.where(email: "grace@hopper.test").search("Lovelace")
+    assert_equal ["Ada Lovelace"], scoped.search("Lovelace", unscoped: true).map(&:name)
+    assert_empty User.where(email: "grace@hopper.test").search("Lovelace", unscoped: true)
   end
 
   test "facade search keeps a relation scope" do
     scoped = User.where(email: "ada@example.com")
 
-    assert_equal ["Ada Lovelace"], RecordingStudioSearch.search(scoped, "Lovelace").map(&:name)
+    assert_equal ["Ada Lovelace"], RecordingStudioSearch.search(scoped, "Lovelace", unscoped: true).map(&:name)
   end
 
   test "blank query keeps the incoming scope" do
     scoped = User.where(email: "ada@example.com")
 
-    assert_equal scoped.to_sql, scoped.search("").to_sql
-    assert_equal 1, scoped.search("").count
+    assert_equal scoped.to_sql, scoped.search("", unscoped: true).to_sql
+    assert_equal 1, scoped.search("", unscoped: true).count
   end
 
   test "filter uses index operators and ranks matched rows" do
-    sql = User.search("Lovelace").to_sql
+    sql = User.search("Lovelace", unscoped: true).to_sql
     where_sql, order_sql = sql.split("ORDER BY", 2)
 
     assert_match(/"users"\."name" % /, where_sql)
@@ -70,7 +70,7 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
   end
 
   test "order by quotes the query" do
-    sql = User.search("O'Brien").to_sql
+    sql = User.search("O'Brien", unscoped: true).to_sql
 
     assert_includes sql, "O''Brien"
   end
@@ -79,7 +79,7 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
     plan = nil
     User.transaction do
       User.connection.execute("SET LOCAL enable_seqscan = off")
-      plan = User.search("Lovelace").explain.inspect
+      plan = User.search("Lovelace", unscoped: true).explain.inspect
     end
 
     assert_match(
@@ -92,8 +92,8 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
     original = RecordingStudioSearch.configuration.trigram_threshold
     RecordingStudioSearch.configuration.trigram_threshold = 0.99
 
-    assert_equal ["Ada Lovelace"], User.search("Lovelace").map(&:name)
-    refute_includes User.search("Lovlace").map(&:name), "Ada Lovelace"
+    assert_equal ["Ada Lovelace"], User.search("Lovelace", unscoped: true).map(&:name)
+    refute_includes User.search("Lovlace", unscoped: true).map(&:name), "Ada Lovelace"
   ensure
     RecordingStudioSearch.configuration.trigram_threshold = original
   end
@@ -101,7 +101,7 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
   test "search restores the caller's similarity threshold" do
     User.transaction do
       User.connection.execute("SET LOCAL pg_trgm.similarity_threshold = 0.85")
-      User.search("Lovelace").load
+      User.search("Lovelace", unscoped: true).load
       current = User.connection.select_value("SHOW pg_trgm.similarity_threshold")
 
       assert_in_delta 0.85, current.to_f
@@ -111,7 +111,7 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
   test "building the relation does not change the similarity threshold" do
     User.transaction do
       User.connection.execute("SET LOCAL pg_trgm.similarity_threshold = 0.77")
-      User.search("Lovelace").to_sql
+      User.search("Lovelace", unscoped: true).to_sql
       current = User.connection.select_value("SHOW pg_trgm.similarity_threshold")
 
       assert_in_delta 0.77, current.to_f
@@ -122,7 +122,7 @@ class UserTrigramSearchTest < ActiveSupport::TestCase
     User.transaction do
       User.connection.execute("SET LOCAL pg_trgm.similarity_threshold = 0.81")
       assert_raises(ActiveRecord::StatementInvalid) do
-        User.search("Lovelace").where("1/0 = 1").load
+        User.search("Lovelace", unscoped: true).where("1/0 = 1").load
       end
       current = User.connection.select_value("SHOW pg_trgm.similarity_threshold")
 

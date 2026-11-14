@@ -2,14 +2,22 @@ class HomeController < ApplicationController
   def index
     @q = params[:q].to_s
     if @q.present?
-      results = RecordingStudioSearch.search([User, Page, Note], @q, limit: 20)
-      @users = results[User]
-      @pages = results[Page]
-      @notes = results[Note]
+      @users = User.search(@q, limit: 20, unscoped: true)
+      @pages = scoped_page_search
+      @notes = Note.search(@q, limit: 20, unscoped: true)
     else
       @users = User.none
       @pages = Page.none
       @notes = Note.none
     end
+  end
+
+  private
+
+  def scoped_page_search
+    root = current_root_recording
+    return Page.none if Current.actor.blank? || root.blank?
+
+    Page.search(@q, actor: Current.actor, root: root, limit: 20)
   end
 end

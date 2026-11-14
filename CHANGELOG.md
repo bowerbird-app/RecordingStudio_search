@@ -6,11 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-14
+
 ### Changed
 
-- Dummy and development pins: Recording Studio `v6.10.0`, FlatPack `v0.1.366`, Accessible `v0.37.0`, API `v0.23.1`, Icons `v0.2.1`, Logs `v0.7.4`, Metrics `v0.8.0`, Moveable `v4.1.1`, Trashable `v0.14.1`, Users `v0.29.0`, Admin `v2.13.0`, Attachable `v0.23.0`, Root Switchable `v0.15.0`, Cache `v0.6.3`.
-- Dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events` so Recording Studio 6.9+ can write events. Dummy passwords are at least 12 characters (`Password123!`) for Users 0.29.
-- Dummy root switch scope lists workspaces the actor can view. Root Switchable 0.15 forbids the switcher when the current root is not viewable.
+- Search scopes to recordings the actor can view. `Model.search` and `RecordingStudioSearch.search` require `actor:` and `root:`, or `unscoped: true`. The access filter is `RecordingStudioAccessible.authorized_recording_ids` (Accessible 0.41.0), kept as a SQL subquery. `LIMIT` stays on that statement for trigram search and for the vector nearest-neighbour query. Trashed recordings are left out. Recordables are loaded for the limited rows only.
+- When `authorized_recording_ids_supported?` is false, search returns no rows. It does not call the method (that call raises) and it does not return every row.
+- Development and dummy pins: Recording Studio `v6.13.0` (Accessible 0.41 requires `>= 6.13.0`), Accessible `v0.41.0`. FlatPack stays `v0.1.366`.
+
+### Upgrade notes
+
+- Bump to `0.12.0`. No migration. Hosts need Recording Studio Accessible `>= 0.41.0` and Recording Studio `>= 6.13.0` for scoped search. There is no walk of `recordings_for` and no compatibility shim that searches every row when the id query is missing.
+- Pass `actor:` and `root:` (a root recording) on every `Model.search` / `RecordingStudioSearch.search` / `InstantSearch.hits_for` call. `root_recording_id:` still limits the vector index to one tenant. The engine instant-search action uses the signed-in actor and `current_root_recording`. `search.query` uses the request actor and root.
+- A model that is not a recording (dummy `User` on `/people` and `/groups`) passes `unscoped: true`. That opt-out is the only way to search without an access scope.
+- Blank `q` on a scoped search returns the viewable relation, not every row. A lookup page should still use `Model.none` when the box is empty.
 
 ## [0.11.0] - 2026-11-14
 
@@ -292,7 +301,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.9.0...v0.10.0

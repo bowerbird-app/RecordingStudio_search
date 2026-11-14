@@ -59,11 +59,15 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
   end
 
   test "vector search finds a page by meaning" do
+    root = DummyAccess.bootstrap_workspace!(name: "Home Search Workspace", actor: @user)
     page = Page.create!(title: "Refunds", body: "How to request a refund when a charge looks wrong.")
+    DummyAccess.record_under_workspace!(page, actor: @user, workspace_name: "Home Search Workspace")
     RecordingStudioSearch::DocumentEmbedder.call(
       searchable_type: "Page",
-      searchable_id: page.id
+      searchable_id: page.id,
+      recording_id: page.search_recording_id
     )
+    switch_root!(root)
 
     get root_path, params: { q: "refund" }
     assert_response :success
@@ -76,5 +80,18 @@ class SearchHomeTest < ActionDispatch::IntegrationTest
     get root_path, params: { q: "sticky" }
     assert_response :success
     assert_match "Sticky reminder", response.body
+  end
+
+  private
+
+  def switch_root!(root)
+    patch "/recording_studio_root_switchable/v1/root_switch", params: {
+      scope: "all_workspaces",
+      root_switch: { root_recording_id: root.id, return_to: "/" }
+    }
+    assert_response :redirect
+    # An engine request sticks its mount path onto the next main-app path helper.
+    integration_session.instance_variable_set(:@controller, nil)
+    integration_session.instance_variable_set(:@url_options, nil)
   end
 end

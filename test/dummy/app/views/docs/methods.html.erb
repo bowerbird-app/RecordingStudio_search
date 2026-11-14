@@ -14,10 +14,10 @@
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      # Dummy /people uses this. Blank q returns the full relation,
-      # so a lookup page should skip search when the box is empty.
+      # Dummy /people uses this. A person is not a recording, so the
+      # lookup opts out of the access scope. Skip search when the box is empty.
       @q = params[:q].to_s
-      @people = @q.present? ? User.search(@q, limit: 20) : User.none
+      @people = @q.present? ? User.search(@q, limit: 20, unscoped: true) : User.none
     CODE
   ) %>
 
@@ -30,10 +30,9 @@
     language: :ruby,
     code: <<~'CODE'
       # Dummy home keeps each type in its own list.
-      results = RecordingStudioSearch.search([User, Page, Note], @q, limit: 20)
-      @users = results[User]
-      @pages = results[Page]
-      @notes = results[Note]
+      @users = User.search(@q, limit: 20, unscoped: true)
+      @pages = Page.search(@q, actor: Current.actor, root: current_root_recording, limit: 20)
+      @notes = Note.search(@q, limit: 20, unscoped: true)
     CODE
   ) %>
 
@@ -45,8 +44,13 @@
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      User.where("email ILIKE ?", "%@example.com").search(@q)
-      RecordingStudioSearch.search(Page.where.not(body: nil), @q)
+      User.where("email ILIKE ?", "%@example.com").search(@q, unscoped: true)
+      RecordingStudioSearch.search(
+        Page.where.not(body: nil),
+        @q,
+        actor: Current.actor,
+        root: current_root_recording
+      )
 
       # Dummy /groups searches people already in a mailbox.
     CODE

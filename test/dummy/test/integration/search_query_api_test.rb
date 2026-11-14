@@ -87,8 +87,13 @@ class SearchQueryApiTest < ActiveSupport::TestCase
       workspace_name: "Search Query Root B"
     )
 
-    unfiltered = RecordingStudioSearch::InstantSearch.hits_for(["Page"], "quokka", actor: @owner)
-    unfiltered_ids = Array(unfiltered).map(&:id)
+    without_root = RecordingStudioSearch::InstantSearch.hits_for(["Page"], "quokka", actor: @owner)
+    in_root_a = RecordingStudioSearch::InstantSearch.hits_for(
+      ["Page"], "quokka", actor: @owner, root: root_a
+    )
+    in_root_b = RecordingStudioSearch::InstantSearch.hits_for(
+      ["Page"], "quokka", actor: @owner, root: root_b
+    )
     payload = RecordingStudioSearch::Api::Query.call(
       Context.new(
         access_grant: AccessGrant.new(@owner),
@@ -98,8 +103,11 @@ class SearchQueryApiTest < ActiveSupport::TestCase
     )
     ids = payload.fetch(:hits).map { |row| row[:id] }
 
-    assert_includes unfiltered_ids, visible.id
-    assert_includes unfiltered_ids, hidden.id
+    assert_empty Array(without_root)
+    assert_includes in_root_a.map(&:id), visible.id
+    refute_includes in_root_a.map(&:id), hidden.id
+    assert_includes in_root_b.map(&:id), hidden.id
+    refute_includes in_root_b.map(&:id), visible.id
     assert_includes ids, visible.id
     refute_includes ids, hidden.id
     assert RecordingStudioAccessible.authorized?(actor: @owner, recording: root_a, role: :view)

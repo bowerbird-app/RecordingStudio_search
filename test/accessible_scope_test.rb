@@ -38,11 +38,14 @@ class AccessibleScopeTest < Minitest::Test
     end
   end
 
-  def test_bulk_scope_uses_accessible_list_apis
+  def test_scope_uses_the_authorized_recording_id_relation
     source = File.read(File.expand_path("../lib/recording_studio_search/accessible_scope.rb", __dir__))
 
-    assert_includes source, "root_recordings_for"
-    assert_includes source, "RecordingStudioAccessible.recordings_for"
+    assert_includes source, "authorized_recording_ids_supported?"
+    assert_includes source, "authorized_recording_ids"
+    assert_includes source, "trashed_at"
+    refute_includes source, "root_recordings_for"
+    refute_includes source, "RecordingStudioAccessible.recordings_for"
     refute_includes source, "RecordingStudioAccessible.authorized?"
   end
 end

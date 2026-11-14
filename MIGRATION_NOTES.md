@@ -4,8 +4,8 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio `>= 6.1.0` (dummy GitHub tag `v6.10.0`). Core 6.9+ needs `recording_studio_events.root_recording_id`. Copy `20261114090000_add_root_recording_id_to_recording_studio_events` before writing events.
-- Accessible dummy tag `v0.37.0` and Root Switchable dummy tag `v0.15.0`
+- Recording Studio `>= 6.1.0` (dummy GitHub tag `v6.13.0`). Core 6.9+ needs `recording_studio_events.root_recording_id`. Copy `20261114090000_add_root_recording_id_to_recording_studio_events` before writing events. Accessible 0.41 needs Recording Studio `>= 6.13.0`.
+- Accessible dummy tag `v0.41.0` (`authorized_recording_ids`) and Root Switchable dummy tag `v0.15.0`
 - Users dummy tag `v0.29.0` (Admin `v2.13.0`, Attachable `v0.23.0`, Logs `v0.7.4` as dummy runtime deps). Passwords shorter than 12 characters do not save.
 - FlatPack dummy tag `v0.1.366` (core 6 needs FlatPack `>= 0.1.315`; Users 0.26 needs `>= 0.1.328`)
 - Accessible 0.8+ stores dependent grants on `recording_studio_accesses.depends_on_recording_id`. Copy that column if you bump Accessible past 0.7.
@@ -31,7 +31,7 @@ bin/rails db:migrate
 
 Declare matching `searchable backend:` on each model. Boot warns if the DSL and schema disagree.
 
-`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Dummy `/people` is the one-model shape (`User.search`). Dummy `/instant` is Accessible-scoped page search through a Turbo Frame (bulk `root_recordings_for` / `recordings_for` before ranking). Dummy `/groups` is scoped people search. Dummy `/title-first` is weighted page ranking inside Accessible `:view`. Dummy writes use `config.authorize_write` through Accessible; seeds bootstrap owner grants with `bootstrap_owner_access!`.
+`RecordingStudioSearch.search` accepts one model class or relation (returns a relation that keeps the incoming scope) or an array of classes (returns `{ Model => relation }` in input order). Hosts render each list themselves; this gem does not merge ranks across types. Every call passes `actor:` and `root:`, or `unscoped: true`. Dummy `/people` is the one-model shape (`User.search(..., unscoped: true)`), because a person is not a recording. Dummy `/instant` and `search.query` scope pages with `authorized_recording_ids` under the current root. Dummy `/groups` keeps a mailbox scope and passes `unscoped: true`. Dummy `/title-first` ranks inside that same access scope. Dummy writes use `config.authorize_write` through Accessible; seeds bootstrap owner grants with `bootstrap_owner_access!`.
 
 ## Instant search (0.4.0)
 
@@ -78,7 +78,7 @@ Do not rely on a silent `ALTER COLUMN`.
 
 ## Tenant vector prefilter (0.11.0)
 
-`recording_studio_search_documents` stores `root_recording_id` (the recording tree root) next to `searchable_type`. Embed and upsert write both. Vector search filters on them inside SQL before `ORDER BY` distance `LIMIT`, then the caller's Accessible relation still applies.
+`recording_studio_search_documents` stores `root_recording_id` (the recording tree root) next to `searchable_type`. Embed and upsert write both. Vector search filters on root, type, and `authorized_recording_ids` inside SQL before `ORDER BY` distance `LIMIT`.
 
 pgvector 0.8+ sets `hnsw.iterative_scan = strict_order` for that statement, with `hnsw.max_scan_tuples = 100000` and `hnsw.scan_mem_multiplier = 2`, and keeps the cosine HNSW index. Older pgvector turns index scans off for that statement and sorts the filtered rows. Results stay inside the tenant either way.
 
@@ -100,7 +100,22 @@ CREATE INDEX index_rss_documents_on_root_and_type
 
 `searchable_pgvector` includes the column and index for a new table. The dummy app migration `20261114120000_add_root_recording_id_to_recording_studio_search_documents` is the same backfill. A second run does not replace a root that is already set.
 
-`RecordingStudioSearch.search` and `InstantSearch.hits_for` take `root_recording_id:`. `search.query` passes the request root. Instant search without that argument uses the roots behind the Accessible relation.
+`RecordingStudioSearch.search` takes `actor:`, `root:`, and `root_recording_id:`. `InstantSearch.hits_for` takes `actor:` and `root:` and uses that root's id as the vector tenant. `search.query` passes the request actor and root. Instant search without an actor or root returns nothing.
+
+## Access scope (0.12.0)
+
+No migration. `Model.search` and `RecordingStudioSearch.search` take `actor:` and `root:` (the root recording). Hits are recordings that actor can view under that root. The filter is one subquery from `RecordingStudioAccessible.authorized_recording_ids`, with `trashed_at` removed, and `LIMIT` is on that same statement. Vector search applies the same recording ids before the distance `LIMIT`.
+
+`authorized_recording_ids_supported?` must be true. When it is false the id method raises, and search returns no rows.
+
+`unscoped: true` is the opt-out for a model that is not on the tree. Omitting both the actor/root pair and `unscoped: true` raises.
+
+```ruby
+Page.search("refund", actor: current_user, root: current_root_recording, limit: 20)
+User.search("ada", limit: 20, unscoped: true)
+```
+
+Install Accessible `>= 0.41.0` and Recording Studio `>= 6.13.0`.
 
 ## Trigram indexes and search limit (0.10.1)
 

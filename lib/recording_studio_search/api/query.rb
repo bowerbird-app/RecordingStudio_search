@@ -11,8 +11,8 @@ module RecordingStudioSearch
           requested_models(context.params),
           query(context.params),
           actor: grant.actor,
-          limit: limit(context.params),
-          root_recording_id: root_id(context.root_recording)
+          root: context.root_recording,
+          limit: limit(context.params)
         )
         { hits: rows_for(in_root(hits, context.root_recording)) }
       end
@@ -27,12 +27,6 @@ module RecordingStudioSearch
 
       def self.query(params)
         params[:q].to_s
-      end
-
-      def self.root_id(root)
-        return unless root.respond_to?(:id)
-
-        root.id
       end
 
       def self.limit(params)
@@ -86,7 +80,7 @@ module RecordingStudioSearch
         }
       end
 
-      private_class_method :requested_models, :query, :root_id, :limit, :in_root, :relation_in_root,
+      private_class_method :requested_models, :query, :limit, :in_root, :relation_in_root,
                            :rows_for, :rows_for_relation, :row_for
     end
   end

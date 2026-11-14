@@ -7,7 +7,7 @@ class GroupSearchesController < ApplicationController
     @q = params[:q].to_s
     @group = GROUPS.include?(params[:group].to_s) ? params[:group].to_s : "everyone"
     people = people_in_group
-    @people = @q.present? ? people.search(@q, limit: 20) : User.none
+    @people = @q.present? ? people.search(@q, limit: 20, unscoped: true) : User.none
   end
 
   private
