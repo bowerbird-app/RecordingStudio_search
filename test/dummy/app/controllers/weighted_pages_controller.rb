@@ -5,7 +5,7 @@ class WeightedPagesController < ApplicationController
     @q = params[:q].to_s
     @pages = if @q.present?
       RecordingStudioSearch::TrigramSearcher.call(
-        RecordingStudioSearch::AccessibleScope.relation_for(Page, Current.actor),
+        RecordingStudioSearch::AccessibleScope.relation_for(Page, Current.actor, root: current_root_recording),
         @q,
         limit: 20
       ).to_a

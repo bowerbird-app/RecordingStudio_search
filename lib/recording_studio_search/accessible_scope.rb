@@ -1,41 +1,44 @@
 # frozen_string_literal: true
 
 module RecordingStudioSearch
-  # Instant search and dummy lookups ask Accessible which recordings the actor
-  # may view. Missing Accessible or a blank actor is empty, not everyone.
-  # Scope is bulk-loaded from Accessible before ranking or limit.
+  # Viewable recordings for one actor under one root.
+  #
+  # Accessible's +authorized_recording_ids+ is an unloaded id relation (a
+  # recursive CTE). Search keeps that relation in SQL and applies LIMIT on
+  # the same statement. Trashed recordings stay in the Accessible set, so
+  # this scope drops +trashed_at+. A blank actor, a blank root, a missing
+  # Accessible, or an authorization service that cannot answer the id query
+  # is empty. It is never every row.
   module AccessibleScope
     VIEW_ROLE = :view
 
     module_function
 
-    def relation_for(model, actor)
+    def relation_for(model, actor, root: nil)
       return none_for(model) unless searchable_model?(model)
+      return none_for(model) unless scope_ready?(actor, root)
 
-      ids = recordable_ids(model, actor)
-      return none_for(model) if ids.empty?
-
-      model.where(id: ids)
+      model.where(id: recordable_id_relation(model, actor, root))
     end
 
-    def recordings_for(actor)
-      return [] unless accessible?
-      return [] if actor.blank?
+    def recordable_ids(model, actor, root: nil)
+      return [] unless scope_ready?(actor, root)
 
-      ids = descendant_recording_ids(actor)
-      return [] if ids.empty?
-
-      RecordingStudio::Recording.where(id: ids).includes(:recordable).reorder(:created_at, :id).to_a
+      recordable_id_relation(model, actor, root)
     end
 
-    def recordable_ids(model, actor)
-      return [] unless accessible?
-      return [] if actor.blank?
-      return [] unless defined?(RecordingStudio::Recording)
+    # Unloaded relation of recording ids the actor can view. Trashed rows
+    # are already removed. +recordable_type+ drops access recordings.
+    def recording_ids_for(actor, root:, recordable_type: nil)
+      return recording_none unless scope_ready?(actor, root)
 
-      recordings_for(actor).filter_map do |recording|
-        recording.recordable_id if recording.recordable_type == model.name
-      end
+      visible_recordings(actor, root: root, recordable_type: recordable_type).select(:id)
+    end
+
+    def recordings_for(actor, root: nil)
+      return [] unless scope_ready?(actor, root)
+
+      visible_recordings(actor, root: root).includes(:recordable).reorder(:created_at, :id).to_a
     end
 
     def accessible?
@@ -50,27 +53,70 @@ module RecordingStudioSearch
       searchable_model?(model) ? model.none : []
     end
 
-    def descendant_recording_ids(actor)
-      seen = {}
-      queue = Array(
-        RecordingStudioAccessible.root_recordings_for(actor: actor, minimum_role: VIEW_ROLE)
-      )
-
-      until queue.empty?
-        recording = queue.shift
-        next if recording.blank? || seen[recording.id]
-
-        seen[recording.id] = true
-        children = RecordingStudioAccessible.recordings_for(
-          actor: actor,
-          parent_recording: recording,
-          minimum_role: VIEW_ROLE
-        )
-        Array(children).each { |child| queue << child }
-      end
-
-      seen.keys
+    def scope_ready?(actor, root)
+      accessible? && actor.present? && root.present? && authorized_ids_supported?
     end
-    private_class_method :descendant_recording_ids
+
+    def authorized_ids_supported?
+      return false unless accessible?
+      return false unless RecordingStudioAccessible.respond_to?(:authorized_recording_ids_supported?)
+
+      RecordingStudioAccessible.authorized_recording_ids_supported?
+    rescue RecordingStudioAccessible::Error
+      false
+    end
+
+    def visible_recordings(actor, root:, recordable_type: nil)
+      scope = RecordingStudio::Recording.where(
+        id: authorized_ids(actor, root, recordable_type: recordable_type)
+      )
+      exclude_trashed(scope)
+    end
+
+    def authorized_ids(actor, root, recordable_type:)
+      return recording_none unless authorized_ids_supported?
+
+      RecordingStudioAccessible.authorized_recording_ids(
+        actor: actor,
+        root: root,
+        role: VIEW_ROLE,
+        recordable_type: recordable_type
+      )
+    rescue RecordingStudioAccessible::Error
+      recording_none
+    end
+
+    def recordable_id_relation(model, actor, root)
+      visible_recordings(
+        actor,
+        root: root,
+        recordable_type: model_name(model)
+      ).select(:recordable_id)
+    end
+
+    def model_name(model)
+      model.respond_to?(:klass) ? model.klass.name : model.name
+    end
+
+    def exclude_trashed(scope)
+      return scope unless recording_class
+      return scope unless recording_class.column_names.include?("trashed_at")
+
+      scope.where(trashed_at: nil)
+    end
+
+    def recording_none
+      recording_class ? recording_class.none : []
+    end
+
+    def recording_class
+      return unless defined?(RecordingStudio::Recording)
+
+      RecordingStudio::Recording
+    end
+
+    private_class_method :scope_ready?, :authorized_ids_supported?, :visible_recordings,
+                         :authorized_ids, :recordable_id_relation, :model_name,
+                         :exclude_trashed, :recording_none, :recording_class
   end
 end

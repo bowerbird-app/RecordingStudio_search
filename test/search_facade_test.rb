@@ -5,29 +5,36 @@ require "minitest/mock"
 
 class SearchFacadeTest < Minitest::Test
   def fake_search
-    lambda do |model, query, limit: nil, root_recording_id: nil|
-      { model: model, query: query, limit: limit, root_recording_id: root_recording_id }
+    lambda do |model, query, limit: nil, access: RecordingStudioSearch::Access.new|
+      { model: model, query: query, limit: limit, access: access }
     end
   end
 
   def test_single_model_returns_the_searcher_result
     model = Class.new
     RecordingStudioSearch::Searcher.stub(:call, fake_search) do
-      result = RecordingStudioSearch.search(model, "ada", limit: 10)
+      result = RecordingStudioSearch.search(model, "ada", limit: 10, unscoped: true)
 
-      assert_equal({ model: model, query: "ada", limit: 10, root_recording_id: nil }, result)
+      assert_equal model, result.fetch(:model)
+      assert_equal "ada", result.fetch(:query)
+      assert_equal 10, result.fetch(:limit)
+      assert_equal true, result.fetch(:access).unscoped
     end
   end
 
   def test_array_returns_hash_of_per_model_results_in_order
     first = Class.new
     second = Class.new
+    actor = Object.new
+    root = Object.new
     RecordingStudioSearch::Searcher.stub(:call, fake_search) do
-      result = RecordingStudioSearch.search([first, second], "refund", limit: 20)
+      result = RecordingStudioSearch.search([first, second], "refund", actor: actor, root: root, limit: 20)
 
       assert_equal [first, second], result.keys
-      assert_equal({ model: first, query: "refund", limit: 20, root_recording_id: nil }, result[first])
-      assert_equal({ model: second, query: "refund", limit: 20, root_recording_id: nil }, result[second])
+      assert_equal actor, result[first].fetch(:access).actor
+      assert_equal root, result[first].fetch(:access).root
+      assert_equal 20, result[first].fetch(:limit)
+      assert_equal result[first].fetch(:access), result[second].fetch(:access)
     end
   end
 

@@ -3,8 +3,8 @@
 class PeopleController < ApplicationController
   def index
     @q = params[:q].to_s
-    # Blank Model.search returns the full relation. A lookup page should
-    # treat empty q as no hits, not "everyone".
-    @people = @q.present? ? User.search(@q, limit: 20) : User.none
+    # People are not recordings. unscoped skips the access scope.
+    # A blank box stays empty instead of listing everyone.
+    @people = @q.present? ? User.search(@q, limit: 20, unscoped: true) : User.none
   end
 end

@@ -103,7 +103,7 @@ class TenantVectorSearchTest < ActiveSupport::TestCase
 
     logs = capture_logs do
       @hits = RecordingStudioSearch::InstantSearch.hits_for(
-        ["Page"], QUERY, actor: owner, limit: LIMIT
+        ["Page"], QUERY, actor: owner, root: owned.fetch(:root), limit: LIMIT
       )
     end
     ids = Array(@hits).map(&:id)
@@ -150,7 +150,8 @@ class TenantVectorSearchTest < ActiveSupport::TestCase
       Page.where(id: visible.id),
       QUERY,
       limit: LIMIT,
-      root_recording_id: root.id
+      root_recording_id: root.id,
+      unscoped: true
     )
 
     assert_equal [visible.id], hits.map(&:id)
