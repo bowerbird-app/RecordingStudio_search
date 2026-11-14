@@ -19,6 +19,7 @@ module RecordingStudioSearch
     end
 
     def call
+      @filtered_model = ResultFilters.apply(model)
       vector = cached_or_create_query_embedding
       ids = nearest_ids(vector)
       if ids.empty?
@@ -26,7 +27,7 @@ module RecordingStudioSearch
         return TrigramSearcher.call(model, query, limit: limit)
       end
 
-      model.where(id: ids).order(order_for(ids)).limit(limit)
+      @filtered_model.where(id: ids).order(order_for(ids)).limit(limit)
     rescue EmbeddingAdapter::Error => e
       warn_fallback("#{e.class}: #{e.message}")
       TrigramSearcher.call(model, query, limit: limit)
@@ -72,6 +73,7 @@ module RecordingStudioSearch
       scope = scope.where.not(recording_id: nil) if entry&.recording_id_method
       scope = scope.where(recording_id: recording_ids) unless recording_ids.nil?
       scope = restrict_to_tenant(scope)
+      scope = scope.where(searchable_id: ResultFilters.ids_for(@filtered_model)) if ResultFilters.registered_for?(model)
       scope.order(distance_order(vector))
     end
 

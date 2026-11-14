@@ -29,6 +29,7 @@ module RecordingStudioSearch
     def call
       relation = model.where(where_sql, query: query)
       relation = relation.order(Arel.sql(order_sql))
+      relation = ResultFilters.apply(relation)
       relation = relation.limit(limit) if limit
       relation
         .annotate("pg_trgm.similarity_threshold=#{threshold_literal}")

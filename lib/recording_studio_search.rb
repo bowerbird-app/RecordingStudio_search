@@ -11,6 +11,7 @@ require "recording_studio_search/registry"
 require "recording_studio_search/embedding_adapter"
 require "recording_studio_search/vector_scan"
 require "recording_studio_search/document_roots"
+require "recording_studio_search/result_filters"
 require "recording_studio_search/trigram_searcher"
 require "recording_studio_search/embedding_searcher"
 require "recording_studio_search/access"
@@ -20,7 +21,6 @@ require "recording_studio_search/document_embedder"
 require "recording_studio_search/boot_checks"
 require "recording_studio_search/accessible_scope"
 require "recording_studio_search/instant_search"
-require "recording_studio_search/routes_proxy"
 require "recording_studio_search/api"
 require "recording_studio_search/engine"
 
@@ -37,6 +37,21 @@ module RecordingStudioSearch
 
     def reset_configuration!
       @configuration = Configuration.new
+    end
+
+    # Narrow +model+ inside the search statement, before LIMIT.
+    # The block receives the relation (already access-scoped when +actor+ and
+    # +root+ are passed) and returns it with an extra +where+. Search ANDs
+    # that relation back onto the one it built, so the block cannot widen
+    # access. Register from +to_prepare+: the same source line replaces itself
+    # on reload instead of stacking. +reset_result_filters!+ clears the registry
+    # in tests.
+    def register_result_filter(model, &)
+      ResultFilters.register(model, &)
+    end
+
+    def reset_result_filters!
+      ResultFilters.reset!
     end
 
     # Search one model (class or relation) or several classes.

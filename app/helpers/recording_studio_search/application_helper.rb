@@ -3,5 +3,6 @@
 module RecordingStudioSearch
   module ApplicationHelper
     include ResultsHelper
+    include InstantSearchHelper
   end
 end

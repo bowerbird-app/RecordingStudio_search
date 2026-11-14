@@ -5,7 +5,7 @@
 ) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= recording_studio_search.instant_search_field(
+  <%= instant_search_field(
     models: [Page],
     frame_id: "page_results",
     url: recording_studio_search.instant_search_path,
@@ -14,7 +14,7 @@
     placeholder: "Try widgets or refund"
   ) %>
 
-  <%= recording_studio_search.instant_search_results(
+  <%= instant_search_results(
     frame_id: "page_results",
     hits: @hits,
     query: nil

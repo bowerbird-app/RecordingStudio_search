@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-14
+
+### Added
+
+- `RecordingStudioSearch.register_result_filter(Model) { |relation| relation.where(...) }` narrows one model's hits inside the search statement, before `LIMIT`. Trigram search, the vector nearest-neighbour query, `Model.search`, `RecordingStudioSearch.search`, and instant search all apply it. The filter is ANDed with the relation search already built, including the Accessible scope, so it cannot widen access. Register from `to_prepare`. The same source line replaces itself on reload.
+
+### Changed
+
+- `instant_search_field` and `instant_search_results` are view helpers included from `ApplicationHelper`. `RecordingStudioSearch::RoutesProxy` and its prepends are gone.
+
+### Upgrade notes
+
+- Bump to `0.13.0`. No migration.
+- Call `instant_search_field` and `instant_search_results` in the view. `recording_studio_search.instant_search_path` is unchanged.
+- A gem that drops rows after the instant-search limit should register a result filter. The block adds a `where`. `reset_result_filters!` clears the registry in tests.
+
 ## [0.12.0] - 2026-11-14
 
 ### Changed
@@ -301,7 +317,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.0...v0.10.1
