@@ -3,15 +3,15 @@
 module RecordingStudioSearch
   # Instant search: opt-in Flatpack field + Turbo Frame results.
   #
-  # Locked host API:
-  #   recording_studio_search.instant_search_field(
+  # Host view helpers (included from ApplicationHelper):
+  #   instant_search_field(
   #     models: [User],
   #     frame_id: "people_results",
   #     url: recording_studio_search.instant_search_path,
   #     param: :q,
   #     debounce_ms: 200
   #   )
-  #   recording_studio_search.instant_search_results(frame_id: "people_results", hits: @hits)
+  #   instant_search_results(frame_id: "people_results", hits: @hits)
   #
   # Engine InstantSearchesController#show is the default results URL.
   # Only +config.instant_search_models+ may be searched. Unknown models are ignored.

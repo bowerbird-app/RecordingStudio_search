@@ -14,7 +14,7 @@ This Rails app exists to validate the Recording Studio search addon in a real ho
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 - Dummy-only `/docs/*` pages for gem-specific onboarding
 - `/people` one-model search (`User.search`) alongside mixed home search
-- `/instant` Turbo Frame instant search (`recording_studio_search.instant_search_field`)
+- `/instant` Turbo Frame instant search (`instant_search_field`)
 - `/groups` scoped people search and `/title-first` weighted page ranking
 
 ## Quick Start
@@ -53,4 +53,4 @@ Use this app to verify search generators, embeddings, and fallback before a host
 
 Authenticated pages call `recording_studio_layout` and render Recording Studio’s default layout (`html data-theme="rounded"`). Dummy keeps a host copy of `recording_studio/shared/_default_layout` aligned with core 6.3 (`content_for :title` / `:subtitle`, `flat_pack_page_nav`, `page_nav_button_group`). Dummy also overrides the root-switch show view so it matches Root Switchable `v0.15.0` (Card uses `border:` / `shadow:`, not `style:`). Sign-in uses Default Layout plus the Users auth shell (`Welcome back`, Continue with email). Dummy names the theme in `config/initializers/flat_pack.rb` (`FlatPack.configuration.default_theme = :rounded`).
 
-The home page in `app/views/home/index.html.erb` searches people and notes with `unscoped: true` and pages with the signed-in actor and `current_root_recording`. The control is a full-width `FlatPack::Search::Component` (`max_width: :none`) submitting GET `q`. `/people` is the same Search control calling `User.search(..., unscoped: true)` only. `/instant` copies `instant_search_field` plus `instant_search_results` against engine `InstantSearchesController#show` for pages the signed-in person can view in the current root. `/groups` keeps a mailbox scope and passes `unscoped: true`. `/title-first` shows weighted ranking inside the same access scope. Deeper explanations live in the product README.
+The home page in `app/views/home/index.html.erb` searches people and notes with `unscoped: true` and pages with the signed-in actor and `current_root_recording`. The control is a full-width `FlatPack::Search::Component` (`max_width: :none`) submitting GET `q`. `/people` is the same Search control calling `User.search(..., unscoped: true)` only. `/instant` calls the view helpers `instant_search_field` and `instant_search_results` against engine `InstantSearchesController#show` for pages the signed-in person can view in the current root. `/groups` keeps a mailbox scope and passes `unscoped: true`. `/title-first` shows weighted ranking inside the same access scope. Deeper explanations live in the product README.

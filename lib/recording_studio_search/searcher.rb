@@ -28,7 +28,7 @@ module RecordingStudioSearch
 
     def perform
       relation = scoped_relation
-      return relation if query.to_s.strip.empty?
+      return ResultFilters.apply(relation) if query.to_s.strip.empty?
 
       case backend
       when :pgvector

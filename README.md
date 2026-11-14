@@ -94,6 +94,20 @@ Every search passes `actor:` and `root:` (the root recording the actor is in), o
 
 `RecordingStudioSearch.search(Model, q, actor:, root:)` is the same facade and returns an `ActiveRecord::Relation`.
 
+## Narrowing results
+
+Other gems can drop rows for one model inside the search statement, before `LIMIT`. The block receives the relation search already built (the Accessible scope is already on it) and returns that relation with an extra `where`. Search ANDs the filter back onto its own relation, so the filter cannot widen access. Register from `to_prepare`. The same source line replaces itself on reload instead of stacking. Call `RecordingStudioSearch.reset_result_filters!` in a test that registered one.
+
+```ruby
+Rails.application.config.to_prepare do
+  RecordingStudioSearch.register_result_filter(SupportPage) do |relation|
+    relation.where(published: true)
+  end
+end
+```
+
+`Model.search`, `RecordingStudioSearch.search`, instant search, trigram search, and vector search all apply it. Vector search adds the filtered model ids as a `searchable_id` subquery beside the authorized recording ids and the root filter, in the statement that orders by distance and applies `LIMIT`. Put a join inside that `where` (a subquery on the ids) so the predicate stays bound and indexable.
+
 Pass an array when a screen needs several types (for example Section + Page). That returns a **Hash** of model class => relation, in the order you passed, with each model using its own backend. The same actor and root apply to each model. Lists stay separate; scores are not merged across types.
 
 ```ruby
@@ -154,14 +168,14 @@ config.instant_search_models = ["Page"]
 4. Copy this pair onto a host page. First helper is the field. Second is the frame.
 
 ```erb
-<%= recording_studio_search.instant_search_field(
+<%= instant_search_field(
       models: [Page],
       frame_id: "page_results",
       url: recording_studio_search.instant_search_path,
       param: :q,
       debounce_ms: 200
     ) %>
-<%= recording_studio_search.instant_search_results(
+<%= instant_search_results(
       frame_id: "page_results",
       hits: @hits
     ) %>

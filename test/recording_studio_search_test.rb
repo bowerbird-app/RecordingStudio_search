@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioSearchTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.12.0", ::RecordingStudioSearch::VERSION
+    assert_equal "0.13.0", ::RecordingStudioSearch::VERSION
   end
 
   def test_engine_exists
@@ -186,6 +186,9 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes readme, "User.search"
     assert_includes readme, "instant_search_field"
     assert_includes readme, "instant_search_results"
+    assert_includes readme, "register_result_filter"
+    refute_includes readme, "recording_studio_search.instant_search_field"
+    refute_includes readme, "recording_studio_search.instant_search_results"
     assert_includes readme, "instant_search_models"
     assert_includes readme, "trigram or vector"
     assert_includes readme, "recording_studio_search_queries"
@@ -266,6 +269,8 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes controller, "Page.none"
     assert_includes view_source, "instant_search_field"
     assert_includes view_source, "instant_search_results"
+    refute_includes view_source, "recording_studio_search.instant_search_field"
+    refute_includes view_source, "recording_studio_search.instant_search_results"
     assert_includes view_source, 'frame_id: "page_results"'
     assert_includes view_source, "recording_studio_search.instant_search_path"
     refute_includes view_source, "<turbo-frame"

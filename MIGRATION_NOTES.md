@@ -35,7 +35,7 @@ Declare matching `searchable backend:` on each model. Boot warns if the DSL and 
 
 ## Instant search (0.4.0)
 
-Off by default. Set `config.instant_search_models` (class names are safest at boot), mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, import Turbo, then copy `instant_search_field` plus `instant_search_results`. The engine show action is the results URL. Blank `q` is empty, not everyone. Models that are not allowlisted are ignored. Hits need Accessible `:view` on the record's recording. The frame uses each model’s declared backend (`:pg_trgm` or `:pgvector`). New query strings still hit the embedding client once, then `recording_studio_search_queries`. Dummy `/instant` allowlists `Page`. No Support `/help` wiring. See `docs/search-plan.md` Phase 4.
+Off by default. Set `config.instant_search_models` (class names are safest at boot), mount `RecordingStudioSearch::Engine`, pin `controllers/recording_studio_search`, import Turbo, then call the view helpers `instant_search_field` and `instant_search_results`. The engine show action is the results URL (`recording_studio_search.instant_search_path`). Blank `q` is empty, not everyone. Models that are not allowlisted are ignored. Hits need Accessible `:view` on the record's recording. The frame uses each model’s declared backend (`:pg_trgm` or `:pgvector`). New query strings still hit the embedding client once, then `recording_studio_search_queries`. Dummy `/instant` allowlists `Page`. No Support `/help` wiring. See `docs/search-plan.md` Phase 4.
 
 ## Interface text (0.5.0)
 
@@ -101,6 +101,25 @@ CREATE INDEX index_rss_documents_on_root_and_type
 `searchable_pgvector` includes the column and index for a new table. The dummy app migration `20261114120000_add_root_recording_id_to_recording_studio_search_documents` is the same backfill. A second run does not replace a root that is already set.
 
 `RecordingStudioSearch.search` takes `actor:`, `root:`, and `root_recording_id:`. `InstantSearch.hits_for` takes `actor:` and `root:` and uses that root's id as the vector tenant. `search.query` passes the request actor and root. Instant search without an actor or root returns nothing.
+
+## Result filters and view helpers (0.13.0)
+
+No migration. `RecordingStudioSearch.register_result_filter(Model)` takes a block that returns the relation with an extra `where`. Search applies it before `LIMIT` on trigram search and on the vector nearest-neighbour query, and ANDs it with the Accessible scope. Register from `to_prepare`. The same source line replaces itself on reload.
+
+`instant_search_field` and `instant_search_results` are view helpers. `recording_studio_search.instant_search_path` is still the results URL.
+
+```ruby
+Rails.application.config.to_prepare do
+  RecordingStudioSearch.register_result_filter(SupportPage) do |relation|
+    relation.where(published: true)
+  end
+end
+```
+
+```erb
+<%= instant_search_field(models: [Page], frame_id: "page_results", url: recording_studio_search.instant_search_path) %>
+<%= instant_search_results(frame_id: "page_results", hits: @hits) %>
+```
 
 ## Access scope (0.12.0)
 
