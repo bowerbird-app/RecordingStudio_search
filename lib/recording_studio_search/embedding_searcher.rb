@@ -2,16 +2,23 @@
 
 module RecordingStudioSearch
   class EmbeddingSearcher
-    def self.call(model, query, limit: nil)
-      new(model, query, limit: limit).call
+    DISTANCE_OPERATORS = {
+      l2: "<->",
+      inner_product: "<#>",
+      cosine: "<=>"
+    }.freeze
+
+    def self.call(model, query, limit: nil, root_recording_id: nil)
+      new(model, query, limit: limit, root_recording_id: root_recording_id).call
     end
 
-    def initialize(model, query, limit: nil)
+    def initialize(model, query, limit: nil, root_recording_id: nil)
       @model = model
       @query = query.to_s
       @limit = limit || RecordingStudioSearch.configuration.vector_result_limit
       @entry = Registry.entry_for(model)
       @adapter = EmbeddingAdapter.new
+      @root_recording_ids = Array(root_recording_id).filter_map(&:presence)
     end
 
     def call
@@ -22,7 +29,7 @@ module RecordingStudioSearch
         return TrigramSearcher.call(model, query, limit: limit)
       end
 
-      model.where(id: ids).order(Arel.sql(order_for(ids))).limit(limit)
+      model.where(id: ids).order(order_for(ids)).limit(limit)
     rescue EmbeddingAdapter::Error => e
       warn_fallback("#{e.class}: #{e.message}")
       TrigramSearcher.call(model, query, limit: limit)
@@ -30,7 +37,7 @@ module RecordingStudioSearch
 
     private
 
-    attr_reader :model, :query, :limit, :entry, :adapter
+    attr_reader :model, :query, :limit, :entry, :adapter, :root_recording_ids
 
     def cached_or_create_query_embedding
       keyword = Normalize.keyword(query)
@@ -53,25 +60,58 @@ module RecordingStudioSearch
     end
 
     def nearest_ids(vector)
-      literal = Document.connection.quote(Normalize.vector_literal(vector))
+      connection = Document.connection
+      connection.transaction do
+        iterative = VectorScan.iterative?(connection)
+        VectorScan.apply!(connection, iterative: iterative)
+        ids = nearest_scope(vector).limit(limit).pluck(:searchable_id)
+        VectorScan.restore!(connection, iterative: iterative)
+        ids
+      end
+    end
+
+    def nearest_scope(vector)
       scope = Document.where(searchable_type: Registry.model_class(model).name).where.not(embedding: nil)
       scope = scope.where.not(recording_id: nil) if entry&.recording_id_method
-      scope.order(Arel.sql("embedding #{distance_operator} #{literal}::vector"))
-           .limit(limit)
-           .pluck(:searchable_id)
+      scope = restrict_to_tenant(scope)
+      scope.order(distance_order(vector))
+    end
+
+    def restrict_to_tenant(scope)
+      return scope.where(root_recording_id: root_recording_ids) if root_recording_ids.any?
+      return scope unless scoped_relation?
+      return scope.none unless defined?(RecordingStudio::Recording)
+
+      roots = RecordingStudio::Recording
+              .where(recordable_type: Registry.model_class(model).name)
+              .where(recordable_id: scoped_record_ids)
+              .where.not(root_recording_id: nil)
+              .select(:root_recording_id)
+      scope.where(root_recording_id: roots)
+    end
+
+    def scoped_relation?
+      model.is_a?(ActiveRecord::Relation) && !model.where_clause.empty?
+    end
+
+    def scoped_record_ids
+      model.except(:order, :includes, :preload, :eager_load, :limit, :offset).reselect(:id)
+    end
+
+    def distance_order(vector)
+      Arel.sql("embedding #{distance_operator} ?::vector", Normalize.vector_literal(vector))
     end
 
     def order_for(ids)
-      quoted = ids.map { |id| model.connection.quote(id) }.join(", ")
-      "array_position(ARRAY[#{quoted}]::uuid[], #{model.quoted_table_name}.id::uuid)"
+      placeholders = Array.new(ids.size, "?").join(", ")
+      Arel.sql(
+        "array_position(ARRAY[#{placeholders}]::uuid[], #{model.quoted_table_name}.id::uuid)",
+        *ids
+      )
     end
 
     def distance_operator
-      case RecordingStudioSearch.configuration.embedding_distance.to_sym
-      when :l2 then "<->"
-      when :inner_product then "<#>"
-      else "<=>"
-      end
+      DISTANCE_OPERATORS.fetch(RecordingStudioSearch.configuration.embedding_distance.to_sym, "<=>")
     end
 
     def warn_fallback(reason)

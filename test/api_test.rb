@@ -145,6 +145,7 @@ class ApiTest < Minitest::Test
       captured[:query] = query
       captured[:actor] = kwargs[:actor]
       captured[:limit] = kwargs[:limit]
+      captured[:root_recording_id] = kwargs[:root_recording_id]
       hits
     }) do
       RecordingStudioSearch.stub(:recording_id_for, "rec-1") do
@@ -162,6 +163,7 @@ class ApiTest < Minitest::Test
     assert_equal "refund", captured[:query]
     assert_equal :owner, captured[:actor]
     assert_equal 5, captured[:limit]
+    assert_equal 1, captured[:root_recording_id]
   end
 
   def test_query_clamps_limit_to_1_through_20

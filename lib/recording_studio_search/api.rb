@@ -15,7 +15,7 @@ module RecordingStudioSearch
     OPENAPI = {
       title: "Search - Query",
       summary: "Search - Query",
-      description: "Ranked search of allowlisted types you can already view. " \
+      description: "Ranked search of allowlisted types you can already view, inside the request root. " \
                    "Same ranking as instant search, not list q. Blank search returns no hits. " \
                    "Limit is top-N, not paginated.",
       tags: ["Search"],

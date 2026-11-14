@@ -44,7 +44,7 @@ Hosts choose per model. Installing the gem does not change host tables. Hosts ru
 
 - Core install: `recording_studio_search_queries` (JSON embeddings so trigram-only hosts never need `vector`).
 - `searchable_pg_trgm`: `search_vector` + GIN / trigram indexes on the model table.
-- First `searchable_pgvector`: enable `vector`, create `recording_studio_search_documents` with `vector(N)`.
+- First `searchable_pgvector`: enable `vector`, create `recording_studio_search_documents` with `vector(N)`, `searchable_type`, and `root_recording_id`. Vector search filters on root and type before the distance limit.
 
 ## Public API
 

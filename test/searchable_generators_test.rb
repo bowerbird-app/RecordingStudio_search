@@ -77,6 +77,10 @@ class SearchableGeneratorsTest < Minitest::Test
       assert_includes documents, "vector("
       assert_includes documents, ":searchable_type"
       assert_includes documents, ":recording_id"
+      assert_includes documents, ":root_recording_id"
+      assert_includes documents, "index_rss_documents_on_root_and_type"
+      assert_includes documents, "using: :hnsw"
+      assert_includes documents, "opclass: :vector_cosine_ops"
     end
   end
 

@@ -83,14 +83,20 @@ class PageVectorSearchTest < ActiveSupport::TestCase
     )
     first = RecordingStudioSearch::Document.find_by!(recording_id: recording.id)
     assert_equal page.id, first.searchable_id
+    assert_equal "Page", first.searchable_type
+    assert_equal recording.root_recording_id, first.root_recording_id
+
+    first.update_column(:root_recording_id, nil)
 
     RecordingStudioSearch::DocumentEmbedder.call(
       searchable_type: "Page",
       searchable_id: page.id,
       recording_id: recording.id
     )
+    stored = RecordingStudioSearch::Document.find_by!(recording_id: recording.id)
     assert_equal 1, RecordingStudioSearch::Document.where(recording_id: recording.id).count
-    assert_equal first.content_digest, RecordingStudioSearch::Document.find_by!(recording_id: recording.id).content_digest
+    assert_equal first.content_digest, stored.content_digest
+    assert_equal recording.root_recording_id, stored.root_recording_id
   end
 
   test "model table has no embedding columns" do

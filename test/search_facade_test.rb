@@ -5,8 +5,8 @@ require "minitest/mock"
 
 class SearchFacadeTest < Minitest::Test
   def fake_search
-    lambda do |model, query, limit: nil|
-      { model: model, query: query, limit: limit }
+    lambda do |model, query, limit: nil, root_recording_id: nil|
+      { model: model, query: query, limit: limit, root_recording_id: root_recording_id }
     end
   end
 
@@ -15,7 +15,7 @@ class SearchFacadeTest < Minitest::Test
     RecordingStudioSearch::Searcher.stub(:call, fake_search) do
       result = RecordingStudioSearch.search(model, "ada", limit: 10)
 
-      assert_equal({ model: model, query: "ada", limit: 10 }, result)
+      assert_equal({ model: model, query: "ada", limit: 10, root_recording_id: nil }, result)
     end
   end
 
@@ -26,8 +26,8 @@ class SearchFacadeTest < Minitest::Test
       result = RecordingStudioSearch.search([first, second], "refund", limit: 20)
 
       assert_equal [first, second], result.keys
-      assert_equal({ model: first, query: "refund", limit: 20 }, result[first])
-      assert_equal({ model: second, query: "refund", limit: 20 }, result[second])
+      assert_equal({ model: first, query: "refund", limit: 20, root_recording_id: nil }, result[first])
+      assert_equal({ model: second, query: "refund", limit: 20, root_recording_id: nil }, result[second])
     end
   end
 

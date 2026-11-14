@@ -8,6 +8,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration[8.1]
       t.string :searchable_type, null: false
       t.uuid :searchable_id, null: false
       t.uuid :recording_id
+      t.uuid :root_recording_id
       t.column :embedding, "vector(<%= embedding_dimensions %>)"
       t.datetime :embedding_at
       t.string :embedding_model
@@ -24,6 +25,9 @@ class <%= migration_class_name %> < ActiveRecord::Migration[8.1]
     add_index :recording_studio_search_documents,
               %i[searchable_type recording_id],
               name: "index_rss_documents_on_type_and_recording"
+    add_index :recording_studio_search_documents,
+              %i[root_recording_id searchable_type],
+              name: "index_rss_documents_on_root_and_type"
     add_index :recording_studio_search_documents, :recording_id,
               unique: true,
               where: "recording_id IS NOT NULL",
