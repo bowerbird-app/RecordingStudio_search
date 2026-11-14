@@ -16,8 +16,8 @@ class UsersAuthTest < ActionDispatch::IntegrationTest
 
   test "tests can wipe seeded Users that have profiles" do
     user = User.find_or_create_by!(email: "wipe-profile@example.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Wipe Me"
     end
     RecordingStudioUser::Profile.create!(
@@ -44,8 +44,8 @@ class UsersAuthTest < ActionDispatch::IntegrationTest
 
   test "email step continues to the Users password screen" do
     user = User.find_or_create_by!(email: "admin@admin.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Ada Admin"
     end
 

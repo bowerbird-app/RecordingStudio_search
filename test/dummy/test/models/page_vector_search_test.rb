@@ -68,7 +68,7 @@ class PageVectorSearchTest < ActiveSupport::TestCase
   test "documents upsert by recording_id and skip unchanged digest" do
     page = Page.create!(title: "Stable identity", body: "refund wording")
     workspace = Workspace.create!(name: "Search Root")
-    user = User.create!(name: "Embedder", email: "embed-#{SecureRandom.hex(4)}@example.com", password: "Password")
+    user = User.create!(name: "Embedder", email: "embed-#{SecureRandom.hex(4)}@example.com", password: "Password123!")
     DummyAccess.bootstrap_workspace!(name: workspace.name, actor: user)
     recording = DummyAccess.record_under_workspace!(
       page,

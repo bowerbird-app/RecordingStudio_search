@@ -5,8 +5,8 @@ require "test_helper"
 class UserTrigramSearchTest < ActiveSupport::TestCase
   setup do
     reset_users!
-    @ada = User.create!(name: "Ada Lovelace", email: "ada@example.com", password: "Password")
-    @grace = User.create!(name: "Grace Hopper", email: "grace@hopper.test", password: "Password")
+    @ada = User.create!(name: "Ada Lovelace", email: "ada@example.com", password: "Password123!")
+    @grace = User.create!(name: "Grace Hopper", email: "grace@hopper.test", password: "Password123!")
   end
 
   test "token match on name" do

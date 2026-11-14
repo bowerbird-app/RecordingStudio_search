@@ -14,8 +14,8 @@ class EnglishFallbackTest < ActionDispatch::IntegrationTest
 
   setup do
     @user = User.find_or_create_by!(email: "admin@admin.com") do |account|
-      account.password = "Password"
-      account.password_confirmation = "Password"
+      account.password = "Password123!"
+      account.password_confirmation = "Password123!"
       account.name = "Ada Admin"
     end
     @user.update!(name: "Ada Admin")

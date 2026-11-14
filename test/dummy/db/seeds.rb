@@ -23,8 +23,8 @@ bootstrap_owner_access = lambda do |actor, recording|
 end
 
 user = User.find_or_create_by!(email: "admin@admin.com") do |account|
-  account.password = "Password"
-  account.password_confirmation = "Password"
+  account.password = "Password123!"
+  account.password_confirmation = "Password123!"
   account.name = "Ada Admin"
 end
 user.update!(name: "Ada Admin") if user.name.blank?
@@ -34,15 +34,15 @@ Current.actor = user
 
 begin
   lovelace = User.find_or_create_by!(email: "ada@example.com") do |account|
-    account.password = "Password"
-    account.password_confirmation = "Password"
+    account.password = "Password123!"
+    account.password_confirmation = "Password123!"
     account.name = "Ada Lovelace"
   end
   lovelace.update!(name: "Ada Lovelace") if lovelace.name.blank?
 
   hopper = User.find_or_create_by!(email: "grace@hopper.test") do |account|
-    account.password = "Password"
-    account.password_confirmation = "Password"
+    account.password = "Password123!"
+    account.password_confirmation = "Password123!"
     account.name = "Grace Hopper"
   end
   hopper.update!(name: "Grace Hopper") if hopper.name.blank?
@@ -99,7 +99,7 @@ end
   )
 end
 
-puts "Seeded: admin@admin.com / Password"
+puts "Seeded: admin@admin.com / Password123!"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
 puts "Seeded: Workspace '#{accessible_workspace.name}' with root recording ##{accessible_root_recording.id}"
 puts "Seeded: Workspace '#{private_workspace.name}' with root recording ##{private_root_recording.id}"

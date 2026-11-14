@@ -13,8 +13,8 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.7.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.31.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.10.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.37.0"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -222,7 +222,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.28.1`): email, then password (`admin@admin.com` / `Password`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame of pages the signed-in person can view. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D` for pages they can view.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.29.0`): email, then password (`admin@admin.com` / `Password123!`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame of pages the signed-in person can view. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D` for pages they can view.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. Dummy embeddings use an injected client so you do not need AI keys.
 
@@ -232,8 +232,8 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 6.1.0` (dummy tag `v6.7.0`, FlatPack `v0.1.356`)
-- Accessible on the host for instant search, recordings tree, and title-first demos (dummy tag `v0.31.0`). Missing Accessible returns no instant hits.
+- Recording Studio `>= 6.1.0` (dummy tag `v6.10.0`, FlatPack `v0.1.366`). Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events.
+- Accessible on the host for instant search, recordings tree, and title-first demos (dummy tag `v0.37.0`). Missing Accessible returns no instant hits.
 - PostgreSQL 16
 
 ## Documentation
