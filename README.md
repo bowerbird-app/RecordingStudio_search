@@ -13,8 +13,8 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.13.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.41.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.43.1"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -193,7 +193,7 @@ helper's default placeholder) ships as English Rails I18n under
 through `RecordingStudio.t` (this gem's shipped keys only). When the active
 locale has no translation, fallback comes from the loaded English (host
 overrides included), then any caller `default:`, then the gem-shipped table
-registered at boot. Requires Recording Studio `>= 6.1.0`. A plain default with
+registered at boot. Requires Recording Studio `>= 7.0, < 8.0`. A plain default with
 no interpolation is returned as a plain (non-html_safe) String, so views will
 escape it. On a missing `_html` key (vs view `t` / `I18n.t` on recording_studio
 v4.7.0): a plain String caller `default:` matches and stays unsafe; an Array
@@ -262,8 +262,8 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 6.1.0` (dummy tag `v6.13.0`, FlatPack `v0.1.366`). Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events. Scoped search needs Recording Studio `>= 6.13.0`.
-- Accessible `>= 0.41.0` on the host (dummy tag `v0.41.0`) for `authorized_recording_ids`. Missing Accessible, or an authorization service that does not support that query, returns no hits.
+- Recording Studio `>= 7.0, < 8.0` (dummy tag `v7.0.0`, FlatPack `v0.1.366`). Create a root with `create_root_recording!` and an actor. `root_recording_for` only finds one. Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events. Scoped search needs Accessible `authorized_recording_ids` (Recording Studio `>= 6.13.0`, which 7 includes).
+- Accessible `>= 0.41.0` on the host (dummy tag `v0.43.1`) for `authorized_recording_ids` and `authorized_recording_ids_supported?`. Missing Accessible, or an authorization service that does not support that query, returns no hits.
 - PostgreSQL 16 and pgvector. 0.8 or newer (CI image `pgvector/pgvector:0.8.1-pg16`) for iterative filtered HNSW scans. Older pgvector returns the same tenant rows with an exact filtered scan.
 
 ## Documentation

@@ -77,9 +77,9 @@ begin
 
   Note.find_or_create_by!(title: "Sticky reminder")
 
-  root_recording = RecordingStudio.root_recording_for(workspace)
-  accessible_root_recording = RecordingStudio.root_recording_for(accessible_workspace)
-  private_root_recording = RecordingStudio.root_recording_for(private_workspace)
+  root_recording = DummyAccess.record_root!(workspace, actor: user)
+  accessible_root_recording = DummyAccess.record_root!(accessible_workspace, actor: user)
+  private_root_recording = DummyAccess.record_root!(private_workspace, actor: user)
   bootstrap_owner_access.call(user, root_recording)
 
   folder_recording = find_or_record_child.call(folder, root_recording, root_recording)

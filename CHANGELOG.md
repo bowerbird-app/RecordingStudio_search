@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-15
+
+### Changed
+
+- Requires Recording Studio `>= 7.0, < 8.0`. Development and dummy pins are `v7.0.0`. Accessible is `v0.43.1` and Trashable is `v0.16.1`. Dummy Admin is `v2.16.0` and Root Switchable is `v0.15.1`. Search still scopes with `authorized_recording_ids`.
+- Dummy seeds and workspace bootstrap create roots with `DummyAccess.record_root!`, which calls `create_root_recording!`. `root_recording_for` stays a lookup.
+- Dummy `authorize_write` stays closed when `recording`, `parent_recording`, and `root_recording` are all nil. A persisted user cannot create a root. Only `record_root!` opens that write, and only for a declared root.
+
+### Upgrade notes
+
+- Bump to `0.14.0`. No migration. Hosts need Recording Studio 7.
+- Seeds and setup that created a root with `root_recording_for` call `create_root_recording!` with an actor. That write reaches `authorize_write` with `recording`, `root_recording`, and `parent_recording` all nil, so the host decides who may create a root. This dummy allows it only from `DummyAccess.record_root!`. A lookup stays on `root_recording_for` and handles `nil`.
+
 ## [0.13.0] - 2026-11-14
 
 ### Added
@@ -317,7 +330,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.10.1...v0.11.0

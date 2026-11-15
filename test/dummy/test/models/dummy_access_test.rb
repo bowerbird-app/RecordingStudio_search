@@ -49,6 +49,11 @@ class DummyAccessTest < ActiveSupport::TestCase
     refute_includes source, "RecordingStudioUser::Profile"
     assert_includes source, "raise(result.error"
     assert_includes source, "bootstrap_owner_access!"
+    assert_includes source, "record_root!"
+    assert_includes source, "private_class_method :creating_root, :creating_root?"
+    seeds = File.read(Rails.root.join("db/seeds.rb"))
+    assert_includes seeds, "DummyAccess.record_root!"
+    refute_includes seeds, "create_root_recording!"
   end
 
   test "AccessCreationContext does not authorize a Page with no grant" do
@@ -59,6 +64,28 @@ class DummyAccessTest < ActiveSupport::TestCase
     end
 
     refute allowed
+  end
+
+  test "a persisted user cannot create a root" do
+    workspace = Workspace.create!(name: "Closed Root Workspace")
+
+    refute DummyAccess.authorize_write?(
+      actor: @owner,
+      recordable: workspace,
+      recording: nil,
+      parent_recording: nil,
+      root_recording: nil
+    )
+    assert_raises(RecordingStudio::AuthorizationError) do
+      RecordingStudio.create_root_recording!(workspace, actor: @owner)
+    end
+    assert_nil RecordingStudio::Recording.find_by(recordable: workspace)
+
+    root = DummyAccess.record_root!(workspace, actor: @owner)
+
+    assert_predicate root, :persisted?
+    assert_equal workspace, root.recordable
+    assert_nil root.parent_recording_id
   end
 
   test "a new Profile with a blank recording is not authorized" do
