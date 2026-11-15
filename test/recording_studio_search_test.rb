@@ -51,7 +51,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.366"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.43.1"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.16.1"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.1"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.4"'
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.43.1"'
@@ -63,7 +63,7 @@ class RecordingStudioSearchTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.16.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.23.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.366"'

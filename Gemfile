@@ -18,7 +18,7 @@ group :development, :test do
   gem "debug"
   gem "minitest-mock"
   gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.43.1"
-  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.1"
+  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.4"
   gem "recording_studio_icons", github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.1"
   gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4"
   gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.8.0"

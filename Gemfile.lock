@@ -19,18 +19,18 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_api.git
-  revision: 46877d99cb7456a77c99a2b2393584942175bd3b
-  tag: v0.23.1
+  revision: 67c27ffb760a1bfe883155a03318a7f180d7d4a8
+  tag: v0.23.4
   specs:
-    recording_studio_api (0.23.1)
+    recording_studio_api (0.23.4)
       flat_pack (>= 0.1.341)
       rails (~> 8.1.0)
-      recording_studio (>= 6.1.0)
-      recording_studio_accessible (~> 0.11)
+      recording_studio (>= 6.14.0)
+      recording_studio_accessible (>= 0.42.0)
       recording_studio_logs (>= 0.4.1, < 1.0)
       recording_studio_metrics (>= 0.3.0, < 1.0)
       recording_studio_moveable (~> 4.0)
-      recording_studio_trashable (~> 0.10)
+      recording_studio_trashable (>= 0.16.0)
       redis (~> 5.3)
       view_component (>= 4.14, < 5)
 
@@ -513,7 +513,7 @@ CHECKSUMS
   rdoc (8.1.0) sha256=befc37880a5cfd36dcb176c748b5fd5ee39dd3536a75e81824e4972ce230f60a
   recording_studio (7.0.0)
   recording_studio_accessible (0.43.1)
-  recording_studio_api (0.23.1)
+  recording_studio_api (0.23.4)
   recording_studio_icons (0.2.1)
   recording_studio_logs (0.7.4)
   recording_studio_metrics (0.8.0)
