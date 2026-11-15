@@ -54,6 +54,8 @@ class DummyAccessTest < ActiveSupport::TestCase
     seeds = File.read(Rails.root.join("db/seeds.rb"))
     assert_includes seeds, "DummyAccess.record_root!"
     refute_includes seeds, "create_root_recording!"
+    assert_includes seeds, "RecordingStudio::Recording.kept"
+    refute_includes seeds, "recording_studio_trashable_kept_sql"
   end
 
   test "AccessCreationContext does not authorize a Page with no grant" do

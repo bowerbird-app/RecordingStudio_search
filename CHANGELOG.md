@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 
 - Requires Recording Studio `>= 7.0, < 8.0`. Development and dummy pins are `v7.0.0`. Accessible is `v0.43.1` and Trashable is `v0.16.1`. Dummy Admin is `v2.16.0` and Root Switchable is `v0.15.1`. Search still scopes with `authorized_recording_ids`.
-- Dummy seeds and workspace bootstrap create roots with `DummyAccess.record_root!`, which calls `create_root_recording!`. `root_recording_for` stays a lookup.
+- Dummy seeds and workspace bootstrap create roots with `DummyAccess.record_root!`, which calls `create_root_recording!`. `root_recording_for` stays a lookup. Seeds find an existing child with `Recording.kept`. Trashable 0.16 removed `recording_studio_trashable_kept_sql`.
 - Dummy `authorize_write` stays closed when `recording`, `parent_recording`, and `root_recording` are all nil. A persisted user cannot create a root. Only `record_root!` opens that write, and only for a declared root.
 
 ### Upgrade notes
