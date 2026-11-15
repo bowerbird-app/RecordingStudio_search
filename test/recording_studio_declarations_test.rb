@@ -68,7 +68,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     folder = Folder.create!(name: unique_name("Root Rejected Folder"))
 
     assert_raises(RecordingStudio::RootNotAllowed) do
-      DummyAccess.as_actor(@actor) { RecordingStudio.root_recording_for(folder) }
+      DummyAccess.as_actor(@actor) { RecordingStudio.create_root_recording!(folder, actor: @actor) }
     end
   end
 
