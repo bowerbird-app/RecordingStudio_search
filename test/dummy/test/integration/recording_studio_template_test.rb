@@ -60,6 +60,8 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_equal root_recording, page_recording.root_recording
     assert_equal 3, Workspace.count
     assert_equal "Ada Lovelace", lovelace.name
+    assert lovelace.confirmed?
+    assert User.find_by!(email: "admin@admin.com").confirmed?
     assert_equal "How to request a refund when a charge looks wrong.", refund_page.body
     assert_equal "Sticky reminder", note.title
 

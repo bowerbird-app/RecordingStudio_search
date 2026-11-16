@@ -42,6 +42,18 @@ class UsersAuthTest < ActionDispatch::IntegrationTest
     assert_includes index_js, 'import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"'
   end
 
+  test "an unconfirmed password account cannot authenticate" do
+    user = User.create!(
+      email: "unconfirmed-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!",
+      name: "Unconfirmed"
+    )
+
+    refute user.confirmed?
+    refute user.active_for_authentication?
+  end
+
   test "email step continues to the Users password screen" do
     user = User.find_or_create_by!(email: "admin@admin.com") do |account|
       account.password = "Password123!"
