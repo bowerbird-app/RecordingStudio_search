@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-11-16
+
+### Changed
+
+- Dummy and development Gemfiles pin the latest Recording Studio and Flatpack release tags. Recording Studio is `v7.3.0`. Accessible is `v0.45.1`, Trashable is `v1.0.0`, API is `v1.2.1`, and Moveable is `v6.0.0`. Flatpack is `v0.1.377`. The gemspec still requires Recording Studio `>= 7.0`, `< 8.0`. Search still scopes with `authorized_recording_ids`.
+- Users now applies Devise confirmable. The dummy does not register `RecordingStudioApi::AdminApi` (this host has no admin root, so that recordable stays undeclared). Demo seeds confirm the sample accounts. Integration `sign_in` confirms the user before the session reload.
+
+### Upgrade notes
+
+- Bump to `0.14.1`. No migration. Hosts stay on Recording Studio 7. The dummy app now installs Trashable `v1.0.0` and API `v1.2.1` alongside the other latest addon tags.
+
 ## [0.14.0] - 2026-11-15
 
 ### Changed
@@ -330,7 +341,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.11.0...v0.12.0

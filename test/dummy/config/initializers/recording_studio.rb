@@ -8,8 +8,7 @@ RecordingStudio.configure do |config|
     "Page",
     "RecordingStudioUser::People",
     "RecordingStudioUser::Profile",
-    "RecordingStudioAttachable::Attachment",
-    "RecordingStudioApi::AdminApi"
+    "RecordingStudioAttachable::Attachment"
   ]
 
   # Require each configured ActiveRecord type to call recording_studio_recordable.

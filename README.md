@@ -13,8 +13,8 @@ This release does **not** wire Support `/help` or other host apps.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.43.1"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.3.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.45.1"
 gem "recording_studio_search", github: "bowerbird-app/RecordingStudio_search"
 ```
 
@@ -252,7 +252,7 @@ bin/rails recording_studio_search:reembed
 
 ## Dummy app
 
-Sign in at `/users/sign_in` with Recording Studio Users (`v0.29.0`): email, then password (`admin@admin.com` / `Password123!`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame of pages the signed-in person can view. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D` for pages they can view.
+Sign in at `/users/sign_in` with Recording Studio Users (`v0.32.0`): email, then password (`admin@admin.com` / `Password123!`). Home searches people, pages, and notes together. `/people` searches **only** `User` (`User.search`). `/instant` types into a Turbo Frame of pages the signed-in person can view. `/groups` keeps an existing people scope. `/title-first` shows title `A` ranking above body `D` for pages they can view.
 
 PostgreSQL 16 with `pg_trgm` and `vector`. pgvector 0.8 or newer walks a filtered HNSW index iteratively (`strict_order`). Older pgvector still filters before the limit and sorts those rows exactly. The cosine HNSW index stays either way. Dummy embeddings use an injected client so you do not need AI keys.
 
@@ -262,8 +262,8 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 - Ruby 3.3+
 - Rails 8.1+
-- Recording Studio `>= 7.0, < 8.0` (dummy tag `v7.0.0`, FlatPack `v0.1.366`). Create a root with `create_root_recording!` and an actor. `root_recording_for` only finds one. Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events. Scoped search needs Accessible `authorized_recording_ids` (Recording Studio `>= 6.13.0`, which 7 includes).
-- Accessible `>= 0.41.0` on the host (dummy tag `v0.43.1`) for `authorized_recording_ids` and `authorized_recording_ids_supported?`. Missing Accessible, or an authorization service that does not support that query, returns no hits.
+- Recording Studio `>= 7.0, < 8.0` (dummy tag `v7.3.0`, FlatPack `v0.1.377`). Create a root with `create_root_recording!` and an actor. `root_recording_for` only finds one. Core 6.9+ stores `root_recording_id` on events. Copy that migration before writing events. Scoped search needs Accessible `authorized_recording_ids` (Recording Studio `>= 6.13.0`, which 7 includes).
+- Accessible `>= 0.41.0` on the host (dummy tag `v0.45.1`) for `authorized_recording_ids` and `authorized_recording_ids_supported?`. Missing Accessible, or an authorization service that does not support that query, returns no hits.
 - PostgreSQL 16 and pgvector. 0.8 or newer (CI image `pgvector/pgvector:0.8.1-pg16`) for iterative filtered HNSW scans. Older pgvector returns the same tenant rows with an exact filtered scan.
 
 ## Documentation

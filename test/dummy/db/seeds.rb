@@ -26,6 +26,13 @@ user = User.find_or_create_by!(email: "admin@admin.com") do |account|
   account.name = "Ada Admin"
 end
 user.update!(name: "Ada Admin") if user.name.blank?
+confirm_demo_account = lambda do |account|
+  next if account.confirmed?
+
+  account.skip_confirmation!
+  account.save!
+end
+confirm_demo_account.call(user)
 
 previous_actor = Current.actor
 Current.actor = user
@@ -37,6 +44,7 @@ begin
     account.name = "Ada Lovelace"
   end
   lovelace.update!(name: "Ada Lovelace") if lovelace.name.blank?
+  confirm_demo_account.call(lovelace)
 
   hopper = User.find_or_create_by!(email: "grace@hopper.test") do |account|
     account.password = "Password123!"
@@ -44,6 +52,7 @@ begin
     account.name = "Grace Hopper"
   end
   hopper.update!(name: "Grace Hopper") if hopper.name.blank?
+  confirm_demo_account.call(hopper)
 
   workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
   accessible_workspace = Workspace.find_or_create_by!(name: "Client Workspace")
