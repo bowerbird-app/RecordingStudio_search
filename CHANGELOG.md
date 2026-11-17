@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-11-17
+
+### Changed
+
+- `search.query` docs say what the call searches, when to use it instead of the general list tool, where `models` names come from, and the hit fields. Each hit has `type` (the Ruby class name), `id`, and `recording_id`. There is no title and no snippet. `limit` is a top-N cap per type. The default stays 20 and values outside 1..20 are still clamped.
+- `models` accepts a short class name when exactly one allowlisted type has that name. The full class name still selects that type. A short name shared by two allowlisted types is ignored. A full name that is not allowlisted does not fall through to another type.
+
+### Upgrade notes
+
+- Bump to `0.14.2`. No migration. Hit fields stay `type`, `id`, and `recording_id`. `type` stays the Ruby class name. MCP 0.36 names types by the short class name (or a recordable `public_name` when one is set). This param accepts the short class name and the full class name. It does not read `public_name`. Pass the full class name when the MCP name is not the short class name.
+
 ## [0.14.1] - 2026-11-16
 
 ### Changed
@@ -341,7 +352,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.2...HEAD
+[0.14.2]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.12.0...v0.13.0

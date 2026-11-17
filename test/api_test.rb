@@ -94,6 +94,7 @@ class ApiTest < Minitest::Test
   def test_engine_registers_api_when_present
     engine = File.read(File.expand_path("../lib/recording_studio_search/engine.rb", __dir__))
     api = File.read(File.expand_path("../lib/recording_studio_search/api.rb", __dir__))
+    docs = File.read(File.expand_path("../lib/recording_studio_search/api/docs.rb", __dir__))
     query = File.read(File.expand_path("../lib/recording_studio_search/api/query.rb", __dir__))
 
     assert_includes engine, 'initializer "recording_studio_search.api"'
@@ -107,7 +108,7 @@ class ApiTest < Minitest::Test
     assert_includes api, "PATH = \"search/query\""
     assert_includes api, 'title: "Search - Query"'
     assert_includes api, 'summary: "Search - Query"'
-    assert_includes api, "not paginated"
+    assert_includes docs, "not paginated"
     refute_includes api, "register_capability_action"
     refute File.exist?(File.expand_path("../lib/recording_studio_search/mcp.rb", __dir__))
     assert_includes query, "grant.authorize!"
@@ -182,6 +183,31 @@ class ApiTest < Minitest::Test
     end
 
     assert_equal [20, 20, 1, 1, 20, 20, 20, 1, 20, 20], captured
+  end
+
+  def test_search_query_docs_name_hits_models_and_limit
+    description = RecordingStudioSearch::Api::OPENAPI.fetch(:description)
+    parameters = RecordingStudioSearch::Api::OPENAPI.fetch(:parameters).to_h do |param|
+      [param.fetch(:name), param.fetch(:description)]
+    end
+    fields = RecordingStudioSearch::Api::INPUT_CONTRACT.fetch(:fields)
+
+    assert_includes description, "config.instant_search_models"
+    assert_includes description, "short class name"
+    assert_includes description, "Each hit has type, id, and recording_id"
+    assert_includes description, "type is the Ruby class name"
+    assert_includes description, "no title and no snippet"
+    assert_includes description, "general list tool"
+    assert_includes description, "Trashed recordings are left out"
+    assert_includes description, "not paginated"
+    assert_equal parameters.fetch("q"), fields.fetch(:q).fetch(:description)
+    assert_equal parameters.fetch("models"), fields.fetch(:models).fetch(:description)
+    assert_equal parameters.fetch("limit"), fields.fetch(:limit).fetch(:description)
+    assert_includes parameters.fetch("models"), "config.instant_search_models"
+    assert_includes parameters.fetch("models"), "short class name"
+    assert_includes parameters.fetch("q"), "whitespace"
+    assert_includes parameters.fetch("limit"), "each type"
+    assert_includes parameters.fetch("limit"), "not paginated"
   end
 
   def test_readme_states_the_query_limit_default_and_max
