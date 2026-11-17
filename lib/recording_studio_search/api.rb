@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "api/docs"
 require_relative "api/query"
 
 module RecordingStudioSearch
@@ -15,31 +16,28 @@ module RecordingStudioSearch
     OPENAPI = {
       title: "Search - Query",
       summary: "Search - Query",
-      description: "Ranked search of allowlisted types you can already view, inside the request root. " \
-                   "Same ranking as instant search, not list q. Blank search returns no hits. " \
-                   "Limit is top-N, not paginated.",
+      description: QUERY_DESCRIPTION,
       tags: ["Search"],
       parameters: [
         {
           name: "q",
           in: "query",
           required: true,
-          description: "Words to search. Blank returns no hits.",
+          description: Q_DESCRIPTION,
           schema: { type: "string" }
         },
         {
           name: "models",
           in: "query",
           required: false,
-          description: "Allowlisted type names. Omit to search every allowlisted type.",
+          description: MODELS_DESCRIPTION,
           schema: { type: "array", items: { type: "string" } }
         },
         {
           name: "limit",
           in: "query",
           required: false,
-          description: "Max ranked hits to return (top-N, not paginated). " \
-                       "Default 20. Values outside 1..20 are clamped.",
+          description: LIMIT_DESCRIPTION,
           schema: { type: "integer" }
         }
       ]
@@ -48,17 +46,16 @@ module RecordingStudioSearch
     INPUT_CONTRACT = {
       reject_unknown: false,
       fields: {
-        q: { type: :string, required: true, description: "Words to search. Blank returns no hits." },
+        q: { type: :string, required: true, description: Q_DESCRIPTION },
         models: {
           type: :array,
           required: false,
-          description: "Allowlisted type names. Omit to search every allowlisted type."
+          description: MODELS_DESCRIPTION
         },
         limit: {
           type: :integer,
           required: false,
-          description: "Max ranked hits to return (top-N, not paginated). " \
-                       "Default 20. Values outside 1..20 are clamped."
+          description: LIMIT_DESCRIPTION
         }
       }
     }.freeze

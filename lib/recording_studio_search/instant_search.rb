@@ -60,7 +60,15 @@ module RecordingStudioSearch
 
     def allowed_models(requested)
       allowlist = allowlisted_by_name
-      Array(requested).filter_map { |item| allowlist[class_name(item)] }.uniq
+      Array(requested).filter_map { |item| allowlist_match(allowlist, class_name(item)) }.uniq
+    end
+
+    def allowlist_match(allowlist, name)
+      return allowlist[name] if allowlist.key?(name)
+      return if name.to_s.include?("::")
+
+      matches = allowlist.select { |full_name, _model| full_name.split("::").last == name.to_s }
+      matches.values.first if matches.one?
     end
 
     def allowlisted_by_name
