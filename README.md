@@ -214,6 +214,7 @@ Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `Pa
 Agents and API clients should not rely on core list `q` (ILIKE). This gem registers one public endpoint when Recording Studio API is loaded:
 
 - Name: `search.query`
+- Title: `Search workspace` on OpenAPI `title` and `summary`. The endpoint name stays `search.query`.
 - Path: `GET search/query`
 - Handler: `InstantSearch.hits_for` after `access_grant.authorize!(role: :view)` on the request root
 
