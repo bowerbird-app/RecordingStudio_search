@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Development and dummy Gemfiles pin Recording Studio `v7.4.0`, API `v1.3.0`, and Trashable `v1.0.1`. Other pins stay put. The gemspec still requires Recording Studio `>= 7.0`, `< 8.0`.
+
+### Upgrade notes
+
+- No gem version bump and no search migration. Recording Studio 7.4.0 adds `index_rs_recordings_on_root_type_created_at_id`; hosts run that core migration. API 1.3.0 omits `meta.total_count` unless the request passes `include_total=true`.
+
 ## [0.14.1] - 2026-11-16
 
 ### Changed
