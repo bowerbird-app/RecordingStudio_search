@@ -106,8 +106,10 @@ class ApiTest < Minitest::Test
     assert_includes api, "http_verb: :get"
     assert_includes api, "path: PATH"
     assert_includes api, "PATH = \"search/query\""
-    assert_includes api, 'title: "Search - Query"'
-    assert_includes api, 'summary: "Search - Query"'
+    assert_includes docs, 'QUERY_TITLE = "Search workspace"'
+    assert_includes api, "title: QUERY_TITLE"
+    assert_includes api, "summary: QUERY_TITLE"
+    refute_includes api, "Search - Query"
     assert_includes docs, "not paginated"
     refute_includes api, "register_capability_action"
     refute File.exist?(File.expand_path("../lib/recording_studio_search/mcp.rb", __dir__))
@@ -136,6 +138,9 @@ class ApiTest < Minitest::Test
     assert_equal :get, registration.fetch(:http_verb)
     assert_equal "search/query", registration.fetch(:path)
     assert_equal RecordingStudioSearch::Api::Query, registration.fetch(:handler)
+    assert_equal "Search workspace", registration.dig(:openapi, :title)
+    assert_equal "Search workspace", registration.dig(:openapi, :summary)
+    assert_equal RecordingStudioSearch::Api::QUERY_DESCRIPTION, registration.dig(:openapi, :description)
   end
 
   def test_query_returns_hits_when_authorized
@@ -192,6 +197,9 @@ class ApiTest < Minitest::Test
     end
     fields = RecordingStudioSearch::Api::INPUT_CONTRACT.fetch(:fields)
 
+    assert_equal "Search workspace", RecordingStudioSearch::Api::OPENAPI.fetch(:title)
+    assert_equal "Search workspace", RecordingStudioSearch::Api::OPENAPI.fetch(:summary)
+    refute_includes description, "Search - Query"
     assert_includes description, "config.instant_search_models"
     assert_includes description, "short class name"
     assert_includes description, "Each hit has type, id, and recording_id"
@@ -213,7 +221,9 @@ class ApiTest < Minitest::Test
   def test_readme_states_the_query_limit_default_and_max
     readme = File.read(File.expand_path("../README.md", __dir__))
 
+    assert_includes readme, "Title: `Search workspace`"
     assert_includes readme, "limit` (default 20, max 20)"
+    refute_includes readme, "Search - Query"
     refute_includes readme, "default 10"
   end
 

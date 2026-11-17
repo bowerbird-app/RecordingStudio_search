@@ -2,6 +2,8 @@
 
 module RecordingStudioSearch
   module Api
+    QUERY_TITLE = "Search workspace"
+
     QUERY_DESCRIPTION = <<~TEXT.tr("\n", " ").squeeze(" ").strip.freeze
       Searches allowlisted types in this workspace by the words each type is set up to search.
       Returns the closest matches.

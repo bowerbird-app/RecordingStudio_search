@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.14.3] - 2026-11-17
+
+### Changed
+
+- `search.query` registers OpenAPI `title` and `summary` as `Search workspace`. The endpoint name stays `search.query`. MCP 0.36.3 shows that title as written. The description, parameters, and hit fields stay as they were in 0.14.2.
+
+### Upgrade notes
+
+- Bump to `0.14.3`. No migration. Match the display title `Search workspace`. The tool name stays `search.query`.
+
 ## [0.14.2] - 2026-11-17
 
 ### Changed
@@ -352,7 +362,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.3...HEAD
+[0.14.3]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.2...v0.14.3
 [0.14.2]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.13.0...v0.14.0

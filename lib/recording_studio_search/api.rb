@@ -14,8 +14,8 @@ module RecordingStudioSearch
     MAX_LIMIT = 20
 
     OPENAPI = {
-      title: "Search - Query",
-      summary: "Search - Query",
+      title: QUERY_TITLE,
+      summary: QUERY_TITLE,
       description: QUERY_DESCRIPTION,
       tags: ["Search"],
       parameters: [
