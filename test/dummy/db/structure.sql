@@ -250,7 +250,9 @@ CREATE TABLE public.recording_studio_api_api_clients (
     name character varying NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    api_key character varying DEFAULT 'public'::character varying NOT NULL
+    api_key character varying DEFAULT 'public'::character varying NOT NULL,
+    owner_type character varying,
+    owner_id uuid
 );
 
 
@@ -1320,6 +1322,13 @@ CREATE INDEX index_recording_studio_user_profiles_on_user_id ON public.recording
 
 
 --
+-- Name: index_rs_api_clients_on_owner; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_api_clients_on_owner ON public.recording_studio_api_api_clients USING btree (owner_type, owner_id);
+
+
+--
 -- Name: index_rs_api_daily_latency_histogram_on_dimensions; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1632,6 +1641,7 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261117000024'),
 ('20261114120000'),
 ('20261114090000'),
 ('20261019000023'),

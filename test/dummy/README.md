@@ -4,7 +4,7 @@ This Rails app exists to validate the Recording Studio search addon in a real ho
 
 ## What It Covers
 
-- Devise actor plus Recording Studio Users `v0.32.0` auth (email, then password)
+- Devise actor plus Recording Studio Users `v0.36.0` auth (email, then password)
 - `Current.actor` wiring for Recording Studio events
 - Root workspace plus seeded folder and page recordables, owner-bootstrapped through Accessible
 - Trigram search on `User` and `Note`
