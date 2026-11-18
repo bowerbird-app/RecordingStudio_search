@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.14.4] - 2026-11-18
+
+### Changed
+
+- Development and dummy Gemfiles pin Recording Studio `v7.7.1` and Flatpack `v0.1.378`. Accessible is `v0.54.0`, API is `v1.15.0`, Trashable is `v1.2.0`, Users is `v0.36.0`, Admin is `v2.19.0`, and Attachable is `v0.32.1`. Icons, Logs, Metrics, and Moveable move to their latest patch tags. The gemspec still requires Recording Studio `>= 7.0`, `< 8.0`.
+
+### Upgrade notes
+
+- Bump to `0.14.4`. No search migration. Hosts stay on Recording Studio 7. API 1.15 needs Accessible `>= 0.50` and Recording Studio `>= 7.7`. A host that loads the API engine needs `config/recording_studio_api.yml` (API 1.12+). API 1.3+ still omits `meta.total_count` unless the request passes `include_total=true`.
+- The dummy does not copy the Recording Studio 7.4, 7.5, or 7.7 root-index migrations.
+
 ## [0.14.3] - 2026-11-17
 
 ### Changed
@@ -362,7 +373,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.4...HEAD
+[0.14.4]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.3...v0.14.4
 [0.14.3]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.2...v0.14.3
 [0.14.2]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.0...v0.14.1
