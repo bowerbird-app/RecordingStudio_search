@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-19
+
+### Changed
+
+- Development and dummy Gemfiles pin Recording Studio `v7.8.0` (`~> 7.8`) and Flatpack `v0.2.0` (`~> 0.2`). Accessible is `v0.55.0`, API is `v1.19.0`, Trashable is `v1.2.3`, Users is `v0.38.0`, Admin is `v2.19.1`, Attachable is `v0.33.2`, Root Switchable is `v0.16.1`, and Cache is `v0.7.1`. Icons, Logs, Metrics, and Moveable move to their latest tags. The gemspec still requires Recording Studio `>= 7.0`, `< 8.0`.
+- The dummy importmap drops the manual `flat_pack/heroicons` pin. `test/dummy/install_page.html` drops that pin and the `flat-pack--icon` controller registration.
+- The dummy copies the Users sign-in lockout and sign-in link migrations so password sign-in can read those tables. It does not copy Recording Studio core migrations.
+
+### Upgrade notes
+
+- Bump to `0.15.0`. No search migration. Hosts MUST run the Recording Studio 7.4, 7.5 and 7.7 migrations if they have not.
+- flat_pack 0.2.0 is supported; hosts moving to 0.2 must remove the manual `flat_pack/heroicons` importmap pin and any `flat-pack--icon` controller registration.
+
 ## [0.14.4] - 2026-11-18
 
 ### Changed
@@ -373,7 +386,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.4...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.4...v0.15.0
 [0.14.4]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.3...v0.14.4
 [0.14.3]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.2...v0.14.3
 [0.14.2]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.1...v0.14.2

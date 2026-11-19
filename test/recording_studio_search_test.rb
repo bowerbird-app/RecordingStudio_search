@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioSearchTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.14.4", ::RecordingStudioSearch::VERSION
+    assert_equal "0.15.0", ::RecordingStudioSearch::VERSION
   end
 
   def test_engine_exists
@@ -47,34 +47,45 @@ class RecordingStudioSearchTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
     root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
 
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.7.1"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.378"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.54.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v1.15.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.1"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.1"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.1"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.1"'
+    assert_includes root_gemfile, 'gem "recording_studio", "~> 7.8"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.8.0"'
+    assert_includes root_gemfile, 'gem "flat_pack", "~> 0.2", github: "bowerbird-app/flatpack", tag: "v0.2.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.55.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.3"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v1.19.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.2"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.2"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.2"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.3"'
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.7.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.54.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.7.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.36.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.19.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.32.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v1.15.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.378"'
+    assert_includes gemfile, 'gem "recording_studio", "~> 7.8", github: "bowerbird-app/RecordingStudio", tag: "v7.8.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.55.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.7.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.38.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.19.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.33.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v1.19.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.3"'
+    assert_includes gemfile, 'gem "flat_pack", "~> 0.2", github: "bowerbird-app/flatpack", tag: "v0.2.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.133"'
     refute_includes gemfile, 'tag: "v0.1.134"'
     refute_includes gemfile, 'tag: "0.3.1"'
+
+    importmap = File.read(File.expand_path("dummy/config/importmap.rb", __dir__))
+    install_page = File.read(File.expand_path("dummy/install_page.html", __dir__))
+    tailwind = File.read(File.expand_path("dummy/app/assets/tailwind/application.css", __dir__))
+
+    refute_includes importmap, "flat_pack/heroicons"
+    refute_includes importmap, "flat-pack--icon"
+    refute_includes install_page, "flat_pack/heroicons"
+    refute_includes install_page, "icon_controller"
+    assert_includes tailwind, "bundler/gems/flatpack-"
   end
 
   def test_dummy_accesses_schema_includes_depends_on_recording_id
@@ -82,6 +93,9 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes structure, "depends_on_recording_id"
     assert_includes structure, "index_rs_events_on_root_and_timeline"
+    assert_includes structure, "recording_studio_user_sign_in_locks"
+    assert_includes structure, "recording_studio_user_sign_in_links"
+    assert_includes structure, "recording_studio_user_password_failures"
   end
 
   def test_template_does_not_ship_copied_core_hooks_or_base_service
