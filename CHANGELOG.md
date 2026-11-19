@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Development and dummy Gemfiles pin Recording Studio `v7.8.0` (`~> 7.8`) and Flatpack `v0.2.0` (`~> 0.2`). Accessible is `v0.55.0`, API is `v1.19.0`, Trashable is `v1.2.3`, Users is `v0.38.0`, Admin is `v2.19.1`, Attachable is `v0.33.2`, Root Switchable is `v0.16.1`, and Cache is `v0.7.1`. Icons, Logs, Metrics, and Moveable move to their latest tags. The gemspec still requires Recording Studio `>= 7.0`, `< 8.0`.
 - The dummy importmap drops the manual `flat_pack/heroicons` pin. `test/dummy/install_page.html` drops that pin and the `flat-pack--icon` controller registration.
+- The dummy copies the Users sign-in lockout and sign-in link migrations so password sign-in can read those tables. It does not copy Recording Studio core migrations.
 
 ### Upgrade notes
 

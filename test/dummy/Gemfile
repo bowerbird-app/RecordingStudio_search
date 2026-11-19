@@ -11,7 +11,8 @@ gem "recording_studio_admin", "~> 2.19", github: "bowerbird-app/RecordingStudio_
 gem "recording_studio_attachable", "~> 0.33", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.33.2"
 
 # Root switcher for the top nav
-gem "recording_studio_root_switchable", "~> 0.16", github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.1"
+gem "recording_studio_root_switchable", "~> 0.16",
+    github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.1"
 # Required by root_switchable / attachable / users (GitHub-only; not on RubyGems)
 gem "recording_studio_metrics", "~> 0.9", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.2"
 # Admin query-only Trashable (GitHub-only; not on RubyGems)

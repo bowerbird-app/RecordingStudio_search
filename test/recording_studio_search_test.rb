@@ -47,7 +47,8 @@ class RecordingStudioSearchTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
     root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
 
-    assert_includes root_gemfile, 'gem "recording_studio", "~> 7.8", github: "bowerbird-app/RecordingStudio", tag: "v7.8.0"'
+    assert_includes root_gemfile, 'gem "recording_studio", "~> 7.8"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.8.0"'
     assert_includes root_gemfile, 'gem "flat_pack", "~> 0.2", github: "bowerbird-app/flatpack", tag: "v0.2.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.55.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.3"'
@@ -92,6 +93,9 @@ class RecordingStudioSearchTest < Minitest::Test
 
     assert_includes structure, "depends_on_recording_id"
     assert_includes structure, "index_rs_events_on_root_and_timeline"
+    assert_includes structure, "recording_studio_user_sign_in_locks"
+    assert_includes structure, "recording_studio_user_sign_in_links"
+    assert_includes structure, "recording_studio_user_password_failures"
   end
 
   def test_template_does_not_ship_copied_core_hooks_or_base_service

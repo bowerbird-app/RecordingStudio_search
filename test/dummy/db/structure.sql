@@ -572,6 +572,18 @@ CREATE TABLE public.recording_studio_user_otp_challenges (
 
 
 --
+-- Name: recording_studio_user_password_failures; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_user_password_failures (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
 -- Name: recording_studio_user_people; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -593,6 +605,36 @@ CREATE TABLE public.recording_studio_user_profiles (
     time_zone character varying DEFAULT 'UTC'::character varying,
     additional_profile_attributes jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_user_sign_in_links; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_user_sign_in_links (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    token_digest character varying NOT NULL,
+    expires_at timestamp(6) without time zone NOT NULL,
+    consumed_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recording_studio_user_sign_in_locks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recording_studio_user_sign_in_locks (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    kind character varying NOT NULL,
+    locked_at timestamp(6) without time zone NOT NULL,
+    notified_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -890,6 +932,14 @@ ALTER TABLE ONLY public.recording_studio_user_otp_challenges
 
 
 --
+-- Name: recording_studio_user_password_failures recording_studio_user_password_failures_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_password_failures
+    ADD CONSTRAINT recording_studio_user_password_failures_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: recording_studio_user_people recording_studio_user_people_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -903,6 +953,22 @@ ALTER TABLE ONLY public.recording_studio_user_people
 
 ALTER TABLE ONLY public.recording_studio_user_profiles
     ADD CONSTRAINT recording_studio_user_profiles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_user_sign_in_links recording_studio_user_sign_in_links_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_sign_in_links
+    ADD CONSTRAINT recording_studio_user_sign_in_links_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recording_studio_user_sign_in_locks recording_studio_user_sign_in_locks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_sign_in_locks
+    ADD CONSTRAINT recording_studio_user_sign_in_locks_pkey PRIMARY KEY (id);
 
 
 --
@@ -1448,6 +1514,34 @@ CREATE UNIQUE INDEX index_rs_unique_root_recording_per_recordable ON public.reco
 
 
 --
+-- Name: index_rs_user_password_failures_on_user_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_user_password_failures_on_user_and_created_at ON public.recording_studio_user_password_failures USING btree (user_id, created_at);
+
+
+--
+-- Name: index_rs_user_sign_in_links_on_token_digest; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_rs_user_sign_in_links_on_token_digest ON public.recording_studio_user_sign_in_links USING btree (token_digest);
+
+
+--
+-- Name: index_rs_user_sign_in_links_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_user_sign_in_links_on_user_id ON public.recording_studio_user_sign_in_links USING btree (user_id);
+
+
+--
+-- Name: index_rs_user_sign_in_locks_on_user_kind_locked_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_rs_user_sign_in_locks_on_user_kind_locked_at ON public.recording_studio_user_sign_in_locks USING btree (user_id, kind, locked_at);
+
+
+--
 -- Name: index_rss_documents_on_embedding; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1587,11 +1681,27 @@ ALTER TABLE ONLY public.recording_studio_user_otp_challenges
 
 
 --
+-- Name: recording_studio_user_sign_in_locks fk_rails_822338dea0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_sign_in_locks
+    ADD CONSTRAINT fk_rails_822338dea0 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: active_storage_variant_records fk_rails_993965df05; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.active_storage_variant_records
     ADD CONSTRAINT fk_rails_993965df05 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
+
+
+--
+-- Name: recording_studio_user_sign_in_links fk_rails_9c380be611; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_sign_in_links
+    ADD CONSTRAINT fk_rails_9c380be611 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1608,6 +1718,14 @@ ALTER TABLE ONLY public.active_storage_attachments
 
 ALTER TABLE ONLY public.recording_studio_events
     ADD CONSTRAINT fk_rails_cc63a4d20c FOREIGN KEY (root_recording_id) REFERENCES public.recording_studio_recordings(id);
+
+
+--
+-- Name: recording_studio_user_password_failures fk_rails_dc906a2348; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recording_studio_user_password_failures
+    ADD CONSTRAINT fk_rails_dc906a2348 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1641,6 +1759,8 @@ ALTER TABLE ONLY public.recording_studio_recordings
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261119053406'),
+('20261119053405'),
 ('20261117000024'),
 ('20261114120000'),
 ('20261114090000'),
