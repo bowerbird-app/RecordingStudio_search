@@ -151,5 +151,9 @@ module RecordingStudioSearch
     initializer "recording_studio_search.api" do
       config.to_prepare { RecordingStudioSearch::Api.register! }
     end
+
+    initializer "recording_studio_search.mcp", after: "recording_studio_search.api" do
+      config.to_prepare { RecordingStudioSearch::McpCopy.register! }
+    end
   end
 end

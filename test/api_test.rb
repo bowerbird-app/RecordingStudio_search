@@ -113,6 +113,7 @@ class ApiTest < Minitest::Test
     assert_includes docs, "not paginated"
     refute_includes api, "register_capability_action"
     refute File.exist?(File.expand_path("../lib/recording_studio_search/mcp.rb", __dir__))
+    assert File.exist?(File.expand_path("../lib/recording_studio_search/mcp_copy.rb", __dir__))
     assert_includes query, "grant.authorize!"
     assert_includes query, "InstantSearch.hits_for"
     assert_includes query, "actor: grant.actor"
@@ -223,6 +224,7 @@ class ApiTest < Minitest::Test
 
     assert_includes readme, "Title: `Search workspace`"
     assert_includes readme, "limit` (default 20, max 20)"
+    assert_includes readme, "search_workspace"
     refute_includes readme, "Search - Query"
     refute_includes readme, "default 10"
   end

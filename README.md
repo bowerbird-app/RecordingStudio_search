@@ -209,7 +209,7 @@ still returns raw English; the results partial translates at render via
 
 Dummy `/instant` (home → **As you type**) is the proof page: it allowlists `Page` so typing updates the frame and leaves the URL at `/instant`. Pages without a grant, and trashed pages, do not appear. `/people` passes `unscoped: true` on `User.search` because a person is not a recording. A clip lives in `docs/demo/` (`instant-search-demo.mp4` plus a text `instant-search-demo.mp4.b64` for fetchers that cannot keep the binary intact).
 
-## API and MCP (`search.query`)
+## API and MCP (`search.query` / `search_workspace`)
 
 Agents and API clients should not rely on core list `q` (ILIKE). This gem registers one public endpoint when Recording Studio API is loaded:
 
@@ -217,8 +217,9 @@ Agents and API clients should not rely on core list `q` (ILIKE). This gem regist
 - Title: `Search workspace` on OpenAPI `title` and `summary`. The endpoint name stays `search.query`.
 - Path: `GET search/query`
 - Handler: `InstantSearch.hits_for` after `access_grant.authorize!(role: :view)` on the request root
+- MCP tool name: `search_workspace` (public MCP server only)
 
-MCP lists registered endpoints. This gem does not add MCP tool code.
+When Recording Studio MCP is loaded, `McpCopy` registers that named tool against `search.query`. Hosts include it with `include_tools(*RecordingStudioSearch::McpCopy.tool_names)` on the public MCP server. This gem does not depend on `recording_studio_mcp` at runtime.
 
 Pass `q`. A blank or whitespace `q` returns no hits. Optionally pass `models` and `limit` (default 20, max 20). `models` names come from `config.instant_search_models`. Pass the short class name (the text after the last `::`) or the full class name. A short name is used only when one allowlisted type has it. Omit `models` to search every allowlisted type. Names that are not allowlisted are ignored. `limit` is the max hits for each type, not one merged list and not a page. Values below 1 become 1 and values above 20 become 20. A missing or non-numeric `limit` stays 20. Several types can return more than 20 hits together. Each hit has `type` (the Ruby class name), `id`, and `recording_id` (or null when the type has no recording id). A hit has no title and no snippet. Ranking is the same as instant search, inside the request root, per type, before that cap. A pgvector type ranks by embedding distance and uses trigram ranking when embeddings are unavailable, the embedding call fails, or vector search finds nothing. A trigram type ranks by full-text rank, then trigram similarity. Hits stay on recordings the caller can view. Trashed recordings are left out. A caller who can view two workspaces still does not see the other root, including when that root's vectors are closer. A caller without `:view` on the root is denied.
 

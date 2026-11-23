@@ -307,6 +307,16 @@ class EngineTest < Minitest::Test
     assert_includes source, "RecordingStudioSearch::Api.register!"
   end
 
+  def test_mcp_initializer_registers_named_copy_after_api
+    initializer = find_initializer("recording_studio_search.mcp")
+
+    refute_nil initializer, "engine must declare recording_studio_search.mcp"
+    assert_equal "recording_studio_search.api", initializer.after
+    source = File.read(File.expand_path("../lib/recording_studio_search/engine.rb", __dir__))
+
+    assert_includes source, "RecordingStudioSearch::McpCopy.register!"
+  end
+
   def test_register_shipped_english_initializer_is_ordered_before_base_load
     initializer = find_initializer("recording_studio_search.register_shipped_english")
 
