@@ -5,7 +5,7 @@ require_relative "api/query"
 
 module RecordingStudioSearch
   # Registers one public GET endpoint when Recording Studio API is loaded.
-  # MCP advertises registered endpoints automatically. This gem adds no MCP tools.
+  # Named MCP copy for that endpoint lives in McpCopy (`search_workspace`).
   module Api
     NAME = "search.query"
     PATH = "search/query"

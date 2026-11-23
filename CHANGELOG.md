@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-11-23
+
+### Added
+
+- Named public MCP tool `search_workspace` on the existing `search.query` endpoint. Copy lives in `McpCopy`. Hosts that load Recording Studio MCP get the tool from this engine's `to_prepare` registration. There is no new endpoint and no second query path. Search has no recordable type, so this gem does not call `register_type`.
+
+### Fixed
+
+- Dummy Puma is `8.1.2` so `bin/bundler-audit` is clean of GHSA-4v6q-hvv7-49h9 and GHSA-rhww-p99c-hgj9. Dummy net-ssh is `7.3.10` and rack-protection is `4.2.2`. Dummy Brakeman is `8.1.1`. `.ruby-version` is `3.3.14` so `bin/brakeman --ensure-latest` is clean of CVE-2026-132825.
+
+### Upgrade notes
+
+- Bump to `0.15.1`. No search migration. Recording Studio MCP 0.45.2 named tools are opt-in. Hosts that splat `RecordingStudioSearch::McpCopy.tool_names` into the public MCP `include_tools` list pick up `search_workspace`. Hosts that hardcode `include_tools` must add `search_workspace` on the public server only. The REST name stays `search.query`. The old MCP tool name `search.query` is no longer advertised.
+- Dummy and development `.ruby-version` is `3.3.14`. Gemspec still requires `>= 3.3.0`.
+
 ## [0.15.0] - 2026-11-19
 
 ### Changed
@@ -386,7 +401,8 @@ First release of Recording Studio Search (renamed from the gem template).
 - Keep `json` on 2.x until Rails’ JSON decoder accepts json 3. Bundler will otherwise pull json 3.0 and query-cache writes fail.
 - To weight fields, change `against:` to `{ title: "A", body: "D" }` (or `--against=title:A,body:D`) and replace the generated `search_vector` expression. List-form `against: %i[title body]` stays equal-weight; no migration. Re-embed after changing weights on a `:pgvector` model.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.4...v0.15.0
 [0.14.4]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.3...v0.14.4
 [0.14.3]: https://github.com/bowerbird-app/RecordingStudio_search/compare/v0.14.2...v0.14.3
